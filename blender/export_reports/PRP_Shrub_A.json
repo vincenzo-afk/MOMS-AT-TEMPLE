@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Shrub_A",
+  "glb": "public/assets/models/environment/PRP_Shrub_A.glb",
+  "blend": "blender/source/PRP_Shrub_A.blend",
+  "bytes": 7040,
+  "triangles": 160,
+  "objects": [
+    "COL_Shrub",
+    "PRP_Shrub_A",
+    "PRP_Shrub_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Shrub"
+  ],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.872,
+    -0.731,
+    0.047
+  ],
+  "boundsMax": [
+    0.855,
+    0.799,
+    0.895
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

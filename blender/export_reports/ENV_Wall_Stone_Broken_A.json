@@ -1,0 +1,30 @@
+{
+  "assetId": "ENV_Wall_Stone_Broken_A",
+  "glb": "public/assets/models/environment/ENV_Wall_Stone_Broken_A.glb",
+  "blend": "blender/source/ENV_Wall_Stone_Broken_A.blend",
+  "bytes": 97184,
+  "triangles": 1434,
+  "objects": [
+    "COL_Wall",
+    "ENV_Wall_Stone_Broken_A",
+    "ENV_Wall_Stone_Broken_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Wall"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -2.0,
+    -1.525,
+    -0.099
+  ],
+  "boundsMax": [
+    2.074,
+    0.43,
+    2.0
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

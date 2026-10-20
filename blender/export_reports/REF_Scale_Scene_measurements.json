@@ -1,0 +1,50 @@
+{
+  "CHR_Player_Base": {
+    "size_m": [
+      0.646,
+      0.348,
+      1.77
+    ],
+    "min_z": -0.006
+  },
+  "CHR_NPC_Valli": {
+    "size_m": [
+      0.566,
+      0.348,
+      1.67
+    ],
+    "min_z": -0.009
+  },
+  "ENV_House_Village_A": {
+    "size_m": [
+      8.03,
+      9.318,
+      5.53
+    ],
+    "min_z": 0.0
+  },
+  "ENV_Pillar_Temple_A": {
+    "size_m": [
+      1.012,
+      1.012,
+      3.21
+    ],
+    "min_z": 0.0
+  },
+  "ENV_Wall_Prakara_A": {
+    "size_m": [
+      4.16,
+      0.76,
+      2.794
+    ],
+    "min_z": 0.0
+  },
+  "ENV_Market_Stall_A": {
+    "size_m": [
+      3.3,
+      2.31,
+      2.857
+    ],
+    "min_z": -0.057
+  }
+}

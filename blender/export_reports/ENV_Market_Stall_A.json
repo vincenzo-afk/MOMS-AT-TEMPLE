@@ -1,0 +1,39 @@
+{
+  "assetId": "ENV_Market_Stall_A",
+  "glb": "public/assets/models/buildings/ENV_Market_Stall_A.glb",
+  "blend": "blender/source/ENV_Market_Stall_A.blend",
+  "bytes": 68344,
+  "triangles": 1568,
+  "objects": [
+    "COL_Counter",
+    "COL_Post_-1",
+    "COL_Post_1",
+    "ENV_Market_Stall_A",
+    "ENV_Market_Stall_A_Mesh",
+    "SOCKET_Trader"
+  ],
+  "colliders": [
+    "COL_Counter",
+    "COL_Post_-1",
+    "COL_Post_1"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.65,
+    -1.16,
+    -0.057
+  ],
+  "boundsMax": [
+    1.65,
+    1.15,
+    2.8
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

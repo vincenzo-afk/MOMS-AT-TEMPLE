@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Rubble_Masonry_A",
+  "glb": "public/assets/models/props/PRP_Rubble_Masonry_A.glb",
+  "blend": "blender/source/PRP_Rubble_Masonry_A.blend",
+  "bytes": 31888,
+  "triangles": 478,
+  "objects": [
+    "COL_Pile",
+    "PICK_Stone",
+    "PRP_Rubble_Masonry_A",
+    "PRP_Rubble_Masonry_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pile"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.74,
+    -0.658,
+    -0.038
+  ],
+  "boundsMax": [
+    0.672,
+    0.557,
+    0.57
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

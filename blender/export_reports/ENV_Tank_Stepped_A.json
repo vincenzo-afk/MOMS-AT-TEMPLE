@@ -1,0 +1,41 @@
+{
+  "assetId": "ENV_Tank_Stepped_A",
+  "glb": "public/assets/models/environment/ENV_Tank_Stepped_A.glb",
+  "blend": "blender/source/ENV_Tank_Stepped_A.blend",
+  "bytes": 82660,
+  "triangles": 984,
+  "objects": [
+    "COL_Basin",
+    "COL_Rim_E_-1",
+    "COL_Rim_E_1",
+    "COL_Rim_N",
+    "COL_Rim_S",
+    "COL_Rim_W",
+    "ENV_Tank_Stepped_A",
+    "ENV_Tank_Stepped_A_Mesh",
+    "WATER_Tank"
+  ],
+  "colliders": [
+    "COL_Basin",
+    "COL_Rim_E_-1",
+    "COL_Rim_E_1",
+    "COL_Rim_N",
+    "COL_Rim_S",
+    "COL_Rim_W"
+  ],
+  "materials": [
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -4.4,
+    -4.4,
+    -1.25
+  ],
+  "boundsMax": [
+    4.6,
+    4.4,
+    0.5
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

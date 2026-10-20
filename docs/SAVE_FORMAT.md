@@ -1,0 +1,56 @@
+# Save Format
+
+Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `saves`, out-of-line string keys.
+
+| Key | Contents |
+|---|---|
+| `slot_main` | the current `GameState` (plain JSON object) |
+| `slot_main_backup` | the previous valid `slot_main`, rotated in the same transaction as each new save |
+| `settings` | `Settings` (volumes, sensitivity, FOV, text scale, quality, invert-Y, intro) |
+| `corrupt_<epoch ms>` | a copy of any main save that failed validation, kept for diagnosis |
+
+## GameState (schemaVersion 1)
+
+```ts
+{
+  schemaVersion: 1,
+  createdAt, updatedAt: ISO strings,
+  player: { position: [x, y, z], yaw },
+  inventory: Array<{ itemId, quantity } | null>,   // 16 slots
+  coins: number,
+  quests: { [questId]: { status: "active"|"completed", objectiveIndex, counts, startedDay, completedDay|null } },
+  flags: { [flag]: boolean },
+  restorations: { [restorationId]: stateName },
+  gatherNodes: { [nodeId]: { depletedAtMinute } },
+  relationships: { [npcId]: -100..100 },
+  discoveries: string[],
+  record: LivingRecordEvent[],                     // see below
+  claimedRewards: string[],                        // "<questId>#<rewardIndex>" - prevents duplicate rewards
+  craftedCounts: { [itemId]: number },
+  worldMinutes: number                             // minutes since day 1 00:00; 1 real second = 1 minute
+}
+```
+
+`LivingRecordEvent`: `{ id: "<type>:<subjectId>", type, worldDay, worldMinute, locationId, actionId, affectedEntityIds[], previousState|null, resultingState|null, causeEventIds[], descriptionKey }`. IDs are deterministic, so recording the same event twice is a no-op.
+
+## When saves happen
+
+- On every restoration, quest completion and Living Record entry (autosave).
+- Every 60 s of play.
+- From the pause menu (Save game; Save and exit to title).
+
+## Loading, validation and recovery
+
+`validateSave()` treats stored data as untrusted:
+
+1. Missing or non-numeric `schemaVersion` → reject. Newer than the game → reject ("made by a newer version"). Older → run `MIGRATIONS[version]` step by step (none needed yet).
+2. Structural fields (player, inventory array, coins, world time, quests, record array) must have valid types → otherwise reject.
+3. References to content that no longer exists (unknown items, quests, restorations, gather nodes, discoveries) are **dropped with a warning** rather than failing the load. Quantities are clamped to stack limits, objective indexes to the quest length, and duplicate record IDs are removed.
+
+If the main save is rejected, it is copied to `corrupt_<time>` and the backup is tried. If the backup loads, the game continues and tells the player ("Main save was damaged; loaded the backup."). The backup is one save older than the latest, so up to one autosave interval of progress can be lost. If both fail, the title screen shows the error and New Game remains available.
+
+## Adding a schema version
+
+1. Bump `SCHEMA_VERSION` in `src/game/core/defs.ts`.
+2. Add `MIGRATIONS[oldVersion] = (raw) => ({ ...raw, /* changes */, schemaVersion: oldVersion + 1 })` in `validateSave.ts`.
+3. Add a unit test that loads an old-version fixture.

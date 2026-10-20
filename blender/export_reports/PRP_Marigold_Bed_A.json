@@ -1,0 +1,34 @@
+{
+  "assetId": "PRP_Marigold_Bed_A",
+  "glb": "public/assets/models/props/PRP_Marigold_Bed_A.glb",
+  "blend": "blender/source/PRP_Marigold_Bed_A.blend",
+  "bytes": 116436,
+  "triangles": 4180,
+  "objects": [
+    "COL_Bed",
+    "PICK_Blooms",
+    "PRP_Marigold_Bed_A",
+    "PRP_Marigold_Bed_A_Bed",
+    "STATE_recovering",
+    "STATE_withered"
+  ],
+  "colliders": [
+    "COL_Bed"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Soil_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -1.6,
+    -0.77,
+    0.0
+  ],
+  "boundsMax": [
+    1.6,
+    0.77,
+    0.709
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

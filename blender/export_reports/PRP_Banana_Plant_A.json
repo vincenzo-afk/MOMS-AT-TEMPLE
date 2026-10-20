@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Banana_Plant_A",
+  "glb": "public/assets/models/environment/PRP_Banana_Plant_A.glb",
+  "blend": "blender/source/PRP_Banana_Plant_A.blend",
+  "bytes": 18536,
+  "triangles": 380,
+  "objects": [
+    "COL_Stem",
+    "PRP_Banana_Plant_A",
+    "PRP_Banana_Plant_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Stem"
+  ],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -1.822,
+    -1.778,
+    0.0
+  ],
+  "boundsMax": [
+    1.668,
+    1.72,
+    2.135
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,0 +1,37 @@
+{
+  "assetId": "PRP_Channel_Restored_A",
+  "glb": "public/assets/models/props/PRP_Channel_Restored_A.glb",
+  "blend": "blender/source/PRP_Channel_Restored_A.blend",
+  "bytes": 416312,
+  "triangles": 5392,
+  "objects": [
+    "COL_Bed",
+    "COL_Wall_-1",
+    "COL_Wall_1",
+    "PRP_Channel_Restored_A",
+    "PRP_Channel_Restored_A_Mesh",
+    "SOCKET_Break",
+    "WATER_Channel"
+  ],
+  "colliders": [
+    "COL_Bed",
+    "COL_Wall_-1",
+    "COL_Wall_1"
+  ],
+  "materials": [
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -7.0,
+    -0.6,
+    0.0
+  ],
+  "boundsMax": [
+    7.55,
+    0.6,
+    0.43
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

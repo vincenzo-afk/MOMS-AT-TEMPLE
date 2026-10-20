@@ -1,0 +1,30 @@
+{
+  "assetId": "ENV_Ruin_Pillar_Broken_A",
+  "glb": "public/assets/models/environment/ENV_Ruin_Pillar_Broken_A.glb",
+  "blend": "blender/source/ENV_Ruin_Pillar_Broken_A.blend",
+  "bytes": 14976,
+  "triangles": 230,
+  "objects": [
+    "COL_Pillar",
+    "ENV_Ruin_Pillar_Broken_A",
+    "ENV_Ruin_Pillar_Broken_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pillar"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.9,
+    -0.419,
+    -0.026
+  ],
+  "boundsMax": [
+    0.985,
+    0.985,
+    2.45
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

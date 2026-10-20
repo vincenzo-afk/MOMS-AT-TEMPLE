@@ -1,0 +1,29 @@
+{
+  "assetId": "ENV_Wall_Post_A",
+  "glb": "public/assets/models/environment/ENV_Wall_Post_A.glb",
+  "blend": "blender/source/ENV_Wall_Post_A.blend",
+  "bytes": 22000,
+  "triangles": 468,
+  "objects": [
+    "COL_Post",
+    "ENV_Wall_Post_A",
+    "ENV_Wall_Post_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Post"
+  ],
+  "materials": [
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.55,
+    -0.55,
+    0.0
+  ],
+  "boundsMax": [
+    0.55,
+    0.55,
+    3.404
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

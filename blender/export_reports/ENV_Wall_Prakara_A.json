@@ -1,0 +1,30 @@
+{
+  "assetId": "ENV_Wall_Prakara_A",
+  "glb": "public/assets/models/environment/ENV_Wall_Prakara_A.glb",
+  "blend": "blender/source/ENV_Wall_Prakara_A.blend",
+  "bytes": 15992,
+  "triangles": 194,
+  "objects": [
+    "COL_Wall",
+    "ENV_Wall_Prakara_A",
+    "ENV_Wall_Prakara_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Wall"
+  ],
+  "materials": [
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -2.08,
+    -0.38,
+    0.0
+  ],
+  "boundsMax": [
+    2.08,
+    0.38,
+    2.794
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

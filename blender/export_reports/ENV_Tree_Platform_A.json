@@ -1,0 +1,34 @@
+{
+  "assetId": "ENV_Tree_Platform_A",
+  "glb": "public/assets/models/environment/ENV_Tree_Platform_A.glb",
+  "blend": "blender/source/ENV_Tree_Platform_A.blend",
+  "bytes": 32652,
+  "triangles": 476,
+  "objects": [
+    "COL_Core",
+    "ENV_Tree_Platform_A",
+    "ENV_Tree_Platform_A_Mesh",
+    "WALK_Platform",
+    "WALK_Platform_rot"
+  ],
+  "colliders": [
+    "COL_Core",
+    "WALK_Platform",
+    "WALK_Platform_rot"
+  ],
+  "materials": [
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -2.4,
+    -2.4,
+    0.0
+  ],
+  "boundsMax": [
+    2.4,
+    2.4,
+    1.0
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

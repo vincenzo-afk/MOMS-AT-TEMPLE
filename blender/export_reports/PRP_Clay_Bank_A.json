@@ -1,0 +1,34 @@
+{
+  "assetId": "PRP_Clay_Bank_A",
+  "glb": "public/assets/models/props/PRP_Clay_Bank_A.glb",
+  "blend": "blender/source/PRP_Clay_Bank_A.blend",
+  "bytes": 18360,
+  "triangles": 416,
+  "objects": [
+    "COL_Mound",
+    "PICK_Clay",
+    "PRP_Clay_Bank_A",
+    "PRP_Clay_Bank_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Mound"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Foliage_A",
+    "MAT_Soil_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.255,
+    -1.18,
+    -1.335
+  ],
+  "boundsMax": [
+    2.224,
+    1.979,
+    1.1
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

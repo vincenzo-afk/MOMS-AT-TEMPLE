@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.npm-cache/
+test-results/
+playwright-report/
+*.blend1
+blender/export_reports/previews/

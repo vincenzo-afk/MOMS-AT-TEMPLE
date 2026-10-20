@@ -1,0 +1,70 @@
+{
+  "assetId": "ENV_Temple_Main_A",
+  "glb": "public/assets/models/landmarks/ENV_Temple_Main_A.glb",
+  "blend": "blender/source/ENV_Temple_Main_A.blend",
+  "bytes": 971864,
+  "triangles": 25606,
+  "objects": [
+    "COL_Ardha",
+    "COL_Balustrade_-1",
+    "COL_Balustrade_1",
+    "COL_PorchPillar_-0.95_-4.6",
+    "COL_PorchPillar_-0.95_-6.6",
+    "COL_PorchPillar_-2.9_-4.6",
+    "COL_PorchPillar_-2.9_-6.6",
+    "COL_PorchPillar_0.95_-4.6",
+    "COL_PorchPillar_0.95_-6.6",
+    "COL_PorchPillar_2.9_-4.6",
+    "COL_PorchPillar_2.9_-6.6",
+    "COL_Sanctum",
+    "ENV_Temple_Main_A",
+    "ENV_Temple_Main_A_Mesh",
+    "ENV_Temple_Main_A_Paving",
+    "SOCKET_TempleDoor",
+    "WALK_Plinth",
+    "WALK_Step_0",
+    "WALK_Step_1",
+    "WALK_Step_2",
+    "WALK_Step_3",
+    "WALK_Step_4",
+    "WALK_Step_5"
+  ],
+  "colliders": [
+    "COL_Ardha",
+    "COL_Balustrade_-1",
+    "COL_Balustrade_1",
+    "COL_PorchPillar_-0.95_-4.6",
+    "COL_PorchPillar_-0.95_-6.6",
+    "COL_PorchPillar_-2.9_-4.6",
+    "COL_PorchPillar_-2.9_-6.6",
+    "COL_PorchPillar_0.95_-4.6",
+    "COL_PorchPillar_0.95_-6.6",
+    "COL_PorchPillar_2.9_-4.6",
+    "COL_PorchPillar_2.9_-6.6",
+    "COL_Sanctum",
+    "WALK_Plinth",
+    "WALK_Step_0",
+    "WALK_Step_1",
+    "WALK_Step_2",
+    "WALK_Step_3",
+    "WALK_Step_4",
+    "WALK_Step_5"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -5.6,
+    -9.685,
+    0.0
+  ],
+  "boundsMax": [
+    5.6,
+    7.6,
+    14.072
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

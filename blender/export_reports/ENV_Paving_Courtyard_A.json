@@ -1,0 +1,26 @@
+{
+  "assetId": "ENV_Paving_Courtyard_A",
+  "glb": "public/assets/models/environment/ENV_Paving_Courtyard_A.glb",
+  "blend": "blender/source/ENV_Paving_Courtyard_A.blend",
+  "bytes": 62604,
+  "triangles": 876,
+  "objects": [
+    "ENV_Paving_Courtyard_A",
+    "ENV_Paving_Courtyard_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -4.98,
+    -4.98,
+    -0.008
+  ],
+  "boundsMax": [
+    4.98,
+    4.98,
+    0.06
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

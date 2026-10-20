@@ -1,0 +1,48 @@
+{
+  "assetId": "ENV_Ruin_Mandapa_Base_A",
+  "glb": "public/assets/models/environment/ENV_Ruin_Mandapa_Base_A.glb",
+  "blend": "blender/source/ENV_Ruin_Mandapa_Base_A.blend",
+  "bytes": 76248,
+  "triangles": 1058,
+  "objects": [
+    "COL_Stump_-2.2_-2.2",
+    "COL_Stump_-2.2_2.2",
+    "COL_Stump_2.2_-2.2",
+    "COL_Stump_2.2_2.2",
+    "ENV_Ruin_Mandapa_Base_A",
+    "ENV_Ruin_Mandapa_Base_A_Mesh",
+    "Stump_-2.2_-2.2",
+    "Stump_-2.2_2.2",
+    "Stump_2.2_-2.2",
+    "Stump_2.2_2.2",
+    "WALK_Platform",
+    "WALK_Step_0",
+    "WALK_Step_1",
+    "WALK_Step_2"
+  ],
+  "colliders": [
+    "COL_Stump_-2.2_-2.2",
+    "COL_Stump_-2.2_2.2",
+    "COL_Stump_2.2_-2.2",
+    "COL_Stump_2.2_2.2",
+    "WALK_Platform",
+    "WALK_Step_0",
+    "WALK_Step_1",
+    "WALK_Step_2"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -3.191,
+    -3.75,
+    0.0
+  ],
+  "boundsMax": [
+    3.1,
+    3.1,
+    3.21
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

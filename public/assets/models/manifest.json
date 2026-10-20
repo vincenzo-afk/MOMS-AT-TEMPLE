@@ -1,0 +1,952 @@
+{
+  "generatedAt": "2026-10-19T16:44:24.772Z",
+  "assets": [
+    {
+      "id": "CHR_NPC_Kamala",
+      "url": "/assets/models/characters/CHR_NPC_Kamala.glb",
+      "type": "character",
+      "triangles": 2588,
+      "bytes": 317572,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "CHR_NPC_Murugan",
+      "url": "/assets/models/characters/CHR_NPC_Murugan.glb",
+      "type": "character",
+      "triangles": 1876,
+      "bytes": 290824,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "CHR_NPC_Ponnan",
+      "url": "/assets/models/characters/CHR_NPC_Ponnan.glb",
+      "type": "character",
+      "triangles": 1700,
+      "bytes": 286260,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "CHR_NPC_Selvam",
+      "url": "/assets/models/characters/CHR_NPC_Selvam.glb",
+      "type": "character",
+      "triangles": 2116,
+      "bytes": 301376,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "CHR_NPC_Valli",
+      "url": "/assets/models/characters/CHR_NPC_Valli.glb",
+      "type": "character",
+      "triangles": 2588,
+      "bytes": 317488,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "CHR_Player_Base",
+      "url": "/assets/models/characters/CHR_Player_Base.glb",
+      "type": "character",
+      "triangles": 1984,
+      "bytes": 299232,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000,
+        "animations": [
+          "idle_relaxed",
+          "walk_forward",
+          "run_forward",
+          "turn_left",
+          "turn_right",
+          "interact_reach",
+          "pickup_ground",
+          "talk_idle",
+          "talk_gesture",
+          "craft_at_station",
+          "repair_channel"
+        ],
+        "skinned": true
+      },
+      "clips": [
+        {
+          "name": "idle_relaxed",
+          "duration": 4,
+          "loop": true
+        },
+        {
+          "name": "walk_forward",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "run_forward",
+          "duration": 0.667,
+          "loop": true
+        },
+        {
+          "name": "turn_left",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "turn_right",
+          "duration": 0.8,
+          "loop": true
+        },
+        {
+          "name": "interact_reach",
+          "duration": 1,
+          "loop": false
+        },
+        {
+          "name": "pickup_ground",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "talk_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "talk_gesture",
+          "duration": 2,
+          "loop": false
+        },
+        {
+          "name": "craft_at_station",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "repair_channel",
+          "duration": 1.6,
+          "loop": true
+        }
+      ]
+    },
+    {
+      "id": "ENV_Gopuram_Entrance_A",
+      "url": "/assets/models/landmarks/ENV_Gopuram_Entrance_A.glb",
+      "type": "landmark",
+      "triangles": 9914,
+      "bytes": 334484,
+      "expect": {
+        "nodes": [
+          "COL_Pier_-1",
+          "COL_Pier_1"
+        ],
+        "maxBytes": 1500000,
+        "maxTriangles": 40000
+      }
+    },
+    {
+      "id": "ENV_House_Village_A",
+      "url": "/assets/models/buildings/ENV_House_Village_A.glb",
+      "type": "building",
+      "triangles": 3146,
+      "bytes": 137732,
+      "expect": {
+        "nodes": [
+          "COL_Body",
+          "COL_Post_-3.2",
+          "COL_Post_3.2"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_House_Village_B",
+      "url": "/assets/models/buildings/ENV_House_Village_B.glb",
+      "type": "building",
+      "triangles": 3146,
+      "bytes": 137732,
+      "expect": {
+        "nodes": [
+          "COL_Body",
+          "COL_Post_-3.2",
+          "COL_Post_3.2"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Lamp_Pillar_A",
+      "url": "/assets/models/landmarks/ENV_Lamp_Pillar_A.glb",
+      "type": "landmark",
+      "triangles": 1768,
+      "bytes": 56544,
+      "expect": {
+        "nodes": [
+          "COL_Base"
+        ],
+        "maxBytes": 1500000,
+        "maxTriangles": 40000
+      }
+    },
+    {
+      "id": "ENV_Market_Stall_A",
+      "url": "/assets/models/buildings/ENV_Market_Stall_A.glb",
+      "type": "building",
+      "triangles": 1568,
+      "bytes": 68344,
+      "expect": {
+        "nodes": [
+          "COL_Counter",
+          "COL_Post_-1",
+          "COL_Post_1"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Paving_Courtyard_A",
+      "url": "/assets/models/environment/ENV_Paving_Courtyard_A.glb",
+      "type": "environment",
+      "triangles": 876,
+      "bytes": 62604,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Pillar_Temple_A",
+      "url": "/assets/models/environment/ENV_Pillar_Temple_A.glb",
+      "type": "environment",
+      "triangles": 984,
+      "bytes": 57452,
+      "expect": {
+        "nodes": [
+          "COL_Pillar"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Pillar_Temple_B",
+      "url": "/assets/models/environment/ENV_Pillar_Temple_B.glb",
+      "type": "environment",
+      "triangles": 740,
+      "bytes": 40248,
+      "expect": {
+        "nodes": [
+          "COL_Pillar"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Ruin_Mandapa_Base_A",
+      "url": "/assets/models/environment/ENV_Ruin_Mandapa_Base_A.glb",
+      "type": "environment",
+      "triangles": 1058,
+      "bytes": 76248,
+      "expect": {
+        "nodes": [
+          "COL_Stump_-2.2_-2.2",
+          "COL_Stump_-2.2_2.2",
+          "COL_Stump_2.2_-2.2"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Ruin_Pillar_Broken_A",
+      "url": "/assets/models/environment/ENV_Ruin_Pillar_Broken_A.glb",
+      "type": "environment",
+      "triangles": 230,
+      "bytes": 14976,
+      "expect": {
+        "nodes": [
+          "COL_Pillar"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Tank_Stepped_A",
+      "url": "/assets/models/environment/ENV_Tank_Stepped_A.glb",
+      "type": "environment",
+      "triangles": 984,
+      "bytes": 82660,
+      "expect": {
+        "nodes": [
+          "COL_Basin",
+          "COL_Rim_E_-1",
+          "COL_Rim_E_1"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Temple_Main_A",
+      "url": "/assets/models/landmarks/ENV_Temple_Main_A.glb",
+      "type": "landmark",
+      "triangles": 25606,
+      "bytes": 971864,
+      "expect": {
+        "nodes": [
+          "COL_Ardha",
+          "COL_Balustrade_-1",
+          "COL_Balustrade_1"
+        ],
+        "maxBytes": 1500000,
+        "maxTriangles": 40000
+      }
+    },
+    {
+      "id": "ENV_Tree_Platform_A",
+      "url": "/assets/models/environment/ENV_Tree_Platform_A.glb",
+      "type": "environment",
+      "triangles": 476,
+      "bytes": 32652,
+      "expect": {
+        "nodes": [
+          "COL_Core",
+          "WALK_Platform",
+          "WALK_Platform_rot"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Wall_Post_A",
+      "url": "/assets/models/environment/ENV_Wall_Post_A.glb",
+      "type": "environment",
+      "triangles": 468,
+      "bytes": 22000,
+      "expect": {
+        "nodes": [
+          "COL_Post"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Wall_Prakara_A",
+      "url": "/assets/models/environment/ENV_Wall_Prakara_A.glb",
+      "type": "environment",
+      "triangles": 194,
+      "bytes": 15992,
+      "expect": {
+        "nodes": [
+          "COL_Wall"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Wall_Stone_A",
+      "url": "/assets/models/environment/ENV_Wall_Stone_A.glb",
+      "type": "environment",
+      "triangles": 1056,
+      "bytes": 82892,
+      "expect": {
+        "nodes": [
+          "COL_Wall"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Wall_Stone_Broken_A",
+      "url": "/assets/models/environment/ENV_Wall_Stone_Broken_A.glb",
+      "type": "environment",
+      "triangles": 1434,
+      "bytes": 97184,
+      "expect": {
+        "nodes": [
+          "COL_Wall"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Workshop_A",
+      "url": "/assets/models/buildings/ENV_Workshop_A.glb",
+      "type": "building",
+      "triangles": 4078,
+      "bytes": 143764,
+      "expect": {
+        "nodes": [
+          "COL_Back",
+          "COL_Bench",
+          "COL_Post_-1.2"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Banana_Plant_A",
+      "url": "/assets/models/environment/PRP_Banana_Plant_A.glb",
+      "type": "environment",
+      "triangles": 380,
+      "bytes": 18536,
+      "expect": {
+        "nodes": [
+          "COL_Stem"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Channel_Blocked_A",
+      "url": "/assets/models/props/PRP_Channel_Blocked_A.glb",
+      "type": "prop",
+      "triangles": 6278,
+      "bytes": 422368,
+      "expect": {
+        "nodes": [
+          "COL_Bed",
+          "COL_Wall_-1",
+          "COL_Wall_1"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Channel_Restored_A",
+      "url": "/assets/models/props/PRP_Channel_Restored_A.glb",
+      "type": "prop",
+      "triangles": 5392,
+      "bytes": 416312,
+      "expect": {
+        "nodes": [
+          "COL_Bed",
+          "COL_Wall_-1",
+          "COL_Wall_1"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Clay_Bank_A",
+      "url": "/assets/models/props/PRP_Clay_Bank_A.glb",
+      "type": "prop",
+      "triangles": 416,
+      "bytes": 18360,
+      "expect": {
+        "nodes": [
+          "COL_Mound"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Garland_Gate_A",
+      "url": "/assets/models/props/PRP_Garland_Gate_A.glb",
+      "type": "prop",
+      "triangles": 2518,
+      "bytes": 65720,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Grass_Clump_A",
+      "url": "/assets/models/environment/PRP_Grass_Clump_A.glb",
+      "type": "environment",
+      "triangles": 44,
+      "bytes": 5720,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Inscription_Stone_A",
+      "url": "/assets/models/props/PRP_Inscription_Stone_A.glb",
+      "type": "prop",
+      "triangles": 1188,
+      "bytes": 82660,
+      "expect": {
+        "nodes": [
+          "COL_Stone"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Jasmine_Bush_A",
+      "url": "/assets/models/props/PRP_Jasmine_Bush_A.glb",
+      "type": "prop",
+      "triangles": 990,
+      "bytes": 29580,
+      "expect": {
+        "nodes": [
+          "COL_Bush"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Marigold_Bed_A",
+      "url": "/assets/models/props/PRP_Marigold_Bed_A.glb",
+      "type": "prop",
+      "triangles": 4180,
+      "bytes": 116436,
+      "expect": {
+        "nodes": [
+          "COL_Bed"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Palm_Coconut_A",
+      "url": "/assets/models/environment/PRP_Palm_Coconut_A.glb",
+      "type": "environment",
+      "triangles": 1412,
+      "bytes": 50004,
+      "expect": {
+        "nodes": [
+          "COL_Trunk"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Rubble_Masonry_A",
+      "url": "/assets/models/props/PRP_Rubble_Masonry_A.glb",
+      "type": "prop",
+      "triangles": 478,
+      "bytes": 31888,
+      "expect": {
+        "nodes": [
+          "COL_Pile"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Shrub_A",
+      "url": "/assets/models/environment/PRP_Shrub_A.glb",
+      "type": "environment",
+      "triangles": 160,
+      "bytes": 7040,
+      "expect": {
+        "nodes": [
+          "COL_Shrub"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Tree_Neem_A",
+      "url": "/assets/models/environment/PRP_Tree_Neem_A.glb",
+      "type": "environment",
+      "triangles": 1056,
+      "bytes": 30124,
+      "expect": {
+        "nodes": [
+          "COL_Trunk"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    }
+  ]
+}

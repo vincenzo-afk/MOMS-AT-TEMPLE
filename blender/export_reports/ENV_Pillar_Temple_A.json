@@ -1,0 +1,29 @@
+{
+  "assetId": "ENV_Pillar_Temple_A",
+  "glb": "public/assets/models/environment/ENV_Pillar_Temple_A.glb",
+  "blend": "blender/source/ENV_Pillar_Temple_A.blend",
+  "bytes": 57452,
+  "triangles": 984,
+  "objects": [
+    "COL_Pillar",
+    "ENV_Pillar_Temple_A",
+    "ENV_Pillar_Temple_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pillar"
+  ],
+  "materials": [
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.506,
+    -0.506,
+    0.0
+  ],
+  "boundsMax": [
+    0.506,
+    0.506,
+    3.21
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

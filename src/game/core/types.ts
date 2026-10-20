@@ -1,0 +1,204 @@
+// Shared data contracts for definitions (authored data) and runtime state (saved data).
+// Definitions are validated at boot by src/data/validate.ts; state is validated on load by save/validateSave.ts.
+
+export type ItemCategory = "flower" | "material" | "crafted" | "trade" | "quest";
+
+export interface ItemDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: ItemCategory;
+  icon: string; // short glyph used until painted icons exist (see docs/ASSET_GENERATION_QUEUE.md)
+  maxStack: number;
+  tags: string[];
+  questProtected?: boolean; // cannot be sold
+  sellPrice?: number;
+}
+
+export interface ItemStack {
+  itemId: string;
+  quantity: number;
+}
+
+export interface RecipeDefinition {
+  id: string;
+  name: string;
+  stationId: string;
+  inputs: ItemStack[];
+  outputs: ItemStack[];
+  prerequisites: string[]; // world flags required
+  craftSeconds: number;
+}
+
+export type Condition =
+  | { type: "quest"; id: string; status: QuestStatus | "not_started" }
+  | { type: "objective"; questId: string; objectiveId: string }
+  | { type: "flag"; id: string; value: boolean }
+  | { type: "restoration"; id: string; state: string }
+  | { type: "hasItem"; itemId: string; count: number }
+  | { type: "discovered"; id: string; value: boolean };
+
+export type Effect =
+  | { type: "startQuest"; questId: string }
+  | { type: "advance"; questId: string; objectiveId: string }
+  | { type: "deliver"; questId: string; objectiveId: string }
+  | { type: "setFlag"; id: string }
+  | { type: "relationship"; npcId: string; amount: number }
+  | { type: "openShop"; shopId: string };
+
+export type ObjectiveType = "talk" | "collect" | "deliver" | "craft" | "restore" | "inspect";
+
+export interface ObjectiveDefinition {
+  id: string;
+  type: ObjectiveType;
+  text: string;
+  targetId: string; // npc, item, restoration or interactable id depending on type
+  requiredCount?: number; // collect / deliver / craft
+  targetState?: string; // restore
+  locationId: string; // where the player should go; used by the journal and HUD
+}
+
+export type Reward =
+  | { type: "coins"; amount: number }
+  | { type: "relationship"; npcId: string; amount: number }
+  | { type: "flag"; id: string };
+
+export interface QuestDefinition {
+  id: string;
+  title: string;
+  description: string;
+  giverNpcId: string;
+  prerequisites: string[]; // quest ids that must be completed
+  objectives: ObjectiveDefinition[];
+  rewards: Reward[];
+  record?: { type: LivingRecordEventType; descriptionKey: string; locationId: string; causeEventIds: string[] };
+}
+
+export interface RestorationDefinition {
+  id: string;
+  name: string;
+  locationId: string;
+  initialState: string;
+  states: string[];
+  restoredState: string;
+  requiredMaterials: ItemStack[];
+  prerequisites: Condition[];
+  resultingWorldFlags: string[];
+  recordEventType: LivingRecordEventType;
+  descriptionKey: string;
+  interactableId?: string;
+  inspectFlag?: string; // set when the player inspects it
+  inspectText?: { before: string[]; after: string[] };
+  // When set, the restoration is a consequence: it happens automatically once these flags exist.
+  triggeredByFlags?: string[];
+  causeEventIds: string[];
+}
+
+export interface GatherNodeDefinition {
+  id: string;
+  itemId: string;
+  quantity: number;
+  regrowMinutes: number;
+  conditions: Condition[]; // e.g. marigolds only after the garden recovers
+  label: string;
+}
+
+export interface ScheduleEntry {
+  fromHour: number; // inclusive, 0-24
+  toHour: number; // exclusive
+  anchorId: string;
+  activity: "work" | "rest" | "talk" | "home";
+}
+
+export interface NpcDefinition {
+  id: string;
+  name: string;
+  role: string;
+  appearance: { model: string; tint: string; accent: string };
+  homeAnchorId: string;
+  workAnchorId: string;
+  schedule: ScheduleEntry[];
+}
+
+export interface DialogueOption {
+  label: string;
+  effects: Effect[];
+  next?: string;
+}
+
+export interface DialogueNode {
+  id: string;
+  npcId: string;
+  priority: number; // highest matching root node is chosen when the conversation starts
+  root: boolean;
+  conditions: Condition[];
+  lines: string[];
+  effects: Effect[]; // applied when the node is shown
+  options: DialogueOption[];
+}
+
+export interface ShopDefinition {
+  id: string;
+  npcId: string;
+  sells: Array<{ itemId: string; price: number }>;
+  buys: Array<{ itemId: string; price: number }>;
+}
+
+export type LivingRecordEventType = "arrival" | "restoration" | "consequence" | "discovery" | "community" | "craft";
+
+export interface LivingRecordEvent {
+  id: string;
+  type: LivingRecordEventType;
+  worldDay: number;
+  worldMinute: number;
+  locationId: string;
+  actionId: string;
+  affectedEntityIds: string[];
+  previousState: string | null;
+  resultingState: string | null;
+  causeEventIds: string[];
+  descriptionKey: string;
+}
+
+export type QuestStatus = "active" | "completed";
+
+export interface QuestProgress {
+  status: QuestStatus;
+  objectiveIndex: number;
+  counts: Record<string, number>;
+  startedDay: number;
+  completedDay: number | null;
+}
+
+export interface GameState {
+  schemaVersion: number;
+  createdAt: string;
+  updatedAt: string;
+  player: { position: [number, number, number]; yaw: number };
+  inventory: Array<ItemStack | null>;
+  coins: number;
+  quests: Record<string, QuestProgress>;
+  flags: Record<string, boolean>;
+  restorations: Record<string, string>;
+  gatherNodes: Record<string, { depletedAtMinute: number }>;
+  relationships: Record<string, number>;
+  discoveries: string[];
+  record: LivingRecordEvent[];
+  claimedRewards: string[];
+  craftedCounts: Record<string, number>;
+  worldMinutes: number; // minutes since day 1 00:00
+}
+
+export interface Settings {
+  masterVolume: number;
+  musicVolume: number;
+  effectsVolume: number;
+  mouseSensitivity: number;
+  invertY: boolean;
+  graphicsQuality: "low" | "medium" | "high";
+  textScale: number;
+  fov: number;
+  showIntro: boolean;
+}
+
+export type ActionResult = { ok: true; message?: string } | { ok: false; reason: string };

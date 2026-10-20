@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Inscription_Stone_A",
+  "glb": "public/assets/models/props/PRP_Inscription_Stone_A.glb",
+  "blend": "blender/source/PRP_Inscription_Stone_A.blend",
+  "bytes": 82660,
+  "triangles": 1188,
+  "objects": [
+    "COL_Stone",
+    "PRP_Inscription_Stone_A",
+    "PRP_Inscription_Stone_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Stone"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.625,
+    -0.27,
+    0.0
+  ],
+  "boundsMax": [
+    0.625,
+    0.27,
+    1.75
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,0 +1,35 @@
+{
+  "assetId": "ENV_Gopuram_Entrance_A",
+  "glb": "public/assets/models/landmarks/ENV_Gopuram_Entrance_A.glb",
+  "blend": "blender/source/ENV_Gopuram_Entrance_A.blend",
+  "bytes": 334484,
+  "triangles": 9914,
+  "objects": [
+    "COL_Pier_-1",
+    "COL_Pier_1",
+    "ENV_Gopuram_Entrance_A",
+    "ENV_Gopuram_Entrance_A_Mesh",
+    "SOCKET_Garland"
+  ],
+  "colliders": [
+    "COL_Pier_-1",
+    "COL_Pier_1"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -5.08,
+    -2.98,
+    0.0
+  ],
+  "boundsMax": [
+    5.08,
+    2.98,
+    13.618
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

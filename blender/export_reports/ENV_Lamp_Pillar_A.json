@@ -1,0 +1,30 @@
+{
+  "assetId": "ENV_Lamp_Pillar_A",
+  "glb": "public/assets/models/landmarks/ENV_Lamp_Pillar_A.glb",
+  "blend": "blender/source/ENV_Lamp_Pillar_A.blend",
+  "bytes": 56544,
+  "triangles": 1768,
+  "objects": [
+    "COL_Base",
+    "ENV_Lamp_Pillar_A",
+    "ENV_Lamp_Pillar_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Base"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -1.0,
+    -1.0,
+    0.0
+  ],
+  "boundsMax": [
+    1.0,
+    1.0,
+    6.448
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

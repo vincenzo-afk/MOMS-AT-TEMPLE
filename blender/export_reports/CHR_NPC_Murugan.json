@@ -1,0 +1,89 @@
+{
+  "assetId": "CHR_NPC_Murugan",
+  "glb": "public/assets/models/characters/CHR_NPC_Murugan.glb",
+  "blend": "blender/source/CHR_NPC_Murugan.blend",
+  "bytes": 290824,
+  "triangles": 1876,
+  "objects": [
+    "CHR_NPC_Murugan",
+    "CHR_NPC_Murugan_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.326,
+    -0.172,
+    -0.006
+  ],
+  "boundsMax": [
+    0.326,
+    0.138,
+    1.785
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "clips": [
+    {
+      "name": "idle_relaxed",
+      "duration": 4.0,
+      "loop": true
+    },
+    {
+      "name": "walk_forward",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "run_forward",
+      "duration": 0.667,
+      "loop": true
+    },
+    {
+      "name": "turn_left",
+      "duration": 0.8,
+      "loop": true
+    },
+    {
+      "name": "turn_right",
+      "duration": 0.8,
+      "loop": true
+    },
+    {
+      "name": "interact_reach",
+      "duration": 1.0,
+      "loop": false
+    },
+    {
+      "name": "pickup_ground",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "talk_idle",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "talk_gesture",
+      "duration": 2.0,
+      "loop": false
+    },
+    {
+      "name": "craft_at_station",
+      "duration": 2.0,
+      "loop": true
+    },
+    {
+      "name": "repair_channel",
+      "duration": 1.6,
+      "loop": true
+    }
+  ],
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.72
+}
