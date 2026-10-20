@@ -25,6 +25,7 @@ import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
 import { InteractionSystem, type Candidate } from "../interaction/InteractionSystem";
 import { NpcSystem } from "../npc/NpcSystem";
 import { AudioManager } from "../audio/AudioManager";
+import { musicCueFor } from "../audio/musicCues";
 import type { SaveSystem } from "../save/SaveSystem";
 import { INTERACTABLES, PLACEMENTS, PLAYER_SPAWN, REGIONS } from "../../data/level";
 import { LOCATIONS } from "../../data/text";
@@ -81,6 +82,8 @@ export interface UiState {
   tutorial: { index: number; total: number; text: string; keys: string } | null;
 }
 
+const _listenDir = new THREE.Vector3();
+
 export class Game {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
@@ -131,6 +134,9 @@ export class Game {
   private actionTimer = 0;
   private talkingTo: string | null = null;
   private seat: SeatSession | null = null;
+  /** placement whose lid is open (storage chest or a world crate) */
+  private lidOpen: string | null = null;
+  private lidAngles = new Map<string, number>();
   private tut: TutorialSignals = { cameraTurned: 0, walked: 0, jogSeconds: 0, jumps: 0, talkedToValli: false, gathered: false, panelsOpened: new Set(), inspected: false };
   private tutYaw = 0;
   private tutPos = new THREE.Vector3();
@@ -503,12 +509,15 @@ export class Game {
   }
 
   resume(): void {
-    this.ui.set({ mode: "play", panel: null });
-    this.input.requestLock();
+    // a pause over an open panel (focus loss mid-dialogue) returns to that panel, so its conversation still ends properly
+    this.ui.set({ mode: "play" });
+    if (!this.ui.get().panel) this.input.requestLock();
   }
 
   openPanel(panel: Panel): void {
     if (this.ui.get().mode !== "play") return;
+    if (panel === "storage") this.lidOpen = "home_chest";
+    if (panel === "container") this.lidOpen = this.session.defs.containers.get(this.ui.get().containerId ?? "")?.placementId ?? null;
     if (panel) this.tut.panelsOpened.add(panel);
     this.input.releaseLock();
     this.audio.play("ui_open");
@@ -517,6 +526,10 @@ export class Game {
 
   closePanel(): void {
     const { panel } = this.ui.get();
+    if (panel === "storage" || panel === "container") {
+      this.lidOpen = null;
+      if (this.player.animator.currentAction === "open_container" || !this.player.animator.busy) this.player.animator.play("close_container", { once: true });
+    }
     if (panel === "minigame" && this.visit?.ui.mini) {
       // Esc out of a mini-game: it counts as a failed attempt
       this.ui.set({ panel: null });
@@ -566,6 +579,10 @@ export class Game {
       case "notify":
         this.toast(e.text, e.tone);
         break;
+      case "handover":
+        // hands the item across (or takes it): a one-shot over the conversation pose
+        this.player.animator.play(e.give ? "give_item" : "receive_item", { once: true });
+        break;
       case "gathered":
         this.tut.gathered = true;
         this.audio.play("sfx_pickup");
@@ -575,6 +592,7 @@ export class Game {
         break;
       case "restored":
         this.audio.play("sfx_restore");
+        this.audio.play("mus_restoration");
         if (e.restorationId === "rest_channel_east") this.audio.startLoop("amb_channel_water");
         void this.saveGame();
         break;
@@ -729,7 +747,7 @@ export class Game {
         break;
       case "open":
       case "close":
-        this.lockFor("interact_reach");
+        this.lockFor("door_push");
         break;
       case "pickup":
         this.lockFor("pickup_ground");
@@ -739,7 +757,7 @@ export class Game {
     }
   }
 
-  private lockFor(clip: "interact_reach" | "pickup_ground" | "gather_flower" | "plant_seed" | "water_plant" | "harvest_plant" | "inspect_object"): void {
+  private lockFor(clip: "interact_reach" | "pickup_ground" | "gather_flower" | "plant_seed" | "water_plant" | "harvest_plant" | "inspect_object" | "door_push"): void {
     this.player.locked = true;
     const ok = this.player.animator.play(clip, { once: true, onDone: () => (this.player.locked = false) });
     if (!ok) this.player.locked = false;
@@ -891,6 +909,7 @@ export class Game {
     this.timer.update();
     const dt = Math.min(this.timer.getDelta(), 0.05);
     const t0 = performance.now();
+    this.audio.tick();
     const ui = this.ui.get();
     const mode = ui.mode;
     this.clock += dt;
@@ -902,7 +921,10 @@ export class Game {
       if (this.input.wasPressed("pause")) {
         if (ui.panel) this.closePanel();
         else this.pause();
-      } else if (ui.panel === null) {
+      }
+      // re-read the UI: a hotkey pressed in the same frame as the Esc that closed a panel still opens its panel
+      const now = this.ui.get();
+      if (now.mode === "play" && now.panel === null) {
         if (this.input.wasPressed("inventory")) this.openPanel("inventory");
         else if (this.input.wasPressed("journal")) this.openPanel("journal");
         else if (this.input.wasPressed("record")) this.openPanel("record");
@@ -918,6 +940,7 @@ export class Game {
       if (!focus && ui.panel === null && this.input.padPressedButton(0)) this.player.requestJump();
       this.player.lookTarget = focus ? this.lookPoint.copy(focus.position).setY(focus.position.y + (focus.def.kind === "npc" ? 1.55 : 0.6)) : null;
       if (this.visit && ui.panel === null) this.visit.update(dt);
+      this.player.carrying = !this.visit && this.session.state.inventory.some((x) => x?.itemId === "water_vessel_full");
       if (!this.visit?.controlsPlayer) this.player.update(dt, ui.panel === null && !this.seated ? this.input : NO_INPUT, this.cam.yaw);
       this.seat?.update(dt);
       const pSpeed = Math.hypot(this.player.velocity.x, this.player.velocity.z);
@@ -1014,6 +1037,14 @@ export class Game {
       rt.angle += (target - rt.angle) * Math.min(1, dt * 5);
       rt.leaf.rotation.y = rt.baseRotY + rt.opens * rt.angle * 1.45;
     }
+    // chest and crate lids swing about their back hinge
+    for (const [placementId, lid] of this.level.lids) {
+      const want = this.lidOpen === placementId ? 1 : 0;
+      const cur = this.lidAngles.get(placementId) ?? 0;
+      const next = cur + (want - cur) * (1 - Math.exp(-7 * dt));
+      this.lidAngles.set(placementId, next);
+      lid.node.rotation.x = lid.baseRotX - next * 1.25;
+    }
     // indoors = a ceiling or roof collider directly overhead
     if (this.player) {
       const head = this.player.position.clone().add(new THREE.Vector3(0, 1.7, 0));
@@ -1037,7 +1068,13 @@ export class Game {
       const water = this.level.waterPoints.reduce((m, w) => Math.min(m, w.distanceTo(p)), Infinity);
       const crowd = Math.hypot(p.x - 82, p.z - 10);
       const channelFlowing = this.session.state.restorations.rest_channel_east === "flowing";
+      // Velan at his bench by day: the chisel is heard from the workshop
+      const velan = this.npcs.positionOf("npc_velan");
+      const working = h >= 7 && h < 18 && Math.hypot(velan.x - 25.5, velan.z - 8) < 3.5 ? 1 : 0;
+      this.camera.getWorldDirection(_listenDir);
+      this.audio.setListener(this.camera.position.x, this.camera.position.y, this.camera.position.z, _listenDir.x, _listenDir.y, _listenDir.z);
       this.audio.updateAmbience(dt, {
+        workshop: working,
         rain: this.weather.rain,
         wind: this.weather.wind,
         day,
@@ -1079,11 +1116,13 @@ export class Game {
     buttons[i < 0 ? 0 : next]!.focus();
   }
 
-  /** Evening ambience after 18:00; festival music on festival evenings. Missing tracks simply stay silent. */
-  private updateMusic(): void {
+  /** Music for the hour and place (musicCueFor); evening ambience after 18:00. Checked every few seconds. */
+  updateMusic(): void {
     const h = this.session.hourOfDay;
-    const festival = this.session.state.flags.festival_held && h >= 17 && h < 23;
-    this.audio.setMusic(festival ? "mus_festival" : "mus_exploration_day");
+    const p = this.player.position;
+    const ws = REGIONS.find((r) => r.id === "loc_workshop");
+    const inWorkshop = !!ws && p.x >= ws.min[0] && p.x <= ws.max[0] && p.z >= ws.min[1] && p.z <= ws.max[1];
+    this.audio.setMusic(musicCueFor({ hour: h, festivalHeld: !!this.session.state.flags.festival_held, inWorkshop, visiting: !!this.visit }));
     if (h >= 18 || h < 6) {
       this.audio.stopLoop("amb_settlement_day");
       this.audio.startLoop("amb_evening");

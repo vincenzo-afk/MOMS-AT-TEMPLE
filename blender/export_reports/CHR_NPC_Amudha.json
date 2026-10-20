@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Amudha",
   "glb": "public/assets/models/characters/CHR_NPC_Amudha.glb",
   "blend": "blender/source/CHR_NPC_Amudha.blend",
-  "bytes": 340524,
-  "triangles": 9044,
+  "bytes": 344488,
+  "triangles": 9124,
   "objects": [
     "CHR_NPC_Amudha",
     "CHR_NPC_Amudha_Mesh",

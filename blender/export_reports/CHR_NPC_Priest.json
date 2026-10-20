@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Priest",
   "glb": "public/assets/models/characters/CHR_NPC_Priest.glb",
   "blend": "blender/source/CHR_NPC_Priest.blend",
-  "bytes": 285452,
-  "triangles": 7758,
+  "bytes": 289472,
+  "triangles": 7838,
   "objects": [
     "CHR_NPC_Priest",
     "CHR_NPC_Priest_Mesh",

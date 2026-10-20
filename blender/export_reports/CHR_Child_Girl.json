@@ -2,8 +2,8 @@
   "assetId": "CHR_Child_Girl",
   "glb": "public/assets/models/characters/CHR_Child_Girl.glb",
   "blend": "blender/source/CHR_Child_Girl.blend",
-  "bytes": 327116,
-  "triangles": 8800,
+  "bytes": 331016,
+  "triangles": 8880,
   "objects": [
     "CHR_Child_Girl",
     "CHR_Child_Girl_Mesh",

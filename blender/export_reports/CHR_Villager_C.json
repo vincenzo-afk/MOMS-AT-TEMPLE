@@ -2,8 +2,8 @@
   "assetId": "CHR_Villager_C",
   "glb": "public/assets/models/characters/CHR_Villager_C.glb",
   "blend": "blender/source/CHR_Villager_C.blend",
-  "bytes": 328368,
-  "triangles": 8772,
+  "bytes": 332268,
+  "triangles": 8852,
   "objects": [
     "CHR_Villager_C",
     "CHR_Villager_C_Mesh",

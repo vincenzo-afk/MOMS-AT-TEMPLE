@@ -1,8 +1,7 @@
 {
   "blender": "5.2.2 LTS",
   "exported": [
-    "CHR_Child_Boy",
-    "CHR_Child_Girl"
+    "CHR_Player_Base"
   ],
   "failures": []
 }

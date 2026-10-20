@@ -4,7 +4,7 @@ Home decorations are separate assets so the player can place them in decor slots
 import math
 import random
 from tom.core import Part, rgb, root, collider, empty, export_asset
-from tom.props import plank, rope_path, pot, basket, heap, sack, chest, kolam, bamboo
+from tom.props import plank, rope_path, pot, basket, heap, sack, chest, chest_lid, kolam, bamboo
 
 ASSETS = {}
 
@@ -20,11 +20,16 @@ def PRP_Storage_Chest_A():
     rng = random.Random(8001)
     rt = root("PRP_Storage_Chest_A")
     p = Part()
-    chest(p, (0, 0, 0.06), (0.9, 0.55, 0.45), rng)
+    chest(p, (0, 0, 0.06), (0.9, 0.55, 0.45), rng, open_lid=True)  # body only: the lid is its own hinged node
     for sx in (-1, 1):
         for sy in (-1, 1):
             plank(p, (0.08, 0.08, 0.06), (sx * 0.4, sy * 0.24, 0.03), rng, "teak_dark")
     p.to_object("PRP_Storage_Chest_A_Mesh").parent = rt
+    lid = Part()
+    chest_lid(lid, (0.9, 0.55, 0.45), rng)
+    lo = lid.to_object("LID_Chest")
+    lo.location = (0, 0.275, 0.51)  # the hinge: back top edge
+    lo.parent = rt
     collider("Chest", (0.95, 0.6, 0.7), (0, 0, 0.35), parent=rt)
     return export_asset("PRP_Storage_Chest_A", "props", rt), rt
 

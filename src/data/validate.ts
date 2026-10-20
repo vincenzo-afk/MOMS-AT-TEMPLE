@@ -3,6 +3,7 @@ import type { Condition, Effect } from "../game/core/types";
 import { RECORD_TEXT, LOCATIONS, NOTICE_HINTS } from "./text";
 import { ANCHORS, PLACEMENTS, INTERACTABLES } from "./level";
 import { SHELTER_ANCHORS } from "./world";
+import { AUDIO_MANIFEST } from "./audioManifest";
 
 /** Cross-reference check for all authored data. Returns a list of human-readable problems. */
 export function validateDefinitions(d: Definitions): string[] {
@@ -10,6 +11,15 @@ export function validateDefinitions(d: Definitions): string[] {
   const need = (ok: boolean, msg: string) => {
     if (!ok) errors.push(msg);
   };
+  // audio: every slot states its licence; positional loops loop; supplied files have a measured duration
+  const audioIds = new Set<string>();
+  for (const a of AUDIO_MANIFEST) {
+    need(!audioIds.has(a.id), `audio ${a.id}: duplicate id`);
+    audioIds.add(a.id);
+    need(a.licence.trim().length > 0, `audio ${a.id}: no licence`);
+    need(!a.spatial || a.loop, `audio ${a.id}: spatial entries must loop`);
+    need(a.status === "pending" || a.durationSec !== null, `audio ${a.id}: supplied without a measured duration`);
+  }
   const item = (id: string, ctx: string) => need(d.items.has(id), `${ctx}: unknown item "${id}"`);
   const loc = (id: string, ctx: string) => need(id in LOCATIONS, `${ctx}: unknown location "${id}"`);
   const text = (id: string, ctx: string) => need(id in RECORD_TEXT, `${ctx}: missing record text "${id}"`);

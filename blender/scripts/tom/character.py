@@ -12,7 +12,7 @@ import bpy
 import bmesh
 from mathutils import Vector, Quaternion, Matrix
 from .core import Part, rgb, collection
-from .anatomy import finger_joints
+from .anatomy import finger_joints, HeadShape, eye_frame, jaw_pivot
 
 DIGITS = ("thumb", "index", "middle", "ring", "pinky")
 
@@ -23,17 +23,22 @@ DEFORM_BONES = [
     "shoulder_R", "upper_arm_R", "forearm_R", "hand_R",
     "thigh_L", "shin_L", "foot_L", "toe_L",
     "thigh_R", "shin_R", "foot_R", "toe_R",
-] + [f"{d}_{k}_{s}" for s in ("L", "R") for d in DIGITS for k in ("01", "02")]
+] + [f"{d}_{k}_{s}" for s in ("L", "R") for d in DIGITS for k in ("01", "02")] + ["jaw", "eye_L", "lid_L", "eye_R", "lid_R"]
 
 
 class Body:
     """Joint positions for a character, derived from a few proportion parameters."""
 
-    def __init__(self, height=1.75, shoulder=0.19, hip=0.095, female=False, belly=0.0, arm_out_deg=11.0):
+    def __init__(self, height=1.75, shoulder=0.19, hip=0.095, female=False, belly=0.0, arm_out_deg=11.0, head_scale=1.0):
         s = height / 1.75
         self.s = s
         # limb and torso radii are authored for adults; children (short bodies) get proportionally slimmer
         self.girth = 1.0 if s >= 0.85 else s / 0.85
+        # the head shape (shared with the mesh builder so face bones pivot where the mesh expects)
+        hs = head_scale
+        rx, ry, rz = (0.078 if female else 0.082) * s * hs, 0.103 * s * hs, 0.116 * s * hs
+        self.head_shape = HeadShape(Vector((0, -0.006, height - rz - 0.004)), rx, ry, rz, fem=female)
+        self.eye_scale = s * hs * 1.04
         self.female = female
         self.belly = belly
         self.hip_joint_z = 0.92 * s
@@ -87,6 +92,11 @@ class Body:
             ]
             for digit, (a, m, t) in finger_joints(self, s).items():
                 b += [(f"{digit}_01_{s}", a, m, f"hand_{s}"), (f"{digit}_02_{s}", m, t, f"{digit}_01_{s}")]
+            # face: eyeball and upper-lid pivots at the eye centre
+            c, fwd, _r = eye_frame(self.head_shape, 1 if s == "L" else -1, self.eye_scale)
+            b += [(f"eye_{s}", c, c + fwd * 0.02, "head"), (f"lid_{s}", c, c + Vector((0, 0, 0.02)), "head")]
+        jp = jaw_pivot(self.head_shape)
+        b.append(("jaw", jp, jp + Vector((0, -self.head_shape.r[1] * 0.8, -self.head_shape.r[2] * 0.35)), "head"))
         return b
 
 
@@ -384,6 +394,9 @@ CLIP_HANDS = {
     "vault": ("open", "open"), "climb": ("grip", "grip"), "sit_down": ("loose", "loose"), "stand_up": ("loose", "loose"),
     "coconut_smash": ("grip", "grip"), "pray_idle": ("open", "open"), "light_lamp": ("open", "pinch"),
     "apply_vibhuti": ("relaxed", "pinch"), "photo_pose": ("loose", "loose"), "drive_seated": ("grip", "grip"), "scold": ("relaxed", "point"),
+    "door_push": ("relaxed", "open"), "close_container": ("open", "open"), "pickup_table": ("relaxed", "grip"),
+    "carry_idle": ("grip", "grip"), "carry_walk": ("grip", "grip"), "sweep": ("grip", "grip"), "garden_kneel": ("pinch", "loose"),
+    "talk_explain": ("open", "open"),
 }
 
 
@@ -1150,6 +1163,104 @@ def clip_scold(t):
     return rots, (0, 0, 0)
 
 
+# --------------------------------------------------------------------------- everyday actions (session 4b)
+def clip_door_push(t):
+    """Push a door open with the right palm, stepping into it (0.8 s)."""
+    e = _env(t, 0.05, 0.35, 0.55, 0.95)
+    step = _env(t, 0.2, 0.45, 0.6, 0.9)
+    rots = {
+        "spine": [("X", 8 * e)], "chest": [("Z", -6 * e)],
+        "upper_arm_R": [("X", -70 * e), ("Y", -6 * e)], "forearm_R": [("X", -20 * e)], "hand_R": [("X", -40 * e)],
+        "upper_arm_L": [("X", -6)], "forearm_L": [("X", -14)],
+        "thigh_R": [("X", -24 * step)], "shin_R": [("X", 30 * step)],
+    }
+    return rots, (0, -0.06 * step, -0.01 * step)
+
+
+def clip_close_container(t):
+    """Lower a lid shut with both hands and straighten (0.7 s)."""
+    e = _env(t, 0.0, 0.3, 0.55, 0.95)
+    rots = {"spine": [("X", 34 * e)], "chest": [("X", 8 * e)], "neck": [("X", 4 * e)]}
+    rots.update({k: [(a, d * e) for a, d in v] for k, v in _crouch(1.0, 0.45)[0].items()})
+    for side in ("L", "R"):
+        rots[f"upper_arm_{side}"] = [("X", -50 * e), ("Y", (6 if side == "L" else -6) * e)]
+        rots[f"forearm_{side}"] = [("X", -30 * e)]
+        rots[f"hand_{side}"] = [("X", -30 * e)]
+    return rots, (0, 0.04 * e, -0.16 * e)
+
+
+def clip_pickup_table(t):
+    """Pick something up from table height (no crouch): reach, grip, bring it in (0.9 s)."""
+    e = _env(t, 0.05, 0.4, 0.55, 0.95)
+    rots = {
+        "spine": [("X", 16 * e)], "chest": [("X", 4 * e)], "neck": [("X", 8 * e)],
+        "upper_arm_R": [("X", -46 * e), ("Y", -4 * e)], "forearm_R": [("X", -30 * e)], "hand_R": [("X", -10 * e)],
+        "upper_arm_L": [("X", -8)], "forearm_L": [("X", -16)],
+    }
+    return rots, (0, -0.02 * e, 0)
+
+
+CARRY_ARMS = {
+    "upper_arm_L": [("X", -14), ("Y", 12)], "upper_arm_R": [("X", -14), ("Y", -12)],
+    "forearm_L": [("X", -66), ("Z", -22)], "forearm_R": [("X", -66), ("Z", 22)],
+    "hand_L": [("Y", -10)], "hand_R": [("Y", 10)],
+}
+
+
+def clip_carry_idle(t):
+    """Holding a water pot against the hip-front with both hands; a slight lean back for the weight."""
+    br = _s(t)
+    rots = {k: list(v) for k, v in CARRY_ARMS.items()}
+    rots.update({"spine": [("X", -4 + br * 0.6)], "chest": [("X", br * 0.8)], "head": [("X", -2)]})
+    return rots, (0, 0.01, -0.004 + br * 0.003)
+
+
+def clip_carry_walk(t):
+    """Walking while carrying: the legs of the walk cycle, the arms locked on the load."""
+    rots, off = clip_walk(t)
+    rots.update({k: list(v) for k, v in CARRY_ARMS.items()})
+    rots["spine"] = [("X", -3)]
+    rots["chest"] = [("Z", -_s(t) * 2)]
+    return rots, off
+
+
+def clip_sweep(t):
+    """Sweeping the courtyard with a short broom: bent forward, both arms swinging side to side (loop)."""
+    sw = _s(t)
+    rots = {
+        "spine": [("X", 36), ("Z", sw * 8)], "chest": [("X", 6), ("Z", sw * 6)], "neck": [("X", -10)],
+        "thigh_L": [("X", -20)], "thigh_R": [("X", -14)], "shin_L": [("X", 30)], "shin_R": [("X", 24)],
+        "upper_arm_L": [("X", -40 + sw * 10), ("Y", 10 + sw * 20)], "upper_arm_R": [("X", -46 + sw * 10), ("Y", -6 + sw * 20)],
+        "forearm_L": [("X", -30)], "forearm_R": [("X", -24)],
+    }
+    return rots, (sw * 0.03, 0.04, -0.06)
+
+
+def clip_garden_kneel(t):
+    """Kneeling at a bed, tending plants with both hands (loop)."""
+    w = _s(t)
+    rots = {
+        "thigh_L": [("X", -100)], "shin_L": [("X", 100)], "foot_L": [("X", -20)],
+        "thigh_R": [("X", -10)], "shin_R": [("X", 110)], "foot_R": [("X", 40)],
+        "spine": [("X", 30)], "chest": [("X", 10)], "neck": [("X", 6)],
+        "upper_arm_L": [("X", -50 + w * 8), ("Y", 8)], "upper_arm_R": [("X", -46 - w * 8), ("Y", -8)],
+        "forearm_L": [("X", -30)], "forearm_R": [("X", -30)],
+    }
+    return rots, (0, 0.12, -0.5)
+
+
+def clip_talk_explain(t):
+    """Explaining something: open-palm gestures with both hands in turn (loop)."""
+    a = max(0.0, _s(t))
+    b = max(0.0, -_s(t))
+    rots = {
+        "spine": [("X", 2)], "head": [("Z", _s(t) * 4), ("X", -2)],
+        "upper_arm_L": [("X", -20 - 30 * a), ("Y", 10 * a)], "forearm_L": [("X", -40 - 40 * a)],
+        "upper_arm_R": [("X", -20 - 30 * b), ("Y", -10 * b)], "forearm_R": [("X", -40 - 40 * b)],
+    }
+    return rots, (0, 0, 0)
+
+
 CLIPS = [
     # name, frames @30fps, function, loop
     ("idle_relaxed", 120, clip_idle, True),
@@ -1207,4 +1318,13 @@ CLIPS = [
     ("drive_seated", 60, clip_drive, True),
     ("queue_shuffle", 27, clip_shuffle, True),
     ("scold", 42, clip_scold, False),
+    # everyday actions
+    ("door_push", 24, clip_door_push, False),
+    ("close_container", 21, clip_close_container, False),
+    ("pickup_table", 27, clip_pickup_table, False),
+    ("carry_idle", 90, clip_carry_idle, True),
+    ("carry_walk", 30, clip_carry_walk, True),
+    ("sweep", 36, clip_sweep, True),
+    ("garden_kneel", 60, clip_garden_kneel, True),
+    ("talk_explain", 60, clip_talk_explain, True),
 ]

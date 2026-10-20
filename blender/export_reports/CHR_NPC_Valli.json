@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Valli",
   "glb": "public/assets/models/characters/CHR_NPC_Valli.glb",
   "blend": "blender/source/CHR_NPC_Valli.blend",
-  "bytes": 336288,
-  "triangles": 8972,
+  "bytes": 340304,
+  "triangles": 9052,
   "objects": [
     "CHR_NPC_Valli",
     "CHR_NPC_Valli_Mesh",

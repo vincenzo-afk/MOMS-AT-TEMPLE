@@ -75,7 +75,7 @@ ${rows.join("\n")}
 | Ground | runtime mesh | integrated | vertex-coloured terrain with worn paths, generated in \`src/game/world/Level.ts\` |
 | Water shader | runtime material | integrated | \`src/game/world/Water.ts\`, applied to every \`WATER_*\` mesh |
 | Sky | runtime material | integrated | gradient + sun disc, time-of-day driven |
-| Audio (15 slots) | audio | planned (pending Lyria) | see \`src/data/audioManifest.ts\` and \`docs/AUDIO_BIBLE.md\` |
+| Audio (20 slots) | audio | planned (pending Lyria) | see \`src/data/audioManifest.ts\` and \`docs/AUDIO_BIBLE.md\` |
 | Item icons | UI | planned | text glyphs used until UI_Icon_Set_A exists |
 `;
 writeFileSync(join(root, "docs/ASSET_MANIFEST.md"), md);

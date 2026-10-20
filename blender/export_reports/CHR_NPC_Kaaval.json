@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Kaaval",
   "glb": "public/assets/models/characters/CHR_NPC_Kaaval.glb",
   "blend": "blender/source/CHR_NPC_Kaaval.blend",
-  "bytes": 318864,
-  "triangles": 8472,
+  "bytes": 322876,
+  "triangles": 8552,
   "objects": [
     "CHR_NPC_Kaaval",
     "CHR_NPC_Kaaval_Mesh",

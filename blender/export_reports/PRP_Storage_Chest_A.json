@@ -2,10 +2,11 @@
   "assetId": "PRP_Storage_Chest_A",
   "glb": "public/assets/models/props/PRP_Storage_Chest_A.glb",
   "blend": "blender/source/PRP_Storage_Chest_A.blend",
-  "bytes": 13492,
-  "triangles": 130,
+  "bytes": 17248,
+  "triangles": 166,
   "objects": [
     "COL_Chest",
+    "LID_Chest",
     "PRP_Storage_Chest_A",
     "PRP_Storage_Chest_A_Mesh"
   ],
@@ -25,7 +26,7 @@
   "boundsMax": [
     0.45,
     0.285,
-    0.664
+    0.674
   ],
   "blenderVersion": "5.2.2 LTS"
 }

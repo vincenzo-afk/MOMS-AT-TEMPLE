@@ -231,10 +231,16 @@ def PRP_Crate_A():
     for sx in (-1, 1):
         for sy in (-1, 1):
             plank(p, (0.06, 0.06, 0.55), (sx * 0.38, sy * 0.28, 0.275), rng, "teak_dark")
-    plank(p, (0.84, 0.62, 0.05), (0, 0, 0.56), rng, "teak_dark")
     rope_path(p, [(-0.42, -0.1, 0.4), (-0.46, 0, 0.35), (-0.42, 0.1, 0.4)], 0.012, rng)
     p.box((0.75, 0.52, 0.02), (0, 0, 0.05), "MAT_Wood_Teak_A", rgb("teak_dark"))
     p.to_object("PRP_Crate_A_Mesh").parent = rt
+    lid = Part()  # the lid on its own hinged node (origin = back top edge)
+    plank(lid, (0.84, 0.62, 0.05), (0, -0.31, 0.025), rng, "teak_dark")
+    plank(lid, (0.06, 0.5, 0.03), (0.3, -0.31, 0.06), rng, "teak")
+    plank(lid, (0.06, 0.5, 0.03), (-0.3, -0.31, 0.06), rng, "teak")
+    lo = lid.to_object("LID_Crate")
+    lo.location = (0, 0.31, 0.535)
+    lo.parent = rt
     collider("Crate", (0.85, 0.65, 0.6), (0, 0, 0.3), parent=rt)
     return export_asset("PRP_Crate_A", "props", rt), rt
 

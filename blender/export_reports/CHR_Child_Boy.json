@@ -2,8 +2,8 @@
   "assetId": "CHR_Child_Boy",
   "glb": "public/assets/models/characters/CHR_Child_Boy.glb",
   "blend": "blender/source/CHR_Child_Boy.blend",
-  "bytes": 300256,
-  "triangles": 8008,
+  "bytes": 304316,
+  "triangles": 8088,
   "objects": [
     "CHR_Child_Boy",
     "CHR_Child_Boy_Mesh",

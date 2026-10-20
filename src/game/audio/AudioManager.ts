@@ -1,13 +1,17 @@
 import { AUDIO_MANIFEST, type AudioEntry } from "../../data/audioManifest";
 import type { Settings } from "../core/types";
 import { Soundscape, type SoundscapeParams, type Surface } from "./Soundscape";
+import { MusicSynth } from "./MusicSynth";
+import type { MusicCue } from "./musicCues";
 
 type Bus = "music" | "effects";
 
 /**
  * Web Audio playback with master / music / effects buses. Starts only after a user gesture.
  * Files that are missing (every Lyria slot until supplied) are skipped with one console warning each;
- * UI and interaction cues fall back to short synthesized blips so feedback and volume settings remain testable.
+ * UI and interaction cues fall back to short synthesized blips, music cues to MusicSynth's placeholder score,
+ * so feedback, mood and volume settings remain audible and testable. Manifest entries with `spatial` play
+ * through a PannerNode; the listener follows the camera (setListener).
  */
 export class AudioManager {
   private ctx: AudioContext | null = null;
@@ -21,6 +25,8 @@ export class AudioManager {
   private settings: Settings | null = null;
   /** Procedural ambience; present once audio is unlocked. */
   soundscape: Soundscape | null = null;
+  /** Placeholder score for music cues without a file; present once audio is unlocked. */
+  synth: MusicSynth | null = null;
   /** Counts of triggered cues (diagnostics and tests). */
   readonly cueCounts: Record<string, number> = {};
 
@@ -40,8 +46,17 @@ export class AudioManager {
       this.buses.music.connect(this.master);
       this.buses.effects.connect(this.master);
       this.applySettings(settings);
-      this.soundscape = new Soundscape(this.ctx, this.buses.effects, (id) => this.loaded.has(id));
-      void this.preload();
+      this.soundscape = new Soundscape(this.ctx, this.buses.effects, (id) => this.loaded.has(id), AUDIO_MANIFEST.find((e) => e.id === "amb_workshop")?.spatial ?? null);
+      this.synth = new MusicSynth(this.ctx, this.buses.music);
+      if (this.music) this.synth.play(this.music as MusicCue, 1);
+      void this.preload().then(() => {
+        // a supplied track that finished loading after its cue started takes over from the placeholder
+        const m = this.music;
+        if (m && this.loaded.has(m) && !this.loops.has(m)) {
+          this.synth?.play(null, 1.5);
+          this.startLoop(m, 1.5);
+        }
+      });
     }
     if (this.ctx.state === "suspended") await this.ctx.resume().catch(() => undefined);
   }
@@ -98,6 +113,41 @@ export class AudioManager {
 
   updateAmbience(dt: number, p: SoundscapeParams): void {
     this.soundscape?.update(dt, p);
+    // the recorded workshop loop (once supplied) plays only while someone works at the bench
+    if (this.loaded.has("amb_workshop")) {
+      if (p.workshop > 0) this.startLoop("amb_workshop", 2);
+      else this.stopLoop("amb_workshop", 2);
+    }
+  }
+
+  /** Schedule the placeholder score's next notes; call every frame, in every mode. */
+  tick(): void {
+    this.synth?.update();
+  }
+
+  /** The ears of every positional sound: the camera's position and facing. */
+  setListener(x: number, y: number, z: number, fx: number, fy: number, fz: number): void {
+    if (!this.ctx) return;
+    const l = this.ctx.listener;
+    if (l.positionX) {
+      l.positionX.value = x;
+      l.positionY.value = y;
+      l.positionZ.value = z;
+      l.forwardX.value = fx;
+      l.forwardY.value = fy;
+      l.forwardZ.value = fz;
+      l.upX.value = 0;
+      l.upY.value = 1;
+      l.upZ.value = 0;
+    } else {
+      l.setPosition(x, y, z);
+      l.setOrientation(fx, fy, fz, 0, 1, 0);
+    }
+  }
+
+  /** The music cue currently wanted (file or placeholder), for diagnostics and tests. */
+  get musicCue(): string | null {
+    return this.music;
   }
   footstep(surface: Surface, running: boolean): void {
     this.count("footstep");
@@ -133,7 +183,8 @@ export class AudioManager {
     if (!this.ctx || !e) return;
     const buf = this.buffers.get(id);
     if (!buf) {
-      this.blip(id);
+      if (id === "mus_restoration" || id === "mus_discovery") this.synth?.sting(id === "mus_restoration" ? "restoration" : "discovery");
+      else this.blip(id);
       return;
     }
     const src = this.ctx.createBufferSource();
@@ -144,12 +195,16 @@ export class AudioManager {
     src.start();
   }
 
-  /** Crossfade to a music track or ambience loop. Missing tracks simply leave silence. */
-  setMusic(id: string | null, fade = 2.5): void {
-    if (!this.ctx || this.music === id) return;
+  /** Crossfade to a music cue: its supplied track, else the synthesized placeholder. null fades to silence. */
+  setMusic(id: MusicCue | null, fade = 2.5): void {
+    if (this.music === id) return;
     if (this.music) this.stopLoop(this.music, fade);
     this.music = id;
-    if (id) this.startLoop(id, fade);
+    if (!this.ctx) return; // remembered; starts on unlock
+    if (id && this.buffers.get(id)) {
+      this.synth?.play(null, fade);
+      this.startLoop(id, fade);
+    } else this.synth?.play(id, fade);
   }
 
   startLoop(id: string, fade = 1.5): void {
@@ -162,7 +217,8 @@ export class AudioManager {
     const g = this.ctx.createGain();
     g.gain.value = 0;
     g.gain.setTargetAtTime(e.volume, this.ctx.currentTime, fade / 3);
-    src.connect(g).connect(this.buses[this.busFor(e)]);
+    const bus = this.buses[this.busFor(e)];
+    src.connect(g).connect(e.spatial ? Soundscape.panner(this.ctx, e.spatial, bus) : bus);
     src.start();
     this.loops.set(id, { src, gain: g });
   }

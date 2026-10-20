@@ -141,6 +141,24 @@ def chest(p, loc, size, rng, rot_z=0.0, open_lid=False):
     p.box((0.06, 0.02, 0.08), (x - s_ * (-d / 2 - 0.01), y + c * (-d / 2 - 0.01), z + h - 0.02), "MAT_Brass_A", rgb("brass"), rot_z=rot_z)
 
 
+def chest_lid(p, size, rng):
+    """The chest's domed lid built around its hinge (origin = back top edge, lid extends toward -Y = front)."""
+    w, d, _h = size
+    for i in range(6):
+        a0, a1 = math.pi * i / 6, math.pi * (i + 1) / 6
+        y0, z0 = math.cos(a0) * d / 2 - d / 2, math.sin(a0) * d * 0.28
+        y1, z1 = math.cos(a1) * d / 2 - d / 2, math.sin(a1) * d * 0.28
+        pa = [(-w / 2, y0, z0), (w / 2, y0, z0)]
+        pb = [(-w / 2, y1, z1), (w / 2, y1, z1)]
+        p.quad_strip(pb, pa, "MAT_Wood_Teak_A", rgb("teak_dark", 0.05, rng), smooth=False)
+    for end in (-1, 1):
+        verts = [p.bm.verts.new((end * w / 2, math.cos(math.pi * k / 6) * d / 2 - d / 2, math.sin(math.pi * k / 6) * d * 0.28)) for k in range(7)]
+        f = p.bm.faces.new(verts if end > 0 else list(reversed(verts)))
+        p._finish([f], "MAT_Wood_Teak_A", rgb("teak_dark", 0.04, rng))
+    for k in (-0.38, 0.0, 0.38):  # iron bands over the dome
+        p.box((0.04, d + 0.02, 0.02), (k * w, -d / 2, d * 0.28), "MAT_Iron_A", rgb("iron", 0.04, rng))
+
+
 def sack(p, loc, s, rng, color="cloth_white", open_top=False, fill="grain"):
     x, y, z = loc
     p.ico(0.22 * s, (x, y, z + 0.2 * s), "MAT_Cloth_A", rgb(color, 0.06, rng), subdiv=2, scale=(1, 0.85, 1.15), noise=0.05, rng=rng)

@@ -3,6 +3,7 @@ import type { Input } from "../core/Input";
 import type { CollisionWorld, RayHit } from "../world/CollisionWorld";
 import { AUTHORED_SPRINT_SPEED, CharacterAnimator } from "./CharacterAnimator";
 import { findRig, lookAt, plantFeet, rotateBoneWorld, solveTwoBone, type Rig } from "./IK";
+import { FaceController, findFace } from "./Face";
 
 // Rewritten in session 4: jumping, vaulting and climbing change the integration order (scripted moves own the
 // position; air time owns vertical motion), which the single-loop session-1 controller could not express.
@@ -106,7 +107,17 @@ export class PlayerController {
     this.object.name = "Player";
     this.object.add(model);
     this.rig = findRig(model);
+    const face = findFace(model);
+    this.face = face ? new FaceController(face, model) : null;
   }
+
+  /** Blinking, gaze and the talking jaw. */
+  readonly face: FaceController | null;
+  /** Set by the game while the player character is speaking (dialogue). */
+  talking = false;
+  /** Carrying a full water pot: walking pace, both arms on the load, the pot shown in the arms. */
+  carrying = false;
+  private carryProp: THREE.Object3D | null = null;
 
   get position(): THREE.Vector3 {
     return this.object.position;
@@ -207,6 +218,7 @@ export class PlayerController {
       _target.set(ix * c + iz * s, 0, -ix * s + iz * c);
       let speed = this.state === "scripted" && this.auto ? this.auto.speed : WALK_SPEED * Math.max(0.35, len);
       if (running) speed = this.runHeld > SPRINT_BUILD ? SPRINT_SPEED : RUN_SPEED;
+      if (this.carrying) speed = Math.min(speed, 2.1); // a full pot: no running
       if (this.crouched) speed = CROUCH_SPEED;
       if (focus) speed = input.isDown("run") ? 2.6 : FOCUS_SPEED;
       if (this.limpTimer > 0) speed = Math.min(speed, 1.3);
@@ -453,9 +465,33 @@ export class PlayerController {
     this.animate(dt, speed, dirX, dirZ, strafe);
   }
 
+  /** A terracotta water pot held at the waist while carrying (built once, attached to the spine). */
+  private updateCarryProp(): void {
+    const rig = this.rig;
+    if (!rig) return;
+    if (this.carrying && !this.carryProp) {
+      const profile = [0, 0.09, 0.13, 0.145, 0.13, 0.08, 0.055, 0.065].map((r, i) => new THREE.Vector2(r, i * 0.04));
+      const pot = new THREE.Mesh(new THREE.LatheGeometry(profile, 14), new THREE.MeshStandardMaterial({ color: 0xa4532e, roughness: 0.85 }));
+      pot.castShadow = true;
+      pot.name = "CarryPot";
+      this.carryProp = pot;
+      this.object.add(pot);
+    }
+    if (!this.carryProp) return;
+    this.carryProp.visible = this.carrying;
+    if (!this.carrying) return;
+    // cradled between the hands (follows the arms through the walk): the pot's widest band just under the wrists
+    rig.hand[0].getWorldPosition(_hand);
+    rig.hand[1].getWorldPosition(_v);
+    _hand.add(_v).multiplyScalar(0.5);
+    this.object.worldToLocal(this.carryProp.position.copy(_hand));
+    this.carryProp.position.z += 0.05;
+    this.carryProp.position.y -= 0.17;
+  }
+
   /** Clip blend, then the procedural layers (seat offset, lean, foot planting, hand IK, look-at). */
   private animate(dt: number, speed: number, dirX: number, dirZ: number, focus: boolean): void {
-    this.animator.setLocomotion({ speed, dirX, dirZ, crouch: this.crouched, strafe: focus });
+    this.animator.setLocomotion({ speed, dirX, dirZ, crouch: this.crouched, strafe: focus, carry: this.carrying && !this.crouched });
     this.animator.update(dt);
     if (this.poseHook) this.poseHook();
     else this.model.position.copy(this.modelOffset);
@@ -496,5 +532,7 @@ export class PlayerController {
     const wantLook = this.lookTarget && this.state !== "vault" && this.state !== "climb" ? 1 : 0;
     this.look = THREE.MathUtils.lerp(this.look, wantLook, 1 - Math.exp(-5 * dt));
     if (this.lookTarget && this.look > 0.01) lookAt(rig, this.lookTarget, this.look * 0.85);
+    this.face?.update(dt, this.lookTarget, this.talking);
+    this.updateCarryProp();
   }
 }

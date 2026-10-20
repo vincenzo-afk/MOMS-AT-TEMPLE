@@ -32,6 +32,7 @@ export type GameEvent =
   | { type: "door"; doorId: string; open: boolean }
   | { type: "crime"; witnessId: string; containerId: string }
   | { type: "pickup"; pickupId: string }
+  | { type: "handover"; give: boolean }
   | { type: "fail" };
 
 export interface Conversation {
@@ -725,6 +726,7 @@ export class GameSession {
             return false;
           }
           this.state.inventory = removed.inventory;
+          this.emit({ type: "handover", give: true });
           this.advance(e.questId, e.objectiveId);
           break;
         }
@@ -758,6 +760,7 @@ export class GameSession {
             break;
           }
           this.state.claimedRewards = [...this.state.claimedRewards, claim];
+          this.emit({ type: "handover", give: false });
           this.notify(`Received ${this.itemName(e.itemId)}`, "good");
           break;
         }

@@ -3,6 +3,7 @@ import type { GameSession } from "../core/GameSession";
 import type { AssetLibrary } from "../core/AssetLibrary";
 import type { BarkTrigger, NpcDefinition, ScheduleEntry } from "../core/types";
 import { CharacterAnimator, type LoopAction, type OneShot } from "../player/CharacterAnimator";
+import { FaceController, findFace } from "../player/Face";
 import { ANCHORS, NAV_EDGES, NAV_NODES } from "../../data/level";
 import { SHELTER_ANCHORS } from "../../data/world";
 import { evaluateAll } from "../world/conditions";
@@ -32,7 +33,9 @@ const ACTIVITY_CLIP: Record<ScheduleEntry["activity"], LoopAction | null> = {
   puja: "pray_idle",
 };
 const NPC_OVERRIDES: Record<string, Partial<Record<ScheduleEntry["activity"], LoopAction | null>>> = {
-  npc_ponnan: { work: "read_record", rest: null },
+  npc_ponnan: { work: "read_record", rest: null, talk: "talk_explain" },
+  npc_amudha: { garden: "garden_kneel" },
+  npc_villager_lakshmi: { work: "sweep" },
   npc_meena: { craft: "make_garland" },
   npc_villager_pandi: { rest: "rest_idle" },
   npc_villager_siva: { rest: "rest_idle", work: "harvest_plant" },
@@ -47,6 +50,7 @@ export interface NpcRuntime {
   def: NpcDefinition;
   object: THREE.Group;
   animator: CharacterAnimator;
+  face: FaceController | null;
   head: THREE.Object3D | null;
   path: THREE.Vector3[];
   anchorId: string;
@@ -150,6 +154,8 @@ export class NpcSystem {
       const clips = own.length ? own : assets.retargetClips(sourceModelId, def.appearance.model);
       const animator = new CharacterAnimator(model, clips);
       animator.fidgets = false; // schedules drive NPC idles
+      const faceBones = findFace(model);
+      const face = faceBones ? new FaceController(faceBones, model) : null; // created in the bind pose
       const obj = new THREE.Group();
       obj.name = def.id;
       obj.add(model);
@@ -158,6 +164,7 @@ export class NpcSystem {
         def,
         object: obj,
         animator,
+        face,
         head: model.getObjectByName("head") ?? null,
         path: [],
         anchorId: "",
@@ -227,6 +234,7 @@ export class NpcSystem {
   }
 
   private sprintRemark = new Map<string, number>();
+  private lookPoint = new THREE.Vector3();
 
   /** NPCs hidden by a mode (the Temple Visit brings its own priest). */
   readonly suppressed = new Set<string>();
@@ -405,9 +413,14 @@ export class NpcSystem {
       rt.frame++;
       const every = tier === 0 ? 1 : dPlayer < MID_DIST ? 2 : 6;
       if (rt.frame % every === 0 || speed > 0) {
-        rt.animator.update(rt.tickAccum, speed);
+        const step = rt.tickAccum;
+        rt.animator.update(step, speed);
         rt.tickAccum = 0;
-        if (tier === 0) this.applyLook(rt, dPlayer);
+        if (tier === 0) {
+          this.applyLook(rt, dPlayer);
+          // faces only where you can see them: blinking, gaze toward you nearby, the jaw while speaking
+          rt.face?.update(step, dPlayer < 6 ? this.lookPoint.copy(this.playerPos).setY(this.playerPos.y + 1.55) : null, rt.mode === "talking");
+        }
       }
     }
   }

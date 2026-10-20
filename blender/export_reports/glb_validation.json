@@ -1,115 +1,115 @@
 {
-  "checkedAt": "2026-10-20T05:27:56.537Z",
+  "checkedAt": "2026-10-20T08:49:19.194Z",
   "results": [
     {
       "id": "CHR_Child_Boy",
-      "bytes": 300256,
-      "triangles": 8008,
+      "bytes": 304316,
+      "triangles": 8088,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Child_Girl",
-      "bytes": 327116,
-      "triangles": 8800,
+      "bytes": 331016,
+      "triangles": 8880,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Family_Husband",
-      "bytes": 304792,
-      "triangles": 8108,
+      "bytes": 308820,
+      "triangles": 8188,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Amudha",
-      "bytes": 340524,
-      "triangles": 9044,
+      "bytes": 344488,
+      "triangles": 9124,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Kaaval",
-      "bytes": 318864,
-      "triangles": 8472,
+      "bytes": 322876,
+      "triangles": 8552,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Meena",
-      "bytes": 336364,
-      "triangles": 8972,
+      "bytes": 340300,
+      "triangles": 9052,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Ponnan",
-      "bytes": 301052,
-      "triangles": 8070,
+      "bytes": 305152,
+      "triangles": 8150,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Priest",
-      "bytes": 285452,
-      "triangles": 7758,
+      "bytes": 289472,
+      "triangles": 7838,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Selvam",
-      "bytes": 316112,
-      "triangles": 8362,
+      "bytes": 320132,
+      "triangles": 8442,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Valli",
-      "bytes": 336288,
-      "triangles": 8972,
+      "bytes": 340304,
+      "triangles": 9052,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Velan",
-      "bytes": 329680,
-      "triangles": 8900,
+      "bytes": 333672,
+      "triangles": 8980,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Player_Base",
-      "bytes": 721576,
-      "triangles": 8356,
-      "animations": 53,
+      "bytes": 806200,
+      "triangles": 8436,
+      "animations": 61,
       "problems": []
     },
     {
       "id": "CHR_Player_Mom",
-      "bytes": 342088,
-      "triangles": 9072,
+      "bytes": 346104,
+      "triangles": 9152,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_A",
-      "bytes": 293736,
-      "triangles": 7900,
+      "bytes": 297616,
+      "triangles": 7980,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_B",
-      "bytes": 298848,
-      "triangles": 8056,
+      "bytes": 302872,
+      "triangles": 8136,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_C",
-      "bytes": 328368,
-      "triangles": 8772,
+      "bytes": 332268,
+      "triangles": 8852,
       "animations": 0,
       "problems": []
     },
@@ -556,8 +556,8 @@
     },
     {
       "id": "PRP_Crate_A",
-      "bytes": 23124,
-      "triangles": 308,
+      "bytes": 25636,
+      "triangles": 332,
       "animations": 0,
       "problems": []
     },
@@ -885,8 +885,8 @@
     },
     {
       "id": "PRP_Storage_Chest_A",
-      "bytes": 13492,
-      "triangles": 142,
+      "bytes": 17248,
+      "triangles": 178,
       "animations": 0,
       "problems": []
     },

@@ -2,8 +2,8 @@
   "assetId": "CHR_Player_Mom",
   "glb": "public/assets/models/characters/CHR_Player_Mom.glb",
   "blend": "blender/source/CHR_Player_Mom.blend",
-  "bytes": 342088,
-  "triangles": 9072,
+  "bytes": 346104,
+  "triangles": 9152,
   "objects": [
     "CHR_Player_Mom",
     "CHR_Player_Mom_Mesh",

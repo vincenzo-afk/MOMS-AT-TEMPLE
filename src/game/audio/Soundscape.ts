@@ -13,6 +13,7 @@ export interface SoundscapeParams {
   water: number; // 0..1 proximity to flowing water
   crowd: number; // 0..1 proximity to the bazaar
   indoors: boolean;
+  workshop: number; // 0..1 someone is working at the workshop bench
 }
 
 export type Surface = "stone" | "soil" | "wood";
@@ -23,11 +24,16 @@ export class Soundscape {
   private birdTimer = 0;
   private cricketGain: GainNode;
   private t = 0;
+  private tapTimer = 0;
+  private workshopOut: PannerNode | null = null;
+  /** procedural events so far (diagnostics and tests) */
+  readonly counts = { taps: 0 };
 
   constructor(
     private ctx: AudioContext,
     private out: AudioNode,
     private hasFile: (id: string) => boolean,
+    private workshopAt: { x: number; y: number; z: number; refDistance: number } | null = null,
   ) {
     // one shared 4 s noise buffer (pink-ish), looped by every noise layer at different filters/rates
     const len = ctx.sampleRate * 4;
@@ -98,6 +104,12 @@ export class Soundscape {
     const night = 1 - Math.min(1, p.day * 3);
     const chirp = Math.sin(this.t * 2.2) > 0.2 ? 1 : 0;
     this.set(this.cricketGain, has("amb_evening") ? 0 : night * (1 - p.rain) * 0.022 * chirp * inside, 0.05);
+    // chisel and mallet at the workbench, heard from the bench itself
+    this.tapTimer -= dt;
+    if (this.tapTimer <= 0) {
+      this.tapTimer = 1.3 + Math.random() * 2.2;
+      if (p.workshop > 0 && this.workshopAt && !has("amb_workshop")) this.chisel(p.workshop);
+    }
     // birdsong by day
     this.birdTimer -= dt;
     if (this.birdTimer <= 0) {
@@ -335,6 +347,56 @@ export class Soundscape {
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.18);
     src.connect(f).connect(g).connect(this.out);
     src.start(at, 1, 0.2);
+  }
+
+  /** A positional output at a point in the world (HRTF panning, inverse-distance roll-off). */
+  static panner(ctx: AudioContext, at: { x: number; y: number; z: number; refDistance: number }, out: AudioNode): PannerNode {
+    const p = ctx.createPanner();
+    p.panningModel = "HRTF";
+    p.distanceModel = "inverse";
+    p.refDistance = at.refDistance;
+    p.maxDistance = 80;
+    p.rolloffFactor = 1.3;
+    if (p.positionX) {
+      p.positionX.value = at.x;
+      p.positionY.value = at.y;
+      p.positionZ.value = at.z;
+    } else p.setPosition(at.x, at.y, at.z);
+    p.connect(out);
+    return p;
+  }
+
+  /** Two to four mallet-on-chisel taps: a bright click over a short wooden knock. */
+  private chisel(level: number): void {
+    const c = this.ctx;
+    this.workshopOut ??= Soundscape.panner(c, this.workshopAt!, this.out);
+    const n = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < n; i++) {
+      const t0 = c.currentTime + i * (0.2 + Math.random() * 0.08);
+      const src = c.createBufferSource();
+      src.buffer = this.noise;
+      const bp = c.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = 2300 + Math.random() * 500;
+      bp.Q.value = 3;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.5 * level, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+      src.connect(bp).connect(g).connect(this.workshopOut);
+      src.start(t0, Math.random() * 3, 0.1);
+      const knock = c.createOscillator();
+      knock.frequency.setValueAtTime(240, t0);
+      knock.frequency.exponentialRampToValueAtTime(130, t0 + 0.06);
+      const kg = c.createGain();
+      kg.gain.setValueAtTime(0.0001, t0);
+      kg.gain.exponentialRampToValueAtTime(0.25 * level, t0 + 0.004);
+      kg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+      knock.connect(kg).connect(this.workshopOut);
+      knock.start(t0);
+      knock.stop(t0 + 0.1);
+    }
+    this.counts.taps++;
   }
 
   /** Low two-tone "uh-oh" when the player is seen stealing. */

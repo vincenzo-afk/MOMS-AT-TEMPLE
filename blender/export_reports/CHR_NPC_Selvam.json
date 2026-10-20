@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Selvam",
   "glb": "public/assets/models/characters/CHR_NPC_Selvam.glb",
   "blend": "blender/source/CHR_NPC_Selvam.blend",
-  "bytes": 316112,
-  "triangles": 8362,
+  "bytes": 320132,
+  "triangles": 8442,
   "objects": [
     "CHR_NPC_Selvam",
     "CHR_NPC_Selvam_Mesh",

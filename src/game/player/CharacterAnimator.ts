@@ -35,7 +35,10 @@ export type OneShot =
   | "coconut_smash"
   | "light_lamp"
   | "apply_vibhuti"
-  | "scold";
+  | "scold"
+  | "door_push"
+  | "close_container"
+  | "pickup_table";
 export type LoopAction =
   | "talk_idle"
   | "talk_listen"
@@ -51,7 +54,10 @@ export type LoopAction =
   | "pray_idle"
   | "photo_pose"
   | "drive_seated"
-  | "queue_shuffle";
+  | "queue_shuffle"
+  | "sweep"
+  | "garden_kneel"
+  | "talk_explain";
 
 /** Crossfade time constant: weights reach ~95% of a new target in about 0.2 s (150-250 ms fades). */
 const TAU = 0.068;
@@ -66,6 +72,8 @@ export interface LocoInput {
   crouch: boolean;
   /** true while the body faces the camera (strafe/backpedal set); false = body faces its velocity */
   strafe: boolean;
+  /** carrying something heavy in both arms (a full water pot): carry idle / carry walk */
+  carry?: boolean;
 }
 
 type AirPhase = "none" | "start" | "air" | "fall";
@@ -113,7 +121,7 @@ export class CharacterAnimator {
     }
     for (const n of ["idle_relaxed", "walk_forward", "run_forward"]) if (!this.actions.has(n)) this.missing.push(n);
     // cycle clips are driven by phase, not by the mixer clock
-    for (const n of ["walk_forward", "run_forward", "sprint_forward", "walk_back", "strafe_left", "strafe_right", "crouch_walk"]) {
+    for (const n of ["walk_forward", "run_forward", "sprint_forward", "walk_back", "strafe_left", "strafe_right", "crouch_walk", "carry_walk"]) {
       const a = this.actions.get(n);
       if (a) a.timeScale = 0;
     }
@@ -254,7 +262,13 @@ export class CharacterAnimator {
     const move = THREE.MathUtils.clamp(L.speed / 0.5, 0, 1);
     let stride: number;
     let locoTargets: Array<[string, number]>;
-    if (L.crouch) {
+    if (L.carry && this.actions.has("carry_walk")) {
+      stride = WALK_STRIDE_PER_CYCLE;
+      locoTargets = [
+        ["carry_idle", 1 - move],
+        ["carry_walk", move],
+      ];
+    } else if (L.crouch) {
       stride = CROUCH_STRIDE_PER_CYCLE;
       locoTargets = [
         ["crouch_idle", 1 - move],
@@ -283,7 +297,7 @@ export class CharacterAnimator {
       ];
     }
     if (L.speed > 0.01) this.phase = (this.phase + (L.speed / Math.max(0.3, stride)) * dt) % 1;
-    for (const n of ["walk_forward", "run_forward", "sprint_forward", "walk_back", "strafe_left", "strafe_right", "crouch_walk"]) {
+    for (const n of ["walk_forward", "run_forward", "sprint_forward", "walk_back", "strafe_left", "strafe_right", "crouch_walk", "carry_walk"]) {
       const a = this.actions.get(n);
       if (a) a.time = this.phase * a.getClip().duration;
     }

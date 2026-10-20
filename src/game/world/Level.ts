@@ -36,6 +36,8 @@ export interface LevelHandles {
   flames: THREE.Object3D[];
   water: THREE.ShaderMaterial;
   doors: Map<string, DoorRuntime>;
+  /** hinged lids (LID_* nodes) by placement id */
+  lids: Map<string, { node: THREE.Object3D; baseRotX: number }>;
   lodChunks: LodChunk[];
   /** World positions of water surfaces (for spatial water ambience). */
   waterPoints: THREE.Vector3[];
@@ -81,6 +83,7 @@ export function buildLevel(assets: AssetLibrary): LevelHandles {
   const flames: THREE.Object3D[] = [];
   const water = createWaterMaterial();
   const doors = new Map<string, DoorRuntime>();
+  const lids = new Map<string, { node: THREE.Object3D; baseRotX: number }>();
   const lodChunks: LodChunk[] = [];
   const waterPoints: THREE.Vector3[] = [];
   let instancedDraws = 0;
@@ -149,6 +152,7 @@ export function buildLevel(assets: AssetLibrary): LevelHandles {
     obj.traverse((o) => {
       if (o.name.startsWith("SOCKET_") && p.id) sockets.set(`${p.id}.${o.name}`, o.getWorldPosition(new THREE.Vector3()));
       if (o.name.startsWith("FLAME_")) flames.push(o);
+      if (o.name.startsWith("LID_") && p.id) lids.set(p.id, { node: o, baseRotX: o.rotation.x });
       if (o.name.startsWith("DOOR_") && p.id) {
         const key = `${p.id}.${o.name.slice(5)}`;
         const prev = doors.get(key);
@@ -187,7 +191,7 @@ export function buildLevel(assets: AssetLibrary): LevelHandles {
   for (const [cx, cz, hx, hz] of [[0, -W, W, 1], [0, W, W, 1], [-W, 0, 1, W], [W, 0, 1, W]] as Array<[number, number, number, number]>)
     collision.add({ cx, cz, hx, hz, cos: 1, sin: 0, yMin: -1, yMax: 10, walk: false, name: "BOUNDARY" });
 
-  return { root, collision, byId, sockets, stateColliders, flames, water, doors, lodChunks, waterPoints, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
+  return { root, collision, byId, sockets, stateColliders, flames, water, doors, lids, lodChunks, waterPoints, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
 }
 
 /** Earth ground with vertex-colour variation, worn paths along the navigation graph and greener field margins. */

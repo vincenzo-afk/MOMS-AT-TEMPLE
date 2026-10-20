@@ -160,14 +160,41 @@ def build_hair_cap(p, shape, color, thick=0.012, front=0.5, side=0.08, back=-0.4
     p.sheet([edge + [edge[0]], inner + [inner[0]]], "MAT_Hair_A", color)
 
 
-def build_eyes(p, shape, colors, scale=1.0, iris_color=(0.2, 0.11, 0.05, 1)):
-    """Eyeballs set into the sockets, with an iris, pupil, catch-light and upper and lower lids."""
+def eye_frame(shape, sx, scale=1.0):
+    """Centre, gaze direction and radius of one eyeball (sx = +1 left, -1 right)."""
     r = 0.0125 * scale
+    socket = shape.landmark(sx * 0.36, 0.09)
+    out = (socket - shape.c).normalized()
+    fwd = (out * 0.35 + V((0, -1, 0)) * 0.65).normalized()  # gaze straight ahead, slightly outward
+    return socket - out * (r * 0.55), fwd, r
+
+
+def jaw_pivot(shape):
+    """Hinge of the lower jaw: behind the mouth, level with the ear lobes."""
+    return shape.c + V((0, shape.r[1] * 0.1, -shape.r[2] * 0.42))
+
+
+def jaw_weight(shape):
+    """Vertex weight fn for the head surface: the lower lip, chin and jaw follow the jaw bone."""
+
+    def fn(co):
+        uz = (co.z - shape.c.z) / shape.r[2]
+        front = max(0.0, min(1.0, -(co.y - shape.c.y) / shape.r[1] * 1.6 + 0.2))
+        k = max(0.0, min(1.0, (-0.555 - uz) / 0.06))  # 0 above the mouth line, 1 below
+        k *= front
+        return {"head": 1 - k, "jaw": k} if k > 0.001 else {"head": 1.0}
+
+    return fn
+
+
+def build_eyes(p, shape, colors, scale=1.0, iris_color=(0.2, 0.11, 0.05, 1), weight_for=None):
+    """Eyeballs set into the sockets, with an iris, pupil, catch-light and upper and lower lids.
+    weight_for(part, side) -> weight fn ('eye' moves the ball, 'lid' the upper lid)."""
     for sx in (-1, 1):
-        socket = shape.landmark(sx * 0.36, 0.09)
-        out = (socket - shape.c).normalized()
-        fwd = (out * 0.35 + V((0, -1, 0)) * 0.65).normalized()  # gaze straight ahead, slightly outward
-        c = socket - out * (r * 0.55)
+        side_name = "L" if sx > 0 else "R"
+        c, fwd, r = eye_frame(shape, sx, scale)
+        if weight_for:
+            p.weight_fn = weight_for("eye", side_name)
         p.ico(1.0, tuple(c), "MAT_Eye_A", colors["sclera"], subdiv=2, scale=(r, r, r))
         side = fwd.cross(V((0, 0, 1))).normalized()
         up = side.cross(fwd).normalized()
@@ -179,6 +206,8 @@ def build_eyes(p, shape, colors, scale=1.0, iris_color=(0.2, 0.11, 0.05, 1)):
         p.ico(1.0, tuple(c + fwd * r * 1.02 + up * r * 0.28 + side * (-sx) * r * 0.22), "MAT_Eye_A", colors["glint"], subdiv=0, scale=(r * 0.09,) * 3)
         # lids: partial shells of a slightly larger sphere; the upper lid covers the top of the iris
         for lo, hi, color, thick in ((0.32, 1.0, colors["lid"], 1.14), (-1.0, -0.62, colors["lid_low"], 1.1)):
+            if weight_for:
+                p.weight_fn = weight_for("lid" if lo > 0 else "head", side_name)
             shell = []
             for k in range(4):
                 v = lo + (hi - lo) * k / 3
@@ -189,7 +218,9 @@ def build_eyes(p, shape, colors, scale=1.0, iris_color=(0.2, 0.11, 0.05, 1)):
                     row.append(c + d * r * thick)
                 shell.append(row)
             p.sheet(shell, "MAT_Skin_A", color)
-        # lash line along the upper lid edge
+        # lash line along the upper lid edge (moves with the upper lid)
+        if weight_for:
+            p.weight_fn = weight_for("lid", side_name)
         edge = []
         for m in range(9):
             a = -1.25 + 2.5 * m / 8

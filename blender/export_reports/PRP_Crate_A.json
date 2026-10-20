@@ -2,10 +2,11 @@
   "assetId": "PRP_Crate_A",
   "glb": "public/assets/models/props/PRP_Crate_A.glb",
   "blend": "blender/source/PRP_Crate_A.blend",
-  "bytes": 23124,
-  "triangles": 296,
+  "bytes": 25636,
+  "triangles": 320,
   "objects": [
     "COL_Crate",
+    "LID_Crate",
     "PRP_Crate_A",
     "PRP_Crate_A_Mesh"
   ],
@@ -24,7 +25,7 @@
   "boundsMax": [
     0.42,
     0.31,
-    0.585
+    0.61
   ],
   "blenderVersion": "5.2.2 LTS"
 }

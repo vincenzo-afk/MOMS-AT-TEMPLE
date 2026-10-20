@@ -17,7 +17,7 @@ import bpy
 from mathutils import Vector
 from tom.core import rgb, root, export_asset
 from tom.character import Body, CharPart, build_armature, chain_weights, fixed, make_action, CLIPS, FPS, pose
-from tom.anatomy import HeadShape, build_head, build_hair_cap, build_eyes, build_brows, build_ears, build_hand, finger_joints
+from tom.anatomy import HeadShape, build_head, build_hair_cap, build_eyes, build_brows, build_ears, build_hand, finger_joints, jaw_weight
 
 ASSETS = {}
 
@@ -81,12 +81,17 @@ def head(p, body, spec, skin, rng):
     rx, ry, rz = (0.078 if fem else 0.082) * s0 * hs, 0.103 * s0 * hs, 0.116 * s0 * hs
     hc = V((0, -0.006, body.head_top.z - rz - 0.004))
     shape = HeadShape(hc, rx, ry, rz, fem=fem, nose=spec.get("nose", 1.0), jaw=spec.get("jaw", 1.0))
-    p.weight_fn = fixed("head")
+    p.weight_fn = jaw_weight(shape)
     lip = shade(skin, (0.82, 0.55, 0.55) if fem else (0.8, 0.6, 0.58))
     build_head(p, shape, {"skin": skin, "lip": lip, "mouth": shade(skin, (0.35, 0.22, 0.22))})
-    build_eyes(p, shape, scale=s0 * hs * 1.04, colors={"sclera": (0.93, 0.91, 0.86, 1), "pupil": (0.02, 0.015, 0.015, 1), "glint": (1, 1, 1, 1),
+    # the inside of the mouth: dark, so an open jaw never shows through the head
+    p.weight_fn = fixed("head")
+    mouth = shape.landmark(0, -0.57)
+    p.ico(1.0, tuple(mouth + (shape.c - mouth).normalized() * 0.022), "MAT_Skin_A", shade(skin, (0.25, 0.12, 0.12)), subdiv=2, scale=(rx * 0.32, ry * 0.2, rz * 0.12))
+    build_eyes(p, shape, scale=s0 * hs * 1.04, weight_for=lambda part, side: fixed("head" if part == "head" else f"{part}_{side}"), colors={"sclera": (0.93, 0.91, 0.86, 1), "pupil": (0.02, 0.015, 0.015, 1), "glint": (1, 1, 1, 1),
                           "lid": shade(skin, (0.9, 0.86, 0.86)), "lid_low": shade(skin, (0.95, 0.93, 0.93)), "lash": (0.05, 0.04, 0.04, 1)})
     brow = col(spec.get("brows", spec.get("hair_color", "black")))
+    p.weight_fn = fixed("head")
     build_brows(p, shape, brow, thickness=0.8 if fem else 1.15, arch=1.25 if fem else 0.8)
     build_ears(p, shape, skin, shade(skin, (0.7, 0.6, 0.58)))
     if spec.get("moustache"):
@@ -94,12 +99,14 @@ def head(p, body, spec, skin, rng):
         pts = [shape.landmark(x, -0.455 - abs(x) * 0.12) for x in (-0.24, -0.16, -0.08, 0.0, 0.08, 0.16, 0.24)]
         p.ribbon([q + (q - hc).normalized() * 0.004 for q in pts], [0.008, 0.011, 0.012, 0.011, 0.012, 0.011, 0.008], V((0, 0, 1)), "MAT_Hair_A", m)
     if spec.get("beard"):
+        p.weight_fn = jaw_weight(shape)  # the beard moves with the chin
         b = col(spec["beard"])
         long = spec.get("beard_long", 0.0)
         p.ico(1.0, tuple(shape.landmark(0, -0.84) + V((0, 0.03, -0.005 - long * 0.035))), "MAT_Hair_A", b, subdiv=2,
               scale=(0.055, 0.042, 0.04 + long * 0.06), noise=0.05, rng=rng)
         for sx in (-1, 1):
             p.ico(1.0, tuple(shape.landmark(sx * 0.62, -0.55) + V((sx * 0.004, 0.012, 0))), "MAT_Hair_A", b, subdiv=2, scale=(0.02, 0.04, 0.045), noise=0.04, rng=rng)
+    p.weight_fn = fixed("head")
     if spec.get("bindi"):
         p.ico(1.0, tuple(shape.landmark(0, 0.2) + V((0, -0.002, 0))), "MAT_Skin_A", col("cloth_red"), subdiv=1, scale=(0.005, 0.002, 0.005))
     if spec.get("earrings"):
@@ -393,7 +400,7 @@ def accessories(p, body, spec, rng):
 def build_character(spec, with_clips):
     rng = random.Random(spec["seed"])
     body = Body(height=spec.get("height", 1.72), shoulder=spec.get("shoulder", 0.19), hip=spec.get("hip", 0.095),
-                female=spec.get("female", False), belly=spec.get("belly", 0.0))
+                female=spec.get("female", False), belly=spec.get("belly", 0.0), head_scale=spec.get("head_scale", 1.0))
     rt = root(spec["id"])
     arm = build_armature(body)
     arm.parent = rt

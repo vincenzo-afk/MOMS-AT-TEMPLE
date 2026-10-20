@@ -1,5 +1,37 @@
 # Changelog
 
+## Session 5: details pass (2026-10-20)
+
+### Added: faces and everyday animation
+- **Living faces.** The shared skeleton gains a jaw, both eyes and both upper lids. `FaceController` (src/game/player/Face.ts) runs after the body animation for the player and nearby villagers:
+  - blinks every 2 to 6 s
+  - eyes follow the look target within comfortable limits
+  - the jaw moves in syllable-like pulses inside rising and falling phrases while the character speaks, and closes when the conversation ends
+- **Everyday actions:**
+  - `door_push` (doors are pushed, not reached for) and `close_container` (lids are lowered shut)
+  - `pickup_table`
+  - `carry_idle` and `carry_walk`: a full water pot is cradled at the waist, and you cannot run with it
+  - `sweep` (Lakshmi in the courtyard), `garden_kneel` (Amudha at the beds) and `talk_explain` (Ponnan's open-palm gestures)
+- **Hinged lids.** The storage chest and crates have hinged lids (`LID_*` nodes). They swing open with the storage panel and close with it.
+- Item handovers play `give_item` and `receive_item`.
+
+### Added: audio
+- **Music for the hour and place.** The cue rules live in `musicCues.ts` and are unit tested:
+  - morning (05–09)
+  - day, or the workshop cue inside the workshop yard
+  - evening (17–21)
+  - festival evenings
+  - no music late at night or during a Temple Visit
+- **A placeholder score.** Until the Lyria tracks exist, `MusicSynth` plays each cue as a tanpura-style drone under sparse flute-like phrases, in a scale suited to the hour, with a frame-drum pulse at the workshop and the festival. It also plays rising stings for a restoration and a discovery. A supplied file takes over automatically.
+- **Spatial audio.** Manifest entries with `spatial` play through an HRTF `PannerNode`, and the listener follows the camera. Velan's chisel and mallet are heard from his bench while he works there by day.
+- **Licences.** Every audio slot has a `licence` field; validation checks it, and also that spatial loops loop.
+- Three new music slots: `mus_morning`, `mus_workshop` and `mus_evening`.
+
+### Fixed
+- **Pausing mid-conversation.** Pausing during a conversation (for example on focus loss) dropped the panel without ending the conversation. The villager stayed in "talking" mode and the player stayed locked. Resuming now returns you to the open panel.
+- **Hotkeys after Esc.** A hotkey pressed in the same frame as the Esc that closed a panel (M right after Esc) was dropped.
+- **Carry pose.** The carry clip had the hands raised to the face. The pot is now placed from the hand bones.
+
 ## Session 4: polish and feature pass (2026-10-20)
 
 ### Fixed

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-20T05:27:56.271Z",
+  "generatedAt": "2026-10-20T08:49:18.881Z",
   "assets": [
     {
       "id": "CHR_Child_Boy",
       "url": "/assets/models/characters/CHR_Child_Boy.glb",
       "type": "character",
-      "triangles": 8008,
-      "bytes": 300256,
+      "triangles": 8088,
+      "bytes": 304316,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -17,8 +17,8 @@
       "id": "CHR_Child_Girl",
       "url": "/assets/models/characters/CHR_Child_Girl.glb",
       "type": "character",
-      "triangles": 8800,
-      "bytes": 327116,
+      "triangles": 8880,
+      "bytes": 331016,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -29,8 +29,8 @@
       "id": "CHR_Family_Husband",
       "url": "/assets/models/characters/CHR_Family_Husband.glb",
       "type": "character",
-      "triangles": 8108,
-      "bytes": 304792,
+      "triangles": 8188,
+      "bytes": 308820,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -41,8 +41,8 @@
       "id": "CHR_NPC_Amudha",
       "url": "/assets/models/characters/CHR_NPC_Amudha.glb",
       "type": "character",
-      "triangles": 9044,
-      "bytes": 340524,
+      "triangles": 9124,
+      "bytes": 344488,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -53,8 +53,8 @@
       "id": "CHR_NPC_Kaaval",
       "url": "/assets/models/characters/CHR_NPC_Kaaval.glb",
       "type": "character",
-      "triangles": 8472,
-      "bytes": 318864,
+      "triangles": 8552,
+      "bytes": 322876,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -65,8 +65,8 @@
       "id": "CHR_NPC_Meena",
       "url": "/assets/models/characters/CHR_NPC_Meena.glb",
       "type": "character",
-      "triangles": 8972,
-      "bytes": 336364,
+      "triangles": 9052,
+      "bytes": 340300,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -77,8 +77,8 @@
       "id": "CHR_NPC_Ponnan",
       "url": "/assets/models/characters/CHR_NPC_Ponnan.glb",
       "type": "character",
-      "triangles": 8070,
-      "bytes": 301052,
+      "triangles": 8150,
+      "bytes": 305152,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -89,8 +89,8 @@
       "id": "CHR_NPC_Priest",
       "url": "/assets/models/characters/CHR_NPC_Priest.glb",
       "type": "character",
-      "triangles": 7758,
-      "bytes": 285452,
+      "triangles": 7838,
+      "bytes": 289472,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -101,8 +101,8 @@
       "id": "CHR_NPC_Selvam",
       "url": "/assets/models/characters/CHR_NPC_Selvam.glb",
       "type": "character",
-      "triangles": 8362,
-      "bytes": 316112,
+      "triangles": 8442,
+      "bytes": 320132,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -113,8 +113,8 @@
       "id": "CHR_NPC_Valli",
       "url": "/assets/models/characters/CHR_NPC_Valli.glb",
       "type": "character",
-      "triangles": 8972,
-      "bytes": 336288,
+      "triangles": 9052,
+      "bytes": 340304,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -125,8 +125,8 @@
       "id": "CHR_NPC_Velan",
       "url": "/assets/models/characters/CHR_NPC_Velan.glb",
       "type": "character",
-      "triangles": 8900,
-      "bytes": 329680,
+      "triangles": 8980,
+      "bytes": 333672,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -137,8 +137,8 @@
       "id": "CHR_Player_Base",
       "url": "/assets/models/characters/CHR_Player_Base.glb",
       "type": "character",
-      "triangles": 8356,
-      "bytes": 721576,
+      "triangles": 8436,
+      "bytes": 806200,
       "expect": {
         "nodes": [],
         "maxBytes": 1500000,
@@ -196,7 +196,15 @@
           "photo_pose",
           "drive_seated",
           "queue_shuffle",
-          "scold"
+          "scold",
+          "door_push",
+          "close_container",
+          "pickup_table",
+          "carry_idle",
+          "carry_walk",
+          "sweep",
+          "garden_kneel",
+          "talk_explain"
         ],
         "skinned": true
       },
@@ -465,6 +473,46 @@
           "name": "scold",
           "duration": 1.4,
           "loop": false
+        },
+        {
+          "name": "door_push",
+          "duration": 0.8,
+          "loop": false
+        },
+        {
+          "name": "close_container",
+          "duration": 0.7,
+          "loop": false
+        },
+        {
+          "name": "pickup_table",
+          "duration": 0.9,
+          "loop": false
+        },
+        {
+          "name": "carry_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "carry_walk",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "sweep",
+          "duration": 1.2,
+          "loop": true
+        },
+        {
+          "name": "garden_kneel",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "talk_explain",
+          "duration": 2,
+          "loop": true
         }
       ]
     },
@@ -472,8 +520,8 @@
       "id": "CHR_Player_Mom",
       "url": "/assets/models/characters/CHR_Player_Mom.glb",
       "type": "character",
-      "triangles": 9072,
-      "bytes": 342088,
+      "triangles": 9152,
+      "bytes": 346104,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -484,8 +532,8 @@
       "id": "CHR_Villager_A",
       "url": "/assets/models/characters/CHR_Villager_A.glb",
       "type": "character",
-      "triangles": 7900,
-      "bytes": 293736,
+      "triangles": 7980,
+      "bytes": 297616,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -496,8 +544,8 @@
       "id": "CHR_Villager_B",
       "url": "/assets/models/characters/CHR_Villager_B.glb",
       "type": "character",
-      "triangles": 8056,
-      "bytes": 298848,
+      "triangles": 8136,
+      "bytes": 302872,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -508,8 +556,8 @@
       "id": "CHR_Villager_C",
       "url": "/assets/models/characters/CHR_Villager_C.glb",
       "type": "character",
-      "triangles": 8772,
-      "bytes": 328368,
+      "triangles": 8852,
+      "bytes": 332268,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -1442,8 +1490,8 @@
       "id": "PRP_Crate_A",
       "url": "/assets/models/props/PRP_Crate_A.glb",
       "type": "prop",
-      "triangles": 296,
-      "bytes": 23124,
+      "triangles": 320,
+      "bytes": 25636,
       "expect": {
         "nodes": [
           "COL_Crate"
@@ -2072,8 +2120,8 @@
       "id": "PRP_Storage_Chest_A",
       "url": "/assets/models/props/PRP_Storage_Chest_A.glb",
       "type": "prop",
-      "triangles": 130,
-      "bytes": 13492,
+      "triangles": 166,
+      "bytes": 17248,
       "expect": {
         "nodes": [
           "COL_Chest"

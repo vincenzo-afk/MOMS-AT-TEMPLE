@@ -52,7 +52,7 @@ test("animation state machine: idle, walk, run, action exclusivity, NPC activiti
   await page.evaluate(() => window.__tom!.game.npcs.snapToSchedule());
   await page.waitForTimeout(500);
   expect((await weights(page, "npc_velan")).current).toBe("craft_at_station");
-  expect((await weights(page, "npc_amudha")).current).toBe("repair_channel");
+  expect((await weights(page, "npc_amudha")).current).toBe("garden_kneel");
   expect((await weights(page, "npc_selvam")).current).toBe("trade_counter");
   expect(log.errors).toEqual([]);
 });
