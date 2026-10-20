@@ -18,6 +18,15 @@ export interface Box {
 
 const STEP = 0.36;
 const tmpV = new THREE.Vector3();
+const tmpRay = new THREE.Ray();
+const tmpBox = new THREE.Box3();
+const tmpSeen = new Set<Box>();
+
+/** Result of {@link CollisionWorld.raycastHit}. */
+export interface RayHit {
+  dist: number;
+  box: Box | null;
+}
 
 export class CollisionWorld {
   boxes: Box[] = [];
@@ -125,32 +134,85 @@ export class CollisionWorld {
 
   /** Distance along a ray to the first box hit (for camera collision), or Infinity. */
   raycast(origin: THREE.Vector3, dir: THREE.Vector3, maxDist: number): number {
-    let best = Infinity;
-    const ray = new THREE.Ray();
-    const box = new THREE.Box3();
-    // gather candidates from the cells along the ray
-    const seen = new Set<Box>();
+    return this.raycastHit(origin, dir, maxDist, scratchHit).dist;
+  }
+
+  /**
+   * First box along a ray (no allocation: the result is written into `out`). Boxes containing the origin and
+   * slabs thinner than `minThickness` (floor tiles) are ignored.
+   */
+  raycastHit(origin: THREE.Vector3, dir: THREE.Vector3, maxDist: number, out: RayHit, minThickness = 0.3): RayHit {
+    out.dist = Infinity;
+    out.box = null;
+    tmpSeen.clear();
     const steps = Math.ceil(maxDist / (this.cell / 2)) + 1;
     for (let i = 0; i <= steps; i++) {
       tmpV.copy(dir).multiplyScalar((maxDist * i) / steps).add(origin);
-      for (const b of this.near(tmpV.x, tmpV.z)) seen.add(b);
+      for (const b of this.near(tmpV.x, tmpV.z)) tmpSeen.add(b);
     }
-    for (const b of seen) {
-      if (b.enabled === false || b.yMax - b.yMin < 0.3) continue; // ignore disabled proxies and thin floor slabs
+    for (const b of tmpSeen) {
+      if (b.enabled === false || b.yMax - b.yMin < minThickness) continue;
       const [ox, oz] = this.toLocal(b, origin.x, origin.z);
       if (Math.abs(ox) < b.hx && Math.abs(oz) < b.hz && origin.y > b.yMin && origin.y < b.yMax) continue;
       const ldx = dir.x * b.cos - dir.z * b.sin;
       const ldz = dir.x * b.sin + dir.z * b.cos;
-      ray.origin.set(ox, origin.y, oz);
-      ray.direction.set(ldx, dir.y, ldz);
-      box.min.set(-b.hx, b.yMin, -b.hz);
-      box.max.set(b.hx, b.yMax, b.hz);
-      const hit = ray.intersectBox(box, tmpV);
+      tmpRay.origin.set(ox, origin.y, oz);
+      tmpRay.direction.set(ldx, dir.y, ldz);
+      tmpBox.min.set(-b.hx, b.yMin, -b.hz);
+      tmpBox.max.set(b.hx, b.yMax, b.hz);
+      const hit = tmpRay.intersectBox(tmpBox, tmpV);
       if (hit) {
-        const d = hit.distanceTo(ray.origin);
-        if (d < best && d <= maxDist) best = d;
+        const d = hit.distanceTo(tmpRay.origin);
+        if (d < out.dist && d <= maxDist) {
+          out.dist = d;
+          out.box = b;
+        }
       }
     }
-    return best;
+    return out;
+  }
+
+  /** Highest top (any enabled proxy) containing (x, z) with its top between y0 and y1, or -Infinity. */
+  topAt(x: number, z: number, y0: number, y1: number, margin = 0): number {
+    let h = -Infinity;
+    for (const b of this.near(x, z)) {
+      if (b.enabled === false || b.yMax < y0 || b.yMax > y1) continue;
+      const [lx, lz] = this.toLocal(b, x, z);
+      if (Math.abs(lx) <= b.hx + margin && Math.abs(lz) <= b.hz + margin && b.yMax > h) h = b.yMax;
+    }
+    return h;
+  }
+
+  /** True if the point is inside any enabled proxy (camera clipping checks). */
+  inside(x: number, y: number, z: number, pad = 0): boolean {
+    for (const b of this.near(x, z)) {
+      if (b.enabled === false || b.yMax - b.yMin < 0.3) continue;
+      if (y < b.yMin - pad || y > b.yMax + pad) continue;
+      const [lx, lz] = this.toLocal(b, x, z);
+      if (Math.abs(lx) < b.hx + pad && Math.abs(lz) < b.hz + pad) return true;
+    }
+    return false;
+  }
+
+  /** Is a vertical capsule at (x, z) from feetY to feetY + height free of blocking proxies? */
+  clear(x: number, z: number, feetY: number, radius: number, height: number): boolean {
+    for (const b of this.near(x, z)) {
+      if (b.enabled === false) continue;
+      const blocks = b.walk ? b.yMax > feetY + STEP && b.yMin < feetY + height : b.yMax > feetY + 0.05 && b.yMin < feetY + height;
+      if (!blocks) continue;
+      const [lx, lz] = this.toLocal(b, x, z);
+      const qx = Math.max(-b.hx, Math.min(b.hx, lx));
+      const qz = Math.max(-b.hz, Math.min(b.hz, lz));
+      if ((lx - qx) ** 2 + (lz - qz) ** 2 < radius * radius) return false;
+    }
+    return true;
+  }
+
+  /** World-space local axes of a box: `along` is its local +X, `across` its local +Z (yaw only). */
+  axes(b: Box, along: THREE.Vector3, across: THREE.Vector3): void {
+    along.set(b.cos, 0, -b.sin);
+    across.set(b.sin, 0, b.cos);
   }
 }
+
+const scratchHit: RayHit = { dist: Infinity, box: null };

@@ -157,6 +157,20 @@ const FRAG_NORMAL = /* glsl */ `
   }
 `;
 
+/**
+ * Skin response: a warm scattered fill (light bleeding through thin skin, so shadowed cheeks stay warm rather
+ * than grey) and a soft rim that separates faces and hands from the background at gameplay distance.
+ */
+const FRAG_SKIN = /* glsl */ `
+#ifdef TOM_SKIN
+  {
+    vec3 tomV = normalize(vViewPosition);
+    float tomRim = pow(1.0 - clamp(dot(normal, tomV), 0.0, 1.0), 3.0);
+    reflectedLight.indirectDiffuse += diffuseColor.rgb * (vec3(0.14, 0.06, 0.04) + tomRim * vec3(0.32, 0.24, 0.2));
+  }
+#endif
+`;
+
 /** Patch a MeshStandardMaterial in place. Safe to call more than once. */
 export function applyDetail(material: THREE.Material, specKey: string, objectSpace: boolean): void {
   const spec = DETAIL_SPECS[specKey];
@@ -165,7 +179,8 @@ export function applyDetail(material: THREE.Material, specKey: string, objectSpa
   const tex = textures(spec.set);
   m.userData.tomDetail = specKey;
   const wind = !objectSpace && (specKey === "MAT_Foliage_A" || specKey === "MAT_Cloth_A");
-  m.defines = { ...(m.defines ?? {}), ...(objectSpace ? { TOM_OBJECT_SPACE: "" } : {}), ...(wind ? { TOM_WIND: "" } : {}) };
+  const skin = specKey === "MAT_Skin_A";
+  m.defines = { ...(m.defines ?? {}), ...(objectSpace ? { TOM_OBJECT_SPACE: "" } : {}), ...(wind ? { TOM_WIND: "" } : {}), ...(skin ? { TOM_SKIN: "" } : {}) };
   m.customProgramCacheKey = () => `tom-${specKey}-${objectSpace ? "o" : "w"}${wind ? "-wind" : ""}`;
   m.onBeforeCompile = (shader) => {
     shader.uniforms.tomAlbedo = { value: tex.albedo };
@@ -185,7 +200,8 @@ export function applyDetail(material: THREE.Material, specKey: string, objectSpa
       shader.fragmentShader
         .replace("#include <color_fragment>", `#include <color_fragment>\n${FRAG_COLOR}`)
         .replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>\n${FRAG_ROUGH}`)
-        .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>\n${FRAG_NORMAL}`);
+        .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>\n${FRAG_NORMAL}`)
+        .replace("#include <aomap_fragment>", `${FRAG_SKIN}\n#include <aomap_fragment>`);
   };
   m.needsUpdate = true;
 }

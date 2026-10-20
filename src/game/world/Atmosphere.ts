@@ -6,6 +6,7 @@ const RAIN_DROPS = 2600;
 const RAIN_BOX = 36;
 const MOTES = 260;
 const FIREFLIES = 120;
+const PUFFS = 96;
 
 /**
  * Weather and ambient particles around the camera: rain streaks, sunlit dust motes by day, fireflies at night.
@@ -21,6 +22,12 @@ export class Atmosphere {
   private flyPos: Float32Array;
   private flyPhase: Float32Array;
   private t = 0;
+  // dust puffs on hard landings: a small pool of particles with velocities and ages
+  private puffs: THREE.Points;
+  private puffPos: Float32Array;
+  private puffVel: Float32Array;
+  private puffAge: Float32Array;
+  private puffNext = 0;
 
   constructor() {
     this.group.name = "Atmosphere";
@@ -50,7 +57,46 @@ export class Atmosphere {
     fg.setAttribute("position", new THREE.BufferAttribute(this.flyPos, 3));
     this.flies = new THREE.Points(fg, new THREE.PointsMaterial({ color: 0xd9ff8a, size: 0.12, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
     this.flies.frustumCulled = false;
-    this.group.add(this.rain, this.motes, this.flies);
+    // ---- landing dust
+    this.puffPos = new Float32Array(PUFFS * 3).fill(-999);
+    this.puffVel = new Float32Array(PUFFS * 3);
+    this.puffAge = new Float32Array(PUFFS).fill(99);
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute("position", new THREE.BufferAttribute(this.puffPos, 3));
+    this.puffs = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xc9b38f, size: 0.16, transparent: true, opacity: 0.55, depthWrite: false }));
+    this.puffs.frustumCulled = false;
+    this.group.add(this.rain, this.motes, this.flies, this.puffs);
+  }
+
+  /** A ring of dust at a landing point; strength 0..1 scales the count and spread. */
+  puff(at: THREE.Vector3, strength: number): void {
+    const n = Math.round(10 + 26 * strength);
+    for (let k = 0; k < n; k++) {
+      const i = this.puffNext;
+      this.puffNext = (this.puffNext + 1) % PUFFS;
+      const a = Math.random() * Math.PI * 2;
+      const sp = (0.6 + Math.random() * 1.4) * (0.5 + strength);
+      this.puffPos.set([at.x + Math.cos(a) * 0.15, at.y + 0.05, at.z + Math.sin(a) * 0.15], i * 3);
+      this.puffVel.set([Math.cos(a) * sp, 0.3 + Math.random() * 0.6 * strength, Math.sin(a) * sp], i * 3);
+      this.puffAge[i] = 0;
+    }
+  }
+
+  private updatePuffs(dt: number): void {
+    let live = false;
+    for (let i = 0; i < PUFFS; i++) {
+      if (this.puffAge[i]! > 1.2) continue;
+      live = true;
+      this.puffAge[i]! += dt;
+      const drag = Math.exp(-3 * dt);
+      for (let k = 0; k < 3; k++) {
+        this.puffVel[i * 3 + k]! *= drag;
+        this.puffPos[i * 3 + k]! += this.puffVel[i * 3 + k]! * dt;
+      }
+      if (this.puffAge[i]! > 1.2) this.puffPos[i * 3 + 1] = -999;
+    }
+    this.puffs.visible = live;
+    if (live) (this.puffs.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
   }
 
   private resetDrop(i: number, center: THREE.Vector3, anyHeight: boolean): void {
@@ -64,6 +110,7 @@ export class Atmosphere {
   update(dt: number, camera: THREE.Camera, weather: Weather, day: number, indoors: boolean): void {
     this.t += dt;
     ENV_UNIFORMS.tomTime.value = this.t;
+    this.updatePuffs(dt);
     ENV_UNIFORMS.tomWind.value = 0.25 + weather.wind * 0.9;
     // wetness builds while it rains and dries slowly afterwards
     const wetTarget = weather.rain;
@@ -111,7 +158,7 @@ export class Atmosphere {
         const o = i * 3;
         const ph = this.flyPhase[i]!;
         this.flyPos[o]! += Math.sin(this.t * 0.7 + ph) * 0.3 * dt;
-        this.flyPos[o + 1]! = 0.5 + Math.abs(Math.sin(this.t * 0.4 + ph)) * 2;
+        this.flyPos[o + 1] = 0.5 + Math.abs(Math.sin(this.t * 0.4 + ph)) * 2;
         this.flyPos[o + 2]! += Math.cos(this.t * 0.6 + ph * 1.7) * 0.3 * dt;
       }
       this.flies.position.set(Math.round(c.x / 10) * 10, 0, Math.round(c.z / 10) * 10);

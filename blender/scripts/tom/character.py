@@ -3,6 +3,7 @@
 Skeleton SK_Humanoid_A (all characters share names and hierarchy):
   root > hips > spine > chest > neck > head
                        chest > shoulder_L > upper_arm_L > forearm_L > hand_L   (and _R)
+                       hand_L > thumb_01_L > thumb_02_L, index_01_L > index_02_L, middle_.., ring_.., pinky_..
         hips > thigh_L > shin_L > foot_L > toe_L                                (and _R)
 Character faces -Y in Blender (+Z in glTF). Left side is +X. Animations are in place (no root motion).
 """
@@ -11,6 +12,9 @@ import bpy
 import bmesh
 from mathutils import Vector, Quaternion, Matrix
 from .core import Part, rgb, collection
+from .anatomy import finger_joints
+
+DIGITS = ("thumb", "index", "middle", "ring", "pinky")
 
 FPS = 30
 DEFORM_BONES = [
@@ -19,7 +23,7 @@ DEFORM_BONES = [
     "shoulder_R", "upper_arm_R", "forearm_R", "hand_R",
     "thigh_L", "shin_L", "foot_L", "toe_L",
     "thigh_R", "shin_R", "foot_R", "toe_R",
-]
+] + [f"{d}_{k}_{s}" for s in ("L", "R") for d in DIGITS for k in ("01", "02")]
 
 
 class Body:
@@ -79,6 +83,8 @@ class Body:
                 (f"foot_{s}", g("ankle"), g("ball"), f"shin_{s}"),
                 (f"toe_{s}", g("ball"), g("toe"), f"foot_{s}"),
             ]
+            for digit, (a, m, t) in finger_joints(self, s).items():
+                b += [(f"{digit}_01_{s}", a, m, f"hand_{s}"), (f"{digit}_02_{s}", m, t, f"{digit}_01_{s}")]
         return b
 
 
@@ -164,6 +170,86 @@ class CharPart(Part):
                 l[self.col] = color_fn(l.vert.co.z)
         return new
 
+    def _colour_loops(self, faces, colour_of):
+        for f in faces:
+            for l in f.loops:
+                l[self.col] = colour_of(l.vert)
+
+    def surface(self, rows, colours, mat, top=None, bottom=None):
+        """Closed-in-u grid of points (rows of equal length) with per-vertex colours and optional pole caps."""
+        before = set(self.bm.faces)
+        vrows = [[self.bm.verts.new(tuple(q)) for q in row] for row in rows]
+        cmap = {}
+        for vr, cr in zip(vrows, colours):
+            for v, c in zip(vr, cr):
+                cmap[v] = c
+        n = len(rows[0])
+        for a, b in zip(vrows, vrows[1:]):
+            for i in range(n):
+                j = (i + 1) % n
+                self.bm.faces.new((a[i], b[i], b[j], a[j]))
+        if top:
+            tv = self.bm.verts.new(tuple(top[0]))
+            cmap[tv] = top[1]
+            for i in range(n):
+                self.bm.faces.new((tv, vrows[0][i], vrows[0][(i + 1) % n]))
+        if bottom:
+            bv = self.bm.verts.new(tuple(bottom[0]))
+            cmap[bv] = bottom[1]
+            for i in range(n):
+                self.bm.faces.new((bv, vrows[-1][(i + 1) % n], vrows[-1][i]))
+        new = [f for f in self.bm.faces if f not in before]
+        self._finish(new, mat, colours[0][0], shade=True)
+        self._colour_loops(new, lambda v: cmap.get(v, colours[0][0]))
+        return new
+
+    def sheet(self, rows, mat, colour, double=True):
+        """Open grid of points; double-sided so thin shells (eyelids) render from both sides."""
+        before = set(self.bm.faces)
+        for flip in ((False, True) if double else (False,)):
+            vrows = [[self.bm.verts.new(tuple(q)) for q in row] for row in rows]
+            for a, b in zip(vrows, vrows[1:]):
+                for i in range(len(a) - 1):
+                    quad = (a[i], a[i + 1], b[i + 1], b[i])
+                    self.bm.faces.new(tuple(reversed(quad)) if flip else quad)
+        new = [f for f in self.bm.faces if f not in before]
+        self._finish(new, mat, colour, shade=True)
+        return new
+
+    def ribbon(self, pts, widths, up, mat, colour):
+        """Tapered double-sided strip along a polyline (brows, lash lines)."""
+        a = [tuple(Vector(q) + Vector(up) * w * 0.5) for q, w in zip(pts, widths)]
+        b = [tuple(Vector(q) - Vector(up) * w * 0.5) for q, w in zip(pts, widths)]
+        return self.sheet([a, b], mat, colour)
+
+    def fan(self, ring, tip, mat, colour):
+        """Shallow cone from a closed ring to a tip (iris and pupil caps)."""
+        before = set(self.bm.faces)
+        vs = [self.bm.verts.new(tuple(q)) for q in ring]
+        tv = self.bm.verts.new(tuple(tip))
+        for i in range(len(vs)):
+            self.bm.faces.new((vs[i], vs[(i + 1) % len(vs)], tv))
+        new = [f for f in self.bm.faces if f not in before]
+        self._finish(new, mat, colour, shade=True)
+        return new
+
+    def rect_loft(self, rings, across, normal, mat, colour, segments=12, exponent=0.6):
+        """Loft of rounded-rectangle sections: rings = [(centre, half_width, half_thickness)]."""
+        across, normal = Vector(across).normalized(), Vector(normal).normalized()
+        rows = []
+        for c, hw, ht in rings:
+            row = []
+            for k in range(segments):
+                a = 2 * math.pi * k / segments
+                ca, sa = math.cos(a), math.sin(a)
+                # superellipse: flat palm and back, rounded edges
+                x = math.copysign(abs(ca) ** exponent, ca) * hw
+                y = math.copysign(abs(sa) ** exponent, sa) * ht
+                row.append(Vector(c) + across * x + normal * y)
+            rows.append(row)
+        cols = [[colour] * segments for _ in rows]
+        return self.surface(rows, cols, mat, top=(rings[0][0], colour), bottom=(rings[-1][0], colour))
+
     def to_skinned(self, name, arm_obj):
         me = bpy.data.meshes.new(name)
         self.bm.normal_update()
@@ -225,8 +311,12 @@ def pose(arm, rotations, hips_offset=(0, 0, 0)):
         pb.location = Vector()
     for bone, rots in rotations.items():
         q = Quaternion()
-        for axis, deg in rots:
-            v = {"X": Vector((1, 0, 0)), "Y": Vector((0, 1, 0)), "Z": Vector((0, 0, 1))}[axis]
+        for rot in rots:
+            if rot[0] == "V":
+                v, deg = Vector(rot[1]).normalized(), rot[2]
+            else:
+                axis, deg = rot
+                v = {"X": Vector((1, 0, 0)), "Y": Vector((0, 1, 0)), "Z": Vector((0, 0, 1))}[axis]
             q = Quaternion(v, math.radians(deg)) @ q
         r = _rest_q(arm, bone)
         arm.pose.bones[bone].rotation_quaternion = r.inverted() @ q @ r
@@ -240,8 +330,66 @@ def key_all(arm, frame):
     arm.pose.bones["hips"].keyframe_insert("location", frame=frame)
 
 
+# --------------------------------------------------------------------------- hand poses
+# degrees for (digit_01, digit_02); the thumb curls across the palm
+HAND_POSES = {
+    "relaxed": {"thumb": (8, 12), "index": (8, 16), "middle": (12, 22), "ring": (15, 25), "pinky": (18, 28)},
+    "loose": {"thumb": (12, 16), "index": (18, 28), "middle": (22, 32), "ring": (25, 35), "pinky": (28, 38)},
+    "fist": {"thumb": (40, 45), "index": (82, 100), "middle": (85, 100), "ring": (85, 100), "pinky": (85, 100)},
+    "grip": {"thumb": (32, 34), "index": (62, 78), "middle": (66, 80), "ring": (68, 80), "pinky": (70, 82)},
+    "point": {"thumb": (35, 40), "index": (0, 4), "middle": (82, 100), "ring": (85, 100), "pinky": (85, 100)},
+    "open": {"thumb": (0, 2), "index": (0, 4), "middle": (2, 4), "ring": (3, 5), "pinky": (4, 6)},
+    "pinch": {"thumb": (34, 30), "index": (40, 48), "middle": (30, 42), "ring": (32, 44), "pinky": (36, 46)},
+}
+_AXES = {}
+
+
+def curl_axes(side):
+    """Rest-space curl axis per digit (d x palm), from a reference 1.75 m body (directions do not scale)."""
+    if side not in _AXES:
+        from .anatomy import hand_frame
+        ref = Body(height=1.75)
+        _, d, palm, front = hand_frame(ref, side)
+        out = {}
+        for digit, (a, m, t) in finger_joints(ref, side).items():
+            seg = (m - a).normalized()
+            toward = palm if digit != "thumb" else (palm * 0.7 - front * 0.6 - d * 0.2).normalized()
+            out[digit] = tuple(seg.cross(toward).normalized())
+        _AXES[side] = out
+    return _AXES[side]
+
+
+def hand_rots(kind_l, kind_r):
+    rots = {}
+    for side, kind in (("L", kind_l), ("R", kind_r)):
+        axes = curl_axes(side)
+        for digit, (a1, a2) in HAND_POSES[kind].items():
+            rots[f"{digit}_01_{side}"] = [("V", axes[digit], a1)]
+            rots[f"{digit}_02_{side}"] = [("V", axes[digit], a2)]
+    return rots
+
+
+# per-clip hands (left, right); clips not listed use relaxed hands
+CLIP_HANDS = {
+    "run_forward": ("fist", "fist"), "pickup_ground": ("open", "grip"), "talk_gesture": ("relaxed", "point"),
+    "craft_at_station": ("grip", "grip"), "repair_channel": ("grip", "grip"), "gather_flower": ("relaxed", "pinch"),
+    "water_plant": ("relaxed", "grip"), "plant_seed": ("relaxed", "pinch"), "harvest_plant": ("grip", "grip"),
+    "make_garland": ("pinch", "pinch"), "open_container": ("open", "open"), "place_object": ("open", "open"),
+    "greet": ("open", "open"), "give_item": ("open", "grip"), "receive_item": ("open", "open"), "read_record": ("grip", "grip"),
+    "sit_idle": ("loose", "loose"), "rest_idle": ("open", "open"), "interact_reach": ("relaxed", "open"),
+    "sprint_forward": ("fist", "fist"), "crouch_idle": ("loose", "loose"), "crouch_walk": ("loose", "loose"),
+    "jump_start": ("loose", "loose"), "jump_air": ("open", "open"), "fall_loop": ("open", "open"), "land_hard": ("loose", "open"),
+    "vault": ("open", "open"), "climb": ("grip", "grip"), "sit_down": ("loose", "loose"), "stand_up": ("loose", "loose"),
+    "coconut_smash": ("grip", "grip"), "pray_idle": ("open", "open"), "light_lamp": ("open", "pinch"),
+    "apply_vibhuti": ("relaxed", "pinch"), "photo_pose": ("loose", "loose"), "drive_seated": ("grip", "grip"), "scold": ("relaxed", "point"),
+}
+
+
 def make_action(arm, name, frames, pose_fn, step=2, loop=True):
-    """Key pose_fn(t in [0,1]) every `step` frames. Loops repeat the first pose on the last frame."""
+    """Key pose_fn(t in [0,1]) every `step` frames. Loops repeat the first pose on the last frame.
+
+    Finger bones the clip does not pose get the clip's hand preset (CLIP_HANDS), so every clip keys every bone."""
+    hands = hand_rots(*CLIP_HANDS.get(name, ("relaxed", "relaxed")))
     act = bpy.data.actions.new(name)
     act.use_fake_user = True
     arm.animation_data_create()
@@ -252,6 +400,7 @@ def make_action(arm, name, frames, pose_fn, step=2, loop=True):
     for f in keys:
         t = (f / frames) % 1.0 if loop else f / frames
         rots, off = pose_fn(t)
+        rots = {**hands, **rots}
         pose(arm, rots, off)
         key_all(arm, f + 1)
     act["tom_loop"] = loop
@@ -670,6 +819,335 @@ def clip_rest(t):
     return rots, (0, 0.12, -0.74)
 
 
+# --------------------------------------------------------------------------- movement set (session 4)
+def _blend_rots(a, b, k):
+    """Linear blend of two single-axis rotation dicts (same structure assumed per bone)."""
+    out = {}
+    for bone in set(a) | set(b):
+        ra = {ax: deg for ax, deg in a.get(bone, [])}
+        rb = {ax: deg for ax, deg in b.get(bone, [])}
+        out[bone] = [(ax, ra.get(ax, 0.0) * (1 - k) + rb.get(ax, 0.0) * k) for ax in sorted(set(ra) | set(rb))]
+    return out
+
+
+def clip_sprint(t):
+    """Full sprint: strong forward lean, long stride, high knees, pumping arms. 3.7 m per 0.6 s cycle."""
+    rots = {"spine": [("X", 16)], "chest": [("X", 5), ("Z", -_s(t) * 9)], "hips": [("Z", _s(t) * 8)], "neck": [("X", -14)], "head": [("X", -4)]}
+    for side, ph in (("L", 0.0), ("R", 0.5)):
+        th = _s(t, ph) * 52 + 10
+        swing = max(0.0, _c(t, ph))
+        knee = 18 + 105 * swing ** 1.15 + 12 * max(0.0, -_s(t, ph))
+        rots[f"thigh_{side}"] = [("X", -th - 12 * swing)]
+        rots[f"shin_{side}"] = [("X", knee)]
+        rots[f"foot_{side}"] = [("X", (th - knee) * 0.45 + 14)]
+        rots[f"toe_{side}"] = [("X", max(0.0, -_s(t, ph)) * 30)]
+        arm = -_s(t, ph) * 52
+        rots[f"upper_arm_{side}"] = [("X", -arm - 8), ("Y", 8 if side == "L" else -8)]
+        rots[f"forearm_{side}"] = [("X", -88 - arm * 0.35)]
+    bob = 0.06 * abs(_c(t)) - 0.05
+    return rots, (0, -0.02, bob)
+
+
+def clip_walk_back(t):
+    """Backpedal: the walk cycle played in reverse with the weight held back."""
+    rots, off = clip_walk(1.0 - t)
+    rots["spine"] = [("X", -4)]
+    rots["neck"] = [("X", 2)]
+    return rots, (off[0], 0.02, off[2])
+
+
+def clip_strafe(direction):
+    """Side-step: legs open and close sideways, a small lead-foot step, hips steady. direction +1 = left."""
+
+    def fn(t):
+        rots = {"spine": [("X", 3)], "chest": [("Z", direction * 3)], "head": [("Z", -direction * 4)]}
+        open_ = _s(t)
+        for side, sx in (("L", 1), ("R", -1)):
+            lead = 1 if sx == direction else -1
+            lift = max(0.0, _s(t, 0.0 if lead > 0 else 0.5))
+            rots[f"thigh_{side}"] = [("Y", sx * (8 * open_ * lead + 4)), ("X", -lift * 14)]
+            rots[f"shin_{side}"] = [("X", 8 + lift * 30)]
+            rots[f"foot_{side}"] = [("X", -lift * 12), ("Y", -sx * 6 * open_ * lead)]
+            rots[f"upper_arm_{side}"] = [("X", -6), ("Y", sx * (4 + 3 * open_ * lead))]
+            rots[f"forearm_{side}"] = [("X", -18)]
+        return rots, (direction * 0.02 * _s(t), 0, -0.012 * abs(_s(t)))
+
+    return fn
+
+
+CROUCH_BASE = {
+    "thigh_L": [("X", -78), ("Y", 8)], "thigh_R": [("X", -72), ("Y", -8)], "shin_L": [("X", 112)], "shin_R": [("X", 104)],
+    "foot_L": [("X", -34)], "foot_R": [("X", -32)], "spine": [("X", 26)], "chest": [("X", 8)], "neck": [("X", -16)], "head": [("X", -8)],
+    "upper_arm_L": [("X", -22), ("Y", 6)], "upper_arm_R": [("X", -22), ("Y", -6)], "forearm_L": [("X", -50)], "forearm_R": [("X", -50)],
+}
+
+
+def clip_crouch_idle(t):
+    rots = {k: list(v) for k, v in CROUCH_BASE.items()}
+    rots["chest"] = [("X", 8 + _s(t) * 1.2)]
+    return rots, (0, 0.05, -0.38 + _s(t) * 0.004)
+
+
+def clip_crouch_walk(t):
+    """Low sneaking walk: 1.0 m per 1.0 s cycle."""
+    rots = {k: list(v) for k, v in CROUCH_BASE.items()}
+    for side, ph in (("L", 0.0), ("R", 0.5)):
+        th = _s(t, ph) * 20
+        swing = max(0.0, _c(t, ph))
+        base_t = -78 if side == "L" else -72
+        rots[f"thigh_{side}"] = [("X", base_t - th - 8 * swing), ("Y", 8 if side == "L" else -8)]
+        rots[f"shin_{side}"] = [("X", (112 if side == "L" else 104) + 14 * swing - th * 0.4)]
+        rots[f"foot_{side}"] = [("X", -34 + th * 0.6)]
+        rots[f"upper_arm_{side}"] = [("X", -22 + _s(t, ph) * 10), ("Y", 6 if side == "L" else -6)]
+    return rots, (0, 0.05, -0.37 + 0.012 * abs(_s(t)))
+
+
+def clip_jump_start(t):
+    """Anticipation: a quick dip, arms swinging back, then rising onto the toes."""
+    dip = math.sin(math.pi * min(1.0, t * 1.15))
+    rise = _ease((t - 0.6) / 0.4)
+    rots = {
+        "thigh_L": [("X", -38 * dip)], "thigh_R": [("X", -38 * dip)], "shin_L": [("X", 62 * dip)], "shin_R": [("X", 62 * dip)],
+        "foot_L": [("X", -24 * dip + 22 * rise)], "foot_R": [("X", -24 * dip + 22 * rise)], "toe_L": [("X", 20 * rise)], "toe_R": [("X", 20 * rise)],
+        "spine": [("X", 16 * dip)], "upper_arm_L": [("X", 30 * dip - 50 * rise), ("Y", 6)], "upper_arm_R": [("X", 30 * dip - 50 * rise), ("Y", -6)],
+        "forearm_L": [("X", -20)], "forearm_R": [("X", -20)],
+    }
+    return rots, (0, 0.03 * dip, -0.16 * dip)
+
+
+def clip_jump_air(t):
+    """Airborne: knees tucked, one leg leading, arms up and out for balance (held while in the air)."""
+    e = _ease(t * 3)
+    rots = {
+        "thigh_L": [("X", -62 * e)], "thigh_R": [("X", -28 * e)], "shin_L": [("X", 92 * e)], "shin_R": [("X", 70 * e)],
+        "foot_L": [("X", -20 * e)], "foot_R": [("X", 10 * e)], "spine": [("X", 6 * e)], "neck": [("X", -6 * e)],
+        "upper_arm_L": [("X", -50 * e), ("Y", 28 * e)], "upper_arm_R": [("X", -36 * e), ("Y", -30 * e)],
+        "forearm_L": [("X", -40 * e)], "forearm_R": [("X", -30 * e)],
+    }
+    return rots, (0, 0, 0.02 * e)
+
+
+def clip_fall(t):
+    """Long fall: legs apart and reaching down, arms out and flailing."""
+    w = _s(t)
+    rots = {
+        "thigh_L": [("X", -24 + w * 8), ("Y", 10)], "thigh_R": [("X", -8 - w * 8), ("Y", -10)], "shin_L": [("X", 40)], "shin_R": [("X", 24)],
+        "spine": [("X", -6)], "neck": [("X", -14)], "head": [("X", -6)],
+        "upper_arm_L": [("X", -70 + w * 18), ("Y", 55)], "upper_arm_R": [("X", -70 - w * 18), ("Y", -55)],
+        "forearm_L": [("X", -24 - w * 10)], "forearm_R": [("X", -24 + w * 10)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_land_soft(t):
+    """Landing from a hop: absorb with the knees and straighten (0.3 s)."""
+    k = math.sin(math.pi * min(1.0, t * 1.05)) * (1 - t * 0.3)
+    rots = {
+        "thigh_L": [("X", -34 * k)], "thigh_R": [("X", -30 * k)], "shin_L": [("X", 58 * k)], "shin_R": [("X", 52 * k)],
+        "foot_L": [("X", -22 * k)], "foot_R": [("X", -20 * k)], "spine": [("X", 14 * k)],
+        "upper_arm_L": [("X", -18 * k), ("Y", 14 * k)], "upper_arm_R": [("X", -18 * k), ("Y", -14 * k)], "forearm_L": [("X", -24 * k)], "forearm_R": [("X", -24 * k)],
+    }
+    return rots, (0, 0.03 * k, -0.15 * k)
+
+
+def clip_land_hard(t):
+    """Heavy landing: drop into a deep crouch, one hand touches the ground, then rise (0.8 s)."""
+    k = _env(t, 0.0, 0.12, 0.45, 1.0)
+    hand = _env(t, 0.05, 0.16, 0.4, 0.6)
+    rots = {
+        "thigh_L": [("X", -88 * k)], "thigh_R": [("X", -60 * k), ("Y", -10 * k)], "shin_L": [("X", 120 * k)], "shin_R": [("X", 112 * k)],
+        "foot_L": [("X", -32 * k)], "foot_R": [("X", -46 * k)], "spine": [("X", 34 * k)], "chest": [("X", 10 * k)], "neck": [("X", -10 * k)],
+        "upper_arm_R": [("X", -40 * k - 20 * hand), ("Y", -10 * k)], "forearm_R": [("X", -12 * k)],
+        "upper_arm_L": [("X", -10 * k), ("Y", 30 * k)], "forearm_L": [("X", -40 * k)],
+    }
+    return rots, (0, 0.08 * k, -0.48 * k)
+
+
+def clip_vault(t):
+    """Vault over a waist-high obstacle: plant the left hand, swing both legs over to the right (0.65 s)."""
+    plant = _env(t, 0.1, 0.3, 0.6, 0.8)
+    tuck = _env(t, 0.2, 0.42, 0.62, 0.85)
+    rots = {
+        "spine": [("X", 30 * plant), ("Z", 12 * tuck)], "chest": [("X", 8 * plant)], "neck": [("X", -16 * plant)],
+        "upper_arm_L": [("X", -62 * plant), ("Y", 12 * plant)], "forearm_L": [("X", -8 * plant)], "hand_L": [("X", 50 * plant)],
+        "upper_arm_R": [("X", -70 * tuck + 10), ("Y", -40 * tuck)], "forearm_R": [("X", -30 * tuck)],
+        "thigh_L": [("X", -80 * tuck), ("Y", -24 * tuck)], "thigh_R": [("X", -70 * tuck), ("Y", -30 * tuck)],
+        "shin_L": [("X", 100 * tuck)], "shin_R": [("X", 90 * tuck)], "foot_L": [("X", -20 * tuck)], "foot_R": [("X", -20 * tuck)],
+    }
+    return rots, (0.06 * tuck, 0, 0)
+
+
+def clip_climb(t):
+    """Climb a ledge: hands on the edge above, pull up, knee onto the top, stand (1.1 s, body raised by the controller)."""
+    reach = _env(t, 0.0, 0.15, 0.55, 0.85)
+    pull = _env(t, 0.2, 0.5, 0.7, 0.95)
+    knee = _env(t, 0.45, 0.65, 0.8, 1.0)
+    rots = {
+        "upper_arm_L": [("X", -160 * reach + 80 * pull), ("Y", 10)], "upper_arm_R": [("X", -160 * reach + 80 * pull), ("Y", -10)],
+        "forearm_L": [("X", -20 * reach - 60 * pull)], "forearm_R": [("X", -20 * reach - 60 * pull)],
+        "hand_L": [("X", 30 * pull)], "hand_R": [("X", 30 * pull)],
+        "spine": [("X", 10 * reach + 24 * pull)], "neck": [("X", -20 * reach)],
+        "thigh_L": [("X", -90 * knee)], "shin_L": [("X", 110 * knee)], "thigh_R": [("X", -20 * pull)], "shin_R": [("X", 30 * pull)],
+        "foot_L": [("X", -20 * knee)],
+    }
+    return rots, (0, 0, -0.1 * knee)
+
+
+SIT_POSE = {
+    "thigh_L": [("X", -88)], "thigh_R": [("X", -88)], "shin_L": [("X", 92)], "shin_R": [("X", 92)], "foot_L": [("X", -4)], "foot_R": [("X", -4)],
+    "spine": [("X", 4)], "upper_arm_L": [("X", -24), ("Y", 4)], "upper_arm_R": [("X", -24), ("Y", -4)], "forearm_L": [("X", -40)], "forearm_R": [("X", -40)],
+}
+
+
+def clip_sit_down(t):
+    """Stand -> seated (0.9 s): bend at hip and knee with the torso counter-leaning forward, settle back.
+    The hip height is set at runtime from the measured seat; the clip supplies the joint angles."""
+    k = _ease(t)
+    lean = math.sin(math.pi * min(1.0, t * 1.1))
+    stand = {"thigh_L": [("X", 0)], "thigh_R": [("X", 0)], "shin_L": [("X", 0)], "shin_R": [("X", 0)], "foot_L": [("X", 0)], "foot_R": [("X", 0)],
+             "spine": [("X", 2)], "upper_arm_L": [("X", -4), ("Y", 0)], "upper_arm_R": [("X", -4), ("Y", 0)], "forearm_L": [("X", -10)], "forearm_R": [("X", -10)]}
+    rots = _blend_rots(stand, SIT_POSE, k)
+    rots["spine"] = [("X", 2 + 2 * k + 26 * lean)]
+    rots["neck"] = [("X", -10 * lean)]
+    rots["upper_arm_L"] = [("X", -4 - 20 * k - 18 * lean), ("Y", 4 * k)]
+    rots["upper_arm_R"] = [("X", -4 - 20 * k - 18 * lean), ("Y", -4 * k)]
+    return rots, (0, 0.06 * k, -0.46 * k)
+
+
+def clip_stand_up(t):
+    """Seated -> stand (0.8 s): lean forward over the feet, push up, straighten."""
+    k = 1 - _ease(t)
+    lean = math.sin(math.pi * min(1.0, t * 1.25))
+    stand = {"thigh_L": [("X", 0)], "thigh_R": [("X", 0)], "shin_L": [("X", 0)], "shin_R": [("X", 0)], "foot_L": [("X", 0)], "foot_R": [("X", 0)],
+             "spine": [("X", 2)], "upper_arm_L": [("X", -4), ("Y", 0)], "upper_arm_R": [("X", -4), ("Y", 0)], "forearm_L": [("X", -10)], "forearm_R": [("X", -10)]}
+    rots = _blend_rots(stand, SIT_POSE, k)
+    rots["spine"] = [("X", 2 + 2 * k + 32 * lean)]
+    rots["neck"] = [("X", -12 * lean)]
+    rots["upper_arm_L"] = [("X", -4 - 20 * k - 24 * lean), ("Y", 4 * k)]
+    rots["upper_arm_R"] = [("X", -4 - 20 * k - 24 * lean), ("Y", -4 * k)]
+    return rots, (0, 0.06 * k, -0.46 * k)
+
+
+def clip_fidget_shift(t):
+    """Idle fidget: shift the weight to one hip, roll the shoulders, adjust the waist cloth, settle back."""
+    e = _env(t, 0.05, 0.25, 0.75, 0.95)
+    adj = _env(t, 0.35, 0.45, 0.55, 0.68)
+    roll = _env(t, 0.15, 0.3, 0.38, 0.5)
+    rots = {
+        "hips": [("Y", 5 * e)], "thigh_L": [("Y", -5 * e), ("X", -6 * e)], "shin_L": [("X", 12 * e)], "thigh_R": [("Y", -5 * e)],
+        "spine": [("X", 1), ("Y", -3 * e)], "chest": [("X", -3 * roll)], "head": [("Z", 6 * e)],
+        "shoulder_L": [("X", -8 * roll)], "shoulder_R": [("X", -8 * roll)],
+        "upper_arm_R": [("X", -10 - 20 * adj), ("Y", -10 * adj)], "forearm_R": [("X", -12 - 70 * adj)],
+        "upper_arm_L": [("X", -4)], "forearm_L": [("X", -12)],
+    }
+    return rots, (0.025 * e, 0, -0.005 * e)
+
+
+def clip_fidget_stretch(t):
+    """Idle fidget: stretch the back with the arms raised, then a glance at the sky."""
+    e = _env(t, 0.05, 0.3, 0.55, 0.8)
+    look = _env(t, 0.5, 0.65, 0.8, 0.95)
+    rots = {
+        "spine": [("X", -8 * e)], "chest": [("X", -6 * e)], "neck": [("X", -10 * e - 12 * look)], "head": [("X", -8 * look)],
+        "upper_arm_L": [("X", -150 * e), ("Y", 20 * e)], "upper_arm_R": [("X", -150 * e), ("Y", -20 * e)],
+        "forearm_L": [("X", -60 * e)], "forearm_R": [("X", -60 * e)],
+    }
+    return rots, (0, 0, 0.01 * e)
+
+
+# --------------------------------------------------------------------------- temple visit actions
+def clip_coconut_smash(t):
+    """Raise the coconut over the head with both hands and bring it down onto the stone (1.2 s)."""
+    up = _env(t, 0.05, 0.45, 0.55, 0.65)
+    down = _env(t, 0.55, 0.65, 0.8, 1.0)
+    rots = {
+        "upper_arm_L": [("X", -170 * up - 70 * down), ("Y", -6)], "upper_arm_R": [("X", -170 * up - 70 * down), ("Y", 6)],
+        "forearm_L": [("X", -30 * up - 20 * down), ("Z", -20)], "forearm_R": [("X", -30 * up - 20 * down), ("Z", 20)],
+        "spine": [("X", -8 * up + 34 * down)], "chest": [("X", 10 * down)], "neck": [("X", -10 * up + 8 * down)],
+        "thigh_L": [("X", -20 * down)], "thigh_R": [("X", -20 * down)], "shin_L": [("X", 34 * down)], "shin_R": [("X", 34 * down)],
+    }
+    return rots, (0, 0.02 * down, -0.08 * down)
+
+
+def clip_pray(t):
+    """Standing prayer: palms together at the chest, head bowed, slow breathing (loop)."""
+    br = _s(t) * 1.0
+    rots = {
+        "spine": [("X", 6 + br)], "neck": [("X", 12)], "head": [("X", 10)],
+        "upper_arm_L": [("X", -32), ("Y", 18), ("Z", -14)], "upper_arm_R": [("X", -32), ("Y", -18), ("Z", 14)],
+        "forearm_L": [("X", -115), ("Z", -55)], "forearm_R": [("X", -115), ("Z", 55)],
+        "hand_L": [("Y", -30)], "hand_R": [("Y", 30)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_light_lamp(t):
+    """Bend toward a lamp, cup the flame with the left hand, light it with the right (1.4 s)."""
+    e = _env(t, 0.05, 0.3, 0.75, 0.95)
+    strike = _env(t, 0.35, 0.45, 0.6, 0.7)
+    rots = {
+        "spine": [("X", 30 * e)], "chest": [("X", 6 * e)], "neck": [("X", 8 * e)],
+        "thigh_L": [("X", -20 * e)], "thigh_R": [("X", -20 * e)], "shin_L": [("X", 32 * e)], "shin_R": [("X", 32 * e)],
+        "upper_arm_R": [("X", -60 * e - 10 * strike)], "forearm_R": [("X", -30 * e)],
+        "upper_arm_L": [("X", -50 * e), ("Y", 10 * e)], "forearm_L": [("X", -60 * e), ("Z", -30 * e)],
+    }
+    return rots, (0, 0.03 * e, -0.07 * e)
+
+
+def clip_vibhuti(t):
+    """Dab sacred ash on the forehead with the right ring finger (0.8 s)."""
+    e = _env(t, 0.05, 0.4, 0.6, 0.95)
+    rots = {
+        "upper_arm_R": [("X", -40 * e), ("Y", -24 * e), ("Z", 30 * e)], "forearm_R": [("X", -128 * e), ("Z", 30 * e)],
+        "neck": [("X", 6 * e)], "head": [("X", 6 * e)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_photo_pose(t):
+    """Stand straight for the family photo: chin up, hands clasped in front, a held smile (loop)."""
+    br = _s(t) * 0.5
+    rots = {
+        "spine": [("X", -2 + br)], "neck": [("X", -4)], "head": [("X", -2)],
+        "upper_arm_L": [("X", -14), ("Y", 10)], "upper_arm_R": [("X", -14), ("Y", -10)],
+        "forearm_L": [("X", -50), ("Z", -40)], "forearm_R": [("X", -50), ("Z", 40)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_drive(t):
+    """Seated at the handlebar of an auto-rickshaw (loop): arms forward, small steering sway."""
+    sway = _s(t) * 5
+    rots = dict((k, list(v)) for k, v in SIT_POSE.items())
+    rots.update({
+        "spine": [("X", 8), ("Z", sway * 0.4)], "neck": [("X", -6)],
+        "upper_arm_L": [("X", -58 + sway * 0.6), ("Y", 12)], "upper_arm_R": [("X", -58 - sway * 0.6), ("Y", -12)],
+        "forearm_L": [("X", -30)], "forearm_R": [("X", -30)],
+    })
+    return rots, (0, 0.06, -0.46)
+
+
+def clip_shuffle(t):
+    """Queue shuffle: short half-steps on the spot with a slight sway (0.33 m per 0.9 s)."""
+    rots, off = clip_walk(t)
+    for bone, rr in list(rots.items()):
+        if bone.startswith(("thigh", "shin", "foot", "toe", "upper_arm", "forearm")):
+            rots[bone] = [(ax, deg * 0.45) for ax, deg in rr]
+    return rots, (off[0] * 0.6, 0, off[2] * 0.4)
+
+
+def clip_scold(t):
+    """Wagging a finger with full eye contact (1.4 s)."""
+    e = _env(t, 0.05, 0.2, 0.85, 1.0)
+    wag = math.sin(2 * math.pi * t * 5) * e
+    rots = {
+        "spine": [("X", 6 * e)], "neck": [("X", -4 * e)], "head": [("Z", 4 * wag)],
+        "upper_arm_R": [("X", -70 * e), ("Y", -10 * e)], "forearm_R": [("X", -60 * e), ("Z", 18 * wag)],
+        "upper_arm_L": [("X", -4)], "forearm_L": [("X", -60 * e), ("Z", -40 * e)],
+    }
+    return rots, (0, 0, 0)
+
+
 CLIPS = [
     # name, frames @30fps, function, loop
     ("idle_relaxed", 120, clip_idle, True),
@@ -700,4 +1178,31 @@ CLIPS = [
     ("read_record", 90, clip_read, True),
     ("sit_idle", 90, clip_sit, True),
     ("rest_idle", 120, clip_rest, True),
+    # session 4: movement, sitting transitions, fidgets
+    ("sprint_forward", 18, clip_sprint, True),
+    ("walk_back", 30, clip_walk_back, True),
+    ("strafe_left", 30, clip_strafe(1), True),
+    ("strafe_right", 30, clip_strafe(-1), True),
+    ("crouch_idle", 90, clip_crouch_idle, True),
+    ("crouch_walk", 30, clip_crouch_walk, True),
+    ("jump_start", 6, clip_jump_start, False),
+    ("jump_air", 18, clip_jump_air, False),
+    ("fall_loop", 30, clip_fall, True),
+    ("land_soft", 9, clip_land_soft, False),
+    ("land_hard", 24, clip_land_hard, False),
+    ("vault", 20, clip_vault, False),
+    ("climb", 33, clip_climb, False),
+    ("sit_down", 27, clip_sit_down, False),
+    ("stand_up", 24, clip_stand_up, False),
+    ("idle_fidget_shift", 120, clip_fidget_shift, False),
+    ("idle_fidget_stretch", 105, clip_fidget_stretch, False),
+    # temple visit
+    ("coconut_smash", 36, clip_coconut_smash, False),
+    ("pray_idle", 90, clip_pray, True),
+    ("light_lamp", 42, clip_light_lamp, False),
+    ("apply_vibhuti", 24, clip_vibhuti, False),
+    ("photo_pose", 60, clip_photo_pose, True),
+    ("drive_seated", 60, clip_drive, True),
+    ("queue_shuffle", 27, clip_shuffle, True),
+    ("scold", 42, clip_scold, False),
 ]

@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Kaaval",
   "glb": "public/assets/models/characters/CHR_NPC_Kaaval.glb",
   "blend": "blender/source/CHR_NPC_Kaaval.blend",
-  "bytes": 127056,
-  "triangles": 3158,
+  "bytes": 318860,
+  "triangles": 8472,
   "objects": [
     "CHR_NPC_Kaaval",
     "CHR_NPC_Kaaval_Mesh",
@@ -24,9 +24,9 @@
     -0.008
   ],
   "boundsMax": [
-    0.363,
+    0.347,
     0.172,
-    1.847
+    1.788
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

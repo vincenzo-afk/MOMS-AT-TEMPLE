@@ -53,7 +53,7 @@ test("notice board, storage chest, home decoration, map and community panels", a
   await expect(page.getByTestId("map")).toBeVisible();
   await page.keyboard.press("Escape");
   await page.waitForTimeout(200);
-  await page.keyboard.press("KeyC");
+  await page.keyboard.press("KeyK");
   await expect(page.getByTestId("person-npc_valli")).toBeVisible();
   await page.keyboard.press("Escape");
   expect(log.errors).toEqual([]);

@@ -12,7 +12,9 @@ import { configureDetail } from "../world/DetailMaterials";
 import { Atmosphere, Bubbles, TargetRing } from "../world/Atmosphere";
 import { updateLod } from "../world/Level";
 import { weatherAt, type Weather } from "../world/weather";
-import { PlayerController, RUN_SPEED, WALK_SPEED } from "../player/PlayerController";
+import { PlayerController, RUN_SPEED, SPRINT_SPEED, WALK_SPEED, type LandKind } from "../player/PlayerController";
+import { measureSeat, SeatSession } from "../player/Seat";
+import { PostFX } from "../render/PostFX";
 import { CharacterAnimator } from "../player/CharacterAnimator";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
 import { InteractionSystem, type Candidate } from "../interaction/InteractionSystem";
@@ -24,6 +26,18 @@ import { LOCATIONS } from "../../data/text";
 
 export const MINUTES_PER_SECOND = 1; // one real second = one world minute (24 min day)
 const PLAYER_MODEL = "CHR_Player_Base";
+
+/** Input seen by the player controller while a panel or menu has the keyboard: no intent at all. */
+const NO_INPUT = {
+  moveAxis: () => ({ x: 0, z: 0 }),
+  isDown: () => false,
+  wasPressed: () => false,
+  get focusHeld() {
+    return false;
+  },
+} as unknown as Input;
+
+const NO_LOOK = { mouseDX: 0, mouseDY: 0, wheel: 0 };
 
 export type Mode = "loading" | "title" | "intro" | "play" | "paused" | "error";
 export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community" | "container";
@@ -62,6 +76,7 @@ export class Game {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(55, 1, 0.1, 280); // just beyond the fog: distant chunks are culled
+  private postfx: PostFX;
   readonly assets = new AssetLibrary();
   readonly audio = new AudioManager();
   readonly ui = new Store<UiState>({
@@ -104,7 +119,18 @@ export class Game {
   private titleT = 0;
   private actionTimer = 0;
   private talkingTo: string | null = null;
-  private seated = false;
+  private seat: SeatSession | null = null;
+  private readonly lookPoint = new THREE.Vector3();
+  private readonly lookPointB = new THREE.Vector3();
+  /** Subscribers to hard landings (the temple visit turns a bad fall into Stress). */
+  readonly landListeners: Array<(kind: LandKind, height: number) => void> = [];
+  private get seated(): boolean {
+    return this.seat !== null;
+  }
+  /** The active sit choreography, if any (diagnostics and tests). */
+  get seatSession(): SeatSession | null {
+    return this.seat;
+  }
   private musicCheck = 0;
   private atmosphere = new Atmosphere();
   private ring = new TargetRing();
@@ -132,6 +158,8 @@ export class Game {
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = settings.graphicsQuality !== "low";
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    this.postfx = new PostFX(this.renderer, this.scene, this.camera);
+    this.postfx.configure(settings.graphicsQuality, settings.ambientOcclusion === true);
     this.input = new Input(canvas);
     this.input.setLockListener((locked) => {
       this.ui.set({ pointerLocked: locked });
@@ -170,8 +198,11 @@ export class Game {
       const animator = new CharacterAnimator(model, clips, WALK_SPEED, RUN_SPEED);
       if (animator.missing.length) this.ui.set({ assetProblems: [...this.ui.get().assetProblems, `player clips missing: ${animator.missing.join(", ")}`] });
       this.player = new PlayerController(model, animator, this.level.collision);
+      this.player.onLand = (kind, h) => this.onPlayerLand(kind, h);
+      this.player.onJump = () => this.audio.footstep("soil", true);
       this.scene.add(this.player.object);
       this.cam = new ThirdPersonCamera(this.camera, this.level.collision);
+      this.cam.baseFov = this.settings.fov;
       this.npcs = new NpcSystem(this.session, this.assets, this.level.collision, PLAYER_MODEL, {
         bark: (npcId, text) => this.bubbles?.show(text, npcId, () => this.npcs.positionOf(npcId)),
         confront: (npcId) => this.confront(npcId),
@@ -255,15 +286,18 @@ export class Game {
     const q = this.settings?.graphicsQuality ?? "high";
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, q === "high" ? 2 : q === "medium" ? 1.5 : 1));
     this.renderer.setSize(w, h, false);
+    this.postfx?.setSize(w, h, this.renderer.getPixelRatio());
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   };
 
   applySettings(s: Settings): void {
     this.settings = s;
+    this.postfx?.configure(s.graphicsQuality, s.ambientOcclusion === true);
     this.camera.fov = s.fov;
     this.camera.updateProjectionMatrix();
     if (this.cam) {
+      this.cam.baseFov = s.fov;
       this.cam.sensitivity = s.mouseSensitivity;
       this.cam.invertY = s.invertY;
     }
@@ -575,20 +609,77 @@ export class Game {
     if (!ok) this.player.locked = false;
   }
 
+  /**
+   * Sit on whatever seat is behind the interaction point: the seat height, depth, floor and backrest are
+   * measured from the collision proxies now, then the approach -> turn -> sit-down choreography runs.
+   */
   private sitAt(at: THREE.Vector3, faceY: number): void {
-    this.player.position.set(at.x, this.player.position.y, at.z);
-    this.player.yaw = (faceY * Math.PI) / 180;
-    this.player.object.rotation.y = this.player.yaw;
-    this.player.locked = true;
-    this.seated = true;
-    this.player.animator.play("sit_idle", { once: false });
-    this.toast("Press a movement key to stand up.", "info");
+    if (this.player.airborne || this.player.busy || this.seat) return;
+    const info = measureSeat(this.level.collision, at, faceY);
+    if (!info) {
+      this.toast("There is nowhere to sit here.", "bad");
+      return;
+    }
+    this.seat = new SeatSession(
+      this.player,
+      info,
+      () => this.toast("Press a movement key to stand up.", "info"),
+      () => {
+        this.seat = null;
+      },
+    );
+  }
+
+  private playerAlpha = 1;
+  private playerMaterials: THREE.Material[] | null = null;
+
+  /** Fade the player out when the camera is pressed against them (a wall behind), so we never see inside the head. */
+  private fadePlayer(): void {
+    this.player.rig?.head.getWorldPosition(this.lookPointB);
+    const d = this.camera.position.distanceTo(this.lookPointB);
+    const alpha = Math.round(THREE.MathUtils.smoothstep(d, 0.45, 0.95) * 50) / 50;
+    if (alpha === this.playerAlpha) return;
+    this.playerAlpha = alpha;
+    if (!this.playerMaterials) {
+      const mats = new Set<THREE.Material>();
+      this.player.model.traverse((o) => {
+        const m = (o as THREE.Mesh).material;
+        if (m) for (const x of Array.isArray(m) ? m : [m]) mats.add(x);
+      });
+      this.playerMaterials = [...mats];
+    }
+    for (const m of this.playerMaterials) {
+      const fading = alpha < 0.999;
+      if (m.transparent !== fading) {
+        m.transparent = fading;
+        m.needsUpdate = true;
+      }
+      m.opacity = alpha;
+      m.depthWrite = !fading;
+    }
+    this.player.model.visible = alpha > 0.02;
+  }
+
+  /** Landing juice and consequences: camera shake and dust scale with the fall; a long fall hurts (limp). */
+  private onPlayerLand(kind: LandKind, height: number): void {
+    const p = this.player.position;
+    if (height > 0.3) this.atmosphere.puff(p, Math.min(1, height / 2.5));
+    if (kind === "soft") {
+      if (height > 0.4) this.audio.footstep(p.y > 0.03 ? "stone" : "soil", true);
+      return;
+    }
+    this.cam.addShake(kind === "injury" ? 0.14 : 0.07);
+    this.audio.footstep(p.y > 0.03 ? "stone" : "soil", true);
+    this.audio.footstep(p.y > 0.03 ? "stone" : "soil", true);
+    if (kind === "injury") {
+      this.audio.play("ui_error");
+      this.toast("Ouch. That was a long drop - you'll be limping for a moment.", "bad");
+    }
+    for (const l of this.landListeners) l(kind, height);
   }
 
   private standUp(): void {
-    this.seated = false;
-    this.player.animator.stopAction();
-    this.player.locked = false;
+    if (this.seat?.seated) this.seat.rise();
   }
 
   /** Called by the craft panel after the session accepted the craft. */
@@ -623,14 +714,21 @@ export class Game {
         else if (this.input.wasPressed("map")) this.openPanel("map");
         else if (this.input.wasPressed("community")) this.openPanel("community");
       }
-      if (this.seated && ui.panel === null && (this.input.isDown("forward") || this.input.isDown("back") || this.input.isDown("left") || this.input.isDown("right"))) this.standUp();
-      const canAct = ui.panel === null && !this.player.locked;
+      if (this.seated && ui.panel === null && (this.input.isDown("forward") || this.input.isDown("back") || this.input.isDown("left") || this.input.isDown("right") || this.input.wasPressed("jump"))) this.standUp();
+      // no interacting mid-air, mid-vault or while a landing or the seat choreography owns the body
+      const canAct = ui.panel === null && !this.player.locked && !this.player.airborne && !this.player.busy && !this.seated;
       this.session.advanceTime(dt * MINUTES_PER_SECOND);
-      this.player.update(dt, this.input, this.cam.yaw);
-      this.cam.update(dt, ui.panel === null ? this.input : ({ mouseDX: 0, mouseDY: 0, wheel: 0 } as Input), this.player.position);
-      const pSpeed = Math.hypot(this.player.velocity.x, this.player.velocity.z);
-      this.npcs.update(dt, { position: this.player.position, speed: pSpeed, busy: ui.panel !== null || this.player.locked });
       const focus = canAct ? this.interaction.update(this.player.position, this.player.yaw) : null;
+      // gamepad A is contextual: interact with a target, otherwise jump
+      if (!focus && ui.panel === null && this.input.padPressedButton(0)) this.player.requestJump();
+      this.player.lookTarget = focus ? this.lookPoint.copy(focus.position).setY(focus.position.y + (focus.def.kind === "npc" ? 1.55 : 0.6)) : null;
+      this.player.update(dt, ui.panel === null && !this.seated ? this.input : NO_INPUT, this.cam.yaw);
+      this.seat?.update(dt);
+      const pSpeed = Math.hypot(this.player.velocity.x, this.player.velocity.z);
+      const sprint = THREE.MathUtils.clamp((pSpeed - RUN_SPEED) / (SPRINT_SPEED - RUN_SPEED), 0, 1);
+      this.cam.update(dt, ui.panel === null ? this.input : NO_LOOK, this.player.position, this.player.velocity, sprint, !this.seated);
+      this.fadePlayer();
+      this.npcs.update(dt, { position: this.player.position, speed: pSpeed, busy: ui.panel !== null || this.player.locked });
       this.updatePrompt(focus);
       this.ring.update(dt, focus?.position ?? null, focus ? focus.position.y : 0, !!focus?.actions[0]?.enabled, this.settings.showTargetRing !== false && ui.pointerLocked !== undefined);
       this.footsteps(pSpeed);
@@ -682,9 +780,9 @@ export class Game {
     this.updateEnvironment(dt);
     this.updateLighting();
     for (const f of this.level?.flames ?? []) f.scale.setScalar(0.85 + Math.random() * 0.3);
-    this.level?.water && (this.level.water.uniforms.uTime!.value += dt);
+    if (this.level?.water) this.level.water.uniforms.uTime!.value += dt;
     this.sky.position.copy(this.camera.position);
-    this.renderer.render(this.scene, this.camera);
+    this.postfx.render(dt);
     this.bubbles?.update(dt, this.camera, this.canvas.clientWidth || window.innerWidth, this.canvas.clientHeight || window.innerHeight);
     this.input.endFrame();
 
@@ -873,6 +971,7 @@ export class Game {
     fog.near = this.fogBase.near * (1 - this.weather.rain * 0.5);
     fog.far = this.fogBase.far * (1 - this.weather.rain * 0.45);
     this.renderer.toneMappingExposure = 1.0 + day * 0.1;
+    this.postfx?.setBloom(0.1 + (1 - day) * 0.3); // lamps and flames glow at night; daylight barely blooms
     this.updateLampLights(day);
   }
 

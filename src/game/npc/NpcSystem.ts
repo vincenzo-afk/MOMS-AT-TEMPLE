@@ -148,6 +148,7 @@ export class NpcSystem {
       const own = assets.clips(def.appearance.model);
       const clips = own.length ? own : assets.retargetClips(sourceModelId, def.appearance.model);
       const animator = new CharacterAnimator(model, clips);
+      animator.fidgets = false; // schedules drive NPC idles
       const obj = new THREE.Group();
       obj.name = def.id;
       obj.add(model);

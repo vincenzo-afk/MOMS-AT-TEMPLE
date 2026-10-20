@@ -1,17 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { GameSession } from "./GameSession";
 import { loadDefinitions } from "./defs";
-import { countItem, addItems } from "../inventory/inventory";
+import { countItem } from "../inventory/inventory";
 import { kindAt, weatherAt } from "../world/weather";
 import { validateSave } from "../save/validateSave";
 
 const defs = loadDefinitions();
-const grant = (s: GameSession, itemId: string, quantity: number) => {
-  const r = addItems(s.state.inventory, [{ itemId, quantity }], (id) => defs.items.get(id));
-  if (!r.ok) throw new Error(r.reason);
-  s.state.inventory = r.inventory;
-  s.advanceTime(1);
-};
 const at = (s: GameSession, hour: number) => {
   s.state.worldMinutes = Math.floor(s.state.worldMinutes / 1440) * 1440 + hour * 60;
 };
@@ -123,7 +117,7 @@ describe("pickups, item use and lost-and-found", () => {
     const keep = new GameSession(defs);
     keep.pickUp("pk_pouch");
     const slot = keep.state.inventory.findIndex((x) => x?.itemId === "coin_pouch");
-    expect(keep.useItem(slot).ok).toBe(true);
+    expect(keep.applyItem(slot).ok).toBe(true);
     expect(keep.state.coins).toBe(8);
     expect(keep.state.flags.kept_pouch).toBe(true);
     expect(keep.talk("npc_villager_raman")?.node.id).toBe("r_pouch_kept");

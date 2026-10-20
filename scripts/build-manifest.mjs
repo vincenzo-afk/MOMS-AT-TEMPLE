@@ -1,5 +1,5 @@
 // Builds public/assets/models/manifest.json from Blender export reports (blender/export_reports/*.json).
-import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,10 +24,11 @@ for (const f of readdirSync(reportDir).sort()) {
     url: "/" + r.glb.replace(/^public\//, ""),
     type,
     triangles: r.triangles,
-    bytes: r.bytes,
+    bytes: existsSync(join(root, r.glb)) ? statSync(join(root, r.glb)).size : r.bytes, // after post-export optimisation
     expect: {
       nodes: (r.colliders ?? []).slice(0, 3),
-      maxBytes: type === "landmark" ? 1_500_000 : 800_000,
+      // the player GLB is also the shared animation library (every clip, every bone)
+      maxBytes: type === "landmark" || r.clips ? 1_500_000 : 800_000,
       maxTriangles: type === "landmark" ? 40_000 : 12_000,
     },
   };

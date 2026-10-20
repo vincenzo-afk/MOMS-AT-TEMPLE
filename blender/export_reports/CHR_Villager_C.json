@@ -2,8 +2,8 @@
   "assetId": "CHR_Villager_C",
   "glb": "public/assets/models/characters/CHR_Villager_C.glb",
   "blend": "blender/source/CHR_Villager_C.blend",
-  "bytes": 133036,
-  "triangles": 3406,
+  "bytes": 323188,
+  "triangles": 8688,
   "objects": [
     "CHR_Villager_C",
     "CHR_Villager_C_Mesh",
@@ -18,14 +18,14 @@
     "MAT_Skin_A"
   ],
   "boundsMin": [
-    -0.284,
+    -0.262,
     -0.204,
     -0.014
   ],
   "boundsMax": [
-    0.284,
-    0.147,
-    1.619
+    0.262,
+    0.145,
+    1.573
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

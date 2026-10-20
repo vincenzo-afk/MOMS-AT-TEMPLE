@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Selvam",
   "glb": "public/assets/models/characters/CHR_NPC_Selvam.glb",
   "blend": "blender/source/CHR_NPC_Selvam.blend",
-  "bytes": 124728,
-  "triangles": 3068,
+  "bytes": 316108,
+  "triangles": 8362,
   "objects": [
     "CHR_NPC_Selvam",
     "CHR_NPC_Selvam_Mesh",
@@ -19,14 +19,14 @@
     "MAT_Wood_Teak_A"
   ],
   "boundsMin": [
-    -0.338,
+    -0.321,
     -0.195,
     -0.01
   ],
   "boundsMax": [
-    0.337,
+    0.321,
     0.156,
-    1.785
+    1.728
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

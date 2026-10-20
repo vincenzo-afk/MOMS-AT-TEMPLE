@@ -135,15 +135,17 @@ export class AssetLibrary {
     };
     const a = restOf(src.gltf.scene);
     const b = restOf(tgt.gltf.scene);
-    const d = a && b ? b.clone().sub(a) : new THREE.Vector3();
+    // hip motion (crouch depth, sitting drop, bob) scales with leg length, so a child crouches less far
+    const k = a && b && a.y > 0.01 ? b.y / a.y : 1;
     const out = src.gltf.animations.map((clip) => {
       const c = clip.clone();
+      if (!a || !b) return c;
       for (const t of c.tracks) {
         if (t.name !== "hips.position") continue;
         for (let i = 0; i < t.values.length; i += 3) {
-          t.values[i]! += d.x;
-          t.values[i + 1]! += d.y;
-          t.values[i + 2]! += d.z;
+          t.values[i] = b.x + (t.values[i]! - a.x) * k;
+          t.values[i + 1] = b.y + (t.values[i + 1]! - a.y) * k;
+          t.values[i + 2] = b.z + (t.values[i + 2]! - a.z) * k;
         }
       }
       return c;

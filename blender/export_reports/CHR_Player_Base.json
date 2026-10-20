@@ -2,8 +2,8 @@
   "assetId": "CHR_Player_Base",
   "glb": "public/assets/models/characters/CHR_Player_Base.glb",
   "blend": "blender/source/CHR_Player_Base.blend",
-  "bytes": 636348,
-  "triangles": 3074,
+  "bytes": 1679628,
+  "triangles": 8356,
   "objects": [
     "CHR_Player_Base",
     "CHR_Player_Base_Mesh",
@@ -19,14 +19,14 @@
     "MAT_Thatch_A"
   ],
   "boundsMin": [
-    -0.334,
+    -0.314,
     -0.184,
     -0.01
   ],
   "boundsMax": [
-    0.334,
+    0.314,
     0.172,
-    1.784
+    1.735
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",
@@ -172,6 +172,131 @@
       "name": "rest_idle",
       "duration": 4.0,
       "loop": true
+    },
+    {
+      "name": "sprint_forward",
+      "duration": 0.6,
+      "loop": true
+    },
+    {
+      "name": "walk_back",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "strafe_left",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "strafe_right",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "crouch_idle",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "crouch_walk",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "jump_start",
+      "duration": 0.2,
+      "loop": false
+    },
+    {
+      "name": "jump_air",
+      "duration": 0.6,
+      "loop": false
+    },
+    {
+      "name": "fall_loop",
+      "duration": 1.0,
+      "loop": true
+    },
+    {
+      "name": "land_soft",
+      "duration": 0.3,
+      "loop": false
+    },
+    {
+      "name": "land_hard",
+      "duration": 0.8,
+      "loop": false
+    },
+    {
+      "name": "vault",
+      "duration": 0.667,
+      "loop": false
+    },
+    {
+      "name": "climb",
+      "duration": 1.1,
+      "loop": false
+    },
+    {
+      "name": "sit_down",
+      "duration": 0.9,
+      "loop": false
+    },
+    {
+      "name": "stand_up",
+      "duration": 0.8,
+      "loop": false
+    },
+    {
+      "name": "idle_fidget_shift",
+      "duration": 4.0,
+      "loop": false
+    },
+    {
+      "name": "idle_fidget_stretch",
+      "duration": 3.5,
+      "loop": false
+    },
+    {
+      "name": "coconut_smash",
+      "duration": 1.2,
+      "loop": false
+    },
+    {
+      "name": "pray_idle",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "light_lamp",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "apply_vibhuti",
+      "duration": 0.8,
+      "loop": false
+    },
+    {
+      "name": "photo_pose",
+      "duration": 2.0,
+      "loop": true
+    },
+    {
+      "name": "drive_seated",
+      "duration": 2.0,
+      "loop": true
+    },
+    {
+      "name": "queue_shuffle",
+      "duration": 0.9,
+      "loop": true
+    },
+    {
+      "name": "scold",
+      "duration": 1.4,
+      "loop": false
     }
   ]
 }

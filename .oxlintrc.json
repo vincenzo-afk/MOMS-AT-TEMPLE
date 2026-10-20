@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "react-hooks",
+    "import"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "no-unused-vars": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "no-underscore-dangle": "off",
+    "import/no-unassigned-import": "off"
+  },
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "public",
+    "blender",
+    ".tmp",
+    "test-results",
+    "playwright-report"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "tests/e2e/**"
+      ],
+      "rules": {
+        "no-shadow": "off"
+      }
+    }
+  ]
+}

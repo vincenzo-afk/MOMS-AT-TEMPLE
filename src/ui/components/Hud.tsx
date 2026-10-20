@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS } from "../../data/text";
 import { keyLabel, type Binding } from "../../game/core/Input";
@@ -41,19 +42,7 @@ export function Hud() {
         </div>
       )}
 
-      {ui.prompt?.primary && ui.panel === null && !ui.busyLabel && (
-        <div className="prompt" data-testid="prompt">
-          <div className={`prompt-row ${ui.prompt.primary.enabled ? "" : "disabled"}`}>
-            <kbd>E</kbd> {ui.prompt.primary.label}
-          </div>
-          {!ui.prompt.primary.enabled && ui.prompt.primary.reason && <div className="prompt-reason">{ui.prompt.primary.reason}</div>}
-          {ui.prompt.secondary && (
-            <div className="prompt-row secondary">
-              <kbd>R</kbd> {ui.prompt.secondary.label}
-            </div>
-          )}
-        </div>
-      )}
+      <InteractionPrompt prompt={ui.prompt?.primary && ui.panel === null && !ui.busyLabel ? ui.prompt : null} />
 
       {ui.busyLabel && <div className="busy">{ui.busyLabel}</div>}
 
@@ -86,6 +75,42 @@ export function Hud() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+type PromptData = NonNullable<ReturnType<typeof useUi>["prompt"]>;
+
+/**
+ * Contextual prompt ("E  Sit on the bench") that fades in and out instead of blinking: the last prompt stays
+ * mounted for the fade-out. Key labels follow the player's bindings.
+ */
+function InteractionPrompt({ prompt }: { prompt: PromptData | null }) {
+  const game = useGame();
+  const [last, setLast] = useState<PromptData | null>(prompt);
+  const [leaving, setLeaving] = useState(false);
+  if (prompt && prompt !== last) {
+    setLast(prompt);
+    setLeaving(false);
+  } else if (!prompt && last && !leaving) setLeaving(true);
+  useEffect(() => {
+    if (!leaving) return;
+    const t = window.setTimeout(() => setLast(null), 180);
+    return () => window.clearTimeout(t);
+  }, [leaving]);
+  if (!last?.primary) return null;
+  const key = (b: "interact" | "secondary") => keyLabel(game.input.keysFor(b)[0] ?? "") || "?";
+  return (
+    <div className={`prompt ${leaving ? "out" : "in"}`} data-testid={leaving ? undefined : "prompt"}>
+      <div className={`prompt-row ${last.primary.enabled ? "" : "disabled"}`}>
+        <kbd>{key("interact")}</kbd> {last.primary.label}
+      </div>
+      {!last.primary.enabled && last.primary.reason && <div className="prompt-reason">{last.primary.reason}</div>}
+      {last.secondary && (
+        <div className="prompt-row secondary">
+          <kbd>{key("secondary")}</kbd> {last.secondary.label}
+        </div>
+      )}
     </div>
   );
 }

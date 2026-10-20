@@ -43,7 +43,7 @@ test("home door: open, walk inside (indoors), close it behind you and stay insid
 
   // walk in through the doorway (camera yaw so W heads against the outward direction)
   await page.evaluate(([ox, oz]) => (window.__tom!.game.cam.yaw = Math.atan2(ox!, oz!)), [d.ox, d.oz]);
-  await hold(page, ["KeyW"], 1300);
+  await hold(page, ["KeyW"], 2000); // walking pace 1.75 m/s
   await expect.poll(() => page.evaluate(() => window.__tom!.game.ui.get().indoors)).toBe(true);
   await expect(page.getByTestId("hud-time")).toContainText("indoors");
   await page.screenshot({ path: "test-results/screens/30-home-interior.png" });
@@ -310,7 +310,13 @@ test("villagers notice the player: a greeting bubble appears above the speaker",
   await startNewGame(page);
   await setHour(page, 9);
   await teleport(page, 3.5, 40.8, Math.PI); // the usual spot for talking to Valli at the gate
-  await page.evaluate(() => (window.__tom!.game.cam.yaw = Math.PI * 0.8));
+  // aim the camera from the player toward Valli so she is on screen
+  await page.evaluate(() => {
+    const t = window.__tom!;
+    const v = t.game.npcs.positionOf("npc_valli");
+    const p = t.game.player.position;
+    t.game.cam.yaw = Math.atan2(-(v.x - p.x), -(v.z - p.z)) + 0.35;
+  });
   await expect(page.locator(".bubble").first()).toBeVisible({ timeout: 10_000 });
   const box = await page.locator(".bubble").first().boundingBox();
   expect(box!.y).toBeGreaterThan(0);

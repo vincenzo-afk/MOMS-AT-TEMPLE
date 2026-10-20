@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Meena",
   "glb": "public/assets/models/characters/CHR_NPC_Meena.glb",
   "blend": "blender/source/CHR_NPC_Meena.blend",
-  "bytes": 141332,
-  "triangles": 3606,
+  "bytes": 331180,
+  "triangles": 8888,
   "objects": [
     "CHR_NPC_Meena",
     "CHR_NPC_Meena_Mesh",
@@ -19,14 +19,14 @@
     "MAT_Skin_A"
   ],
   "boundsMin": [
-    -0.298,
+    -0.275,
     -0.205,
     -0.012
   ],
   "boundsMax": [
-    0.297,
-    0.151,
-    1.681
+    0.275,
+    0.149,
+    1.633
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

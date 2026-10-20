@@ -1,80 +1,80 @@
 {
-  "checkedAt": "2026-10-20T04:25:47.687Z",
+  "checkedAt": "2026-10-20T04:57:59.804Z",
   "results": [
     {
       "id": "CHR_NPC_Amudha",
-      "bytes": 145212,
-      "triangles": 3678,
+      "bytes": 335344,
+      "triangles": 8960,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Kaaval",
-      "bytes": 127056,
-      "triangles": 3158,
+      "bytes": 318860,
+      "triangles": 8472,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Meena",
-      "bytes": 141332,
-      "triangles": 3606,
+      "bytes": 331180,
+      "triangles": 8888,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Ponnan",
-      "bytes": 121304,
-      "triangles": 3006,
+      "bytes": 301044,
+      "triangles": 8070,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Selvam",
-      "bytes": 124728,
-      "triangles": 3068,
+      "bytes": 316108,
+      "triangles": 8362,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Valli",
-      "bytes": 141476,
-      "triangles": 3606,
+      "bytes": 331108,
+      "triangles": 8888,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Velan",
-      "bytes": 134920,
-      "triangles": 3486,
+      "bytes": 329680,
+      "triangles": 8900,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Player_Base",
-      "bytes": 636348,
-      "triangles": 3074,
-      "animations": 28,
+      "bytes": 721564,
+      "triangles": 8356,
+      "animations": 53,
       "problems": []
     },
     {
       "id": "CHR_Villager_A",
-      "bytes": 102500,
-      "triangles": 2606,
+      "bytes": 293740,
+      "triangles": 7900,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_B",
-      "bytes": 107004,
-      "triangles": 2742,
+      "bytes": 298840,
+      "triangles": 8056,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_C",
-      "bytes": 133036,
-      "triangles": 3406,
+      "bytes": 323188,
+      "triangles": 8688,
       "animations": 0,
       "problems": []
     },
@@ -376,6 +376,13 @@
       "id": "PRP_Bangle_A",
       "bytes": 6988,
       "triangles": 216,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Bench_Back_A",
+      "bytes": 21732,
+      "triangles": 252,
       "animations": 0,
       "problems": []
     },

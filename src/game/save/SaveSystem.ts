@@ -28,6 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dialogueBackdrop: 0.9,
   typewriter: true,
   showTargetRing: true,
+  ambientOcclusion: false,
 };
 
 /** IndexedDB persistence with a rolling backup and validation on every read. */
@@ -170,5 +171,6 @@ export function sanitizeSettings(raw: unknown): Settings {
     s.keyBindings = kb;
   }
   if (r.graphicsQuality === "low" || r.graphicsQuality === "medium" || r.graphicsQuality === "high") s.graphicsQuality = r.graphicsQuality;
+  if (typeof r.ambientOcclusion === "boolean") s.ambientOcclusion = r.ambientOcclusion;
   return s;
 }

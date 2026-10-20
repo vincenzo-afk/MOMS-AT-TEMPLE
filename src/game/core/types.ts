@@ -273,6 +273,8 @@ export interface Settings {
   keyBindings: Record<string, string[]>;
   dialogueBackdrop: number; // 0.4-1 opacity of the dialogue box
   typewriter: boolean; // reveal dialogue text gradually
+  /** Screen-space ambient occlusion (GTAO). Re-renders the scene's normals, so it is off by default. */
+  ambientOcclusion: boolean;
   showTargetRing: boolean;
 }
 

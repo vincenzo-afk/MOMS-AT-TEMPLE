@@ -37,6 +37,8 @@ export type GameEvent =
 export interface Conversation {
   npcId: string;
   node: DialogueNode;
+  /** Increments with every node shown (the UI resets its line and reveal state on change). */
+  seq: number;
 }
 
 export function newGameState(now = new Date()): GameState {
@@ -654,8 +656,9 @@ export class GameSession {
     this.state.talkLog = [...this.state.talkLog, ...lines.map((text) => ({ npcId, text, day, minute }))].slice(-TALK_LOG_MAX);
   }
 
+  private conversationSeq = 0;
   private showNode(npcId: string, node: DialogueNode): void {
-    this.conversation = { npcId, node };
+    this.conversation = { npcId, node, seq: ++this.conversationSeq };
     this.logTalk(npcId, node.lines);
     this.applyEffects(node.effects);
     this.advanceWhere("talk", npcId);
@@ -800,7 +803,7 @@ export class GameSession {
       case "notice":
         return [{ verb: "notices", label: "Read the notice board", enabled: true }];
       case "sit":
-        return [{ verb: "sit", label: "Sit and rest a while", enabled: true }];
+        return [{ verb: "sit", label: `Sit on the ${it.label}`, enabled: true }];
       case "door": {
         const open = this.isDoorOpen(it.refId);
         const locked = !open && this.isDoorLocked(it.refId);
@@ -978,7 +981,7 @@ export class GameSession {
     this.commit();
     return { ok: true };
   }
-  useItem(slot: number): ActionResult {
+  applyItem(slot: number): ActionResult {
     const stack = this.state.inventory[slot];
     const def = stack ? this.defs.items.get(stack.itemId) : undefined;
     if (!stack || !def?.use) return { ok: false, reason: "You can't use that." };
@@ -996,7 +999,7 @@ export class GameSession {
     return who === npcId || (!!group && who === `group:${group}`);
   }
   /** Topics this NPC can be asked about right now. */
-  topicsFor(npcId: string): Array<{ id: string; label: string }> {
+  topicsFor(_npcId: string): Array<{ id: string; label: string }> {
     return [...this.defs.topics.values()].filter((t) => evaluateAll(t.conditions, this.state, this.defs)).map((t) => ({ id: t.id, label: t.label }));
   }
   /** The answer this NPC gives: its own, then its group's, then the default (knowledge boundary). */

@@ -64,20 +64,28 @@ function DialoguePanel() {
   const game = useGame();
   useGameState(); // re-render on state changes
   const conv = game.session.conversation;
+  if (!conv) return null;
+  // a fresh body per shown node: line and reveal state start over without resetting state in effects
+  return <DialogueBody key={conv.seq} />;
+}
+
+function DialogueBody() {
+  const game = useGame();
+  useGameState();
+  const conv = game.session.conversation;
   const [line, setLine] = useState(0);
-  const [shown, setShown] = useState(0);
+  // characters revealed so far, tagged with the line they belong to (a new line starts from zero)
+  const [reveal, setReveal] = useState({ line: 0, n: 0 });
   const firstOption = useRef<HTMLButtonElement>(null);
-  const nodeId = conv?.node.id;
   const lines = conv?.node.lines ?? [];
   const text = lines[line] ?? "";
-  const typing = game.settings.typewriter !== false && shown < text.length;
-  useEffect(() => setLine(0), [nodeId]);
-  useEffect(() => setShown(game.settings.typewriter === false ? Infinity : 0), [nodeId, line, game.settings.typewriter]);
+  const shown = game.settings.typewriter === false ? Infinity : reveal.line === line ? reveal.n : 0;
+  const typing = shown < text.length;
   useEffect(() => {
     if (!typing) return;
-    const t = window.setInterval(() => setShown((n) => n + 2), 22);
+    const t = window.setInterval(() => setReveal((r) => ({ line, n: (r.line === line ? r.n : 0) + 2 })), 22);
     return () => window.clearInterval(t);
-  }, [typing, nodeId, line]);
+  }, [typing, line]);
   const onLast = line >= lines.length - 1;
   const hasOptions = (conv?.node.options.length ?? 0) > 0;
   const topics = conv && onLast && !hasOptions && !typing ? game.session.topicsFor(conv.npcId) : [];
@@ -85,7 +93,7 @@ function DialoguePanel() {
   const advance = (opt?: number) => {
     if (!conv) return;
     if (typing) {
-      setShown(Infinity); // first press finishes the line
+      setReveal({ line, n: Infinity }); // first press finishes the line
       return;
     }
     if (!onLast) {
@@ -103,7 +111,7 @@ function DialoguePanel() {
 
   useEffect(() => {
     if (onLast && !typing) firstOption.current?.focus();
-  }, [onLast, nodeId, typing]);
+  }, [onLast, typing]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -199,7 +207,7 @@ function InventoryPanel() {
             </div>
             <p>{def.description}</p>
             {def.use && (
-              <button className="primary" data-testid="use-item" onClick={() => game.session.useItem(sel!)}>
+              <button className="primary" data-testid="use-item" onClick={() => game.session.applyItem(sel!)}>
                 {def.use.label}
               </button>
             )}

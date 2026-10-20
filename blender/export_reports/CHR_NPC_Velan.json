@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Velan",
   "glb": "public/assets/models/characters/CHR_NPC_Velan.glb",
   "blend": "blender/source/CHR_NPC_Velan.blend",
-  "bytes": 134920,
-  "triangles": 3486,
+  "bytes": 329680,
+  "triangles": 8900,
   "objects": [
     "CHR_NPC_Velan",
     "CHR_NPC_Velan_Mesh",
@@ -19,14 +19,14 @@
     "MAT_Wood_Teak_A"
   ],
   "boundsMin": [
-    -0.369,
+    -0.367,
     -0.192,
     -0.009
   ],
   "boundsMax": [
-    0.369,
+    0.367,
     0.18,
-    1.845
+    1.795
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

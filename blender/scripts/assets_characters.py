@@ -17,6 +17,7 @@ import bpy
 from mathutils import Vector
 from tom.core import rgb, root, export_asset
 from tom.character import Body, CharPart, build_armature, chain_weights, fixed, make_action, CLIPS, FPS, pose
+from tom.anatomy import HeadShape, build_head, build_hair_cap, build_eyes, build_brows, build_ears, build_hand, finger_joints
 
 ASSETS = {}
 
@@ -66,70 +67,67 @@ def torso(p, body, spec, skin):
     p.ico(1.0, (0, -0.096 - belly, 1.035 * s), "MAT_Skin_A", (skin[0] * 0.7, skin[1] * 0.7, skin[2] * 0.7, 1), subdiv=1, scale=(0.006, 0.004, 0.008))
 
 
+def shade(c, k):
+    return (c[0] * k[0], c[1] * k[1], c[2] * k[2], 1)
+
+
 def head(p, body, spec, skin, rng):
+    """Sculpted head (one surface) with set-in eyes, lids, brows, ears, then hair and facial hair."""
     s0 = body.s
-    s = s0 * 1.08
-    hc = V((0, -0.006, 1.665 * s0 + 0.006))
+    fem = body.female
+    rx, ry, rz = (0.078 if fem else 0.082) * s0, 0.103 * s0, 0.116 * s0
+    hc = V((0, -0.006, body.head_top.z - rz - 0.004))
+    shape = HeadShape(hc, rx, ry, rz, fem=fem, nose=spec.get("nose", 1.0), jaw=spec.get("jaw", 1.0))
     p.weight_fn = fixed("head")
-    p.ico(1.0, tuple(hc), "MAT_Skin_A", skin, subdiv=2, scale=(0.09 * s, 0.106 * s, 0.12 * s))
-    p.ico(1.0, (0, hc.y - 0.035, hc.z - 0.062 * s), "MAT_Skin_A", skin, subdiv=2, scale=(0.064 * s, 0.07 * s, 0.058 * s))  # jaw
-    for sx in (-1, 1):  # cheekbones
-        p.ico(1.0, (sx * 0.052 * s, hc.y - 0.07 * s, hc.z - 0.005 * s), "MAT_Skin_A", skin, subdiv=1, scale=(0.03, 0.03, 0.025))
-    # nose: bridge + tip + wings
-    p.box((0.02, 0.035, 0.05), (0, hc.y - 0.104 * s, hc.z - 0.008 * s), "MAT_Skin_A", skin, taper=(0.55, 0.45))
-    p.ico(1.0, (0, hc.y - 0.118 * s, hc.z - 0.035 * s), "MAT_Skin_A", skin, subdiv=1, scale=(0.017, 0.014, 0.013))
-    for sx in (-1, 1):
-        p.ico(1.0, (sx * 0.014, hc.y - 0.11 * s, hc.z - 0.038 * s), "MAT_Skin_A", skin, subdiv=1, scale=(0.011, 0.01, 0.009))
-    for sx in (-1, 1):  # ears
-        p.ico(1.0, (sx * 0.091 * s, hc.y + 0.006, hc.z - 0.006), "MAT_Skin_A", skin, subdiv=1, scale=(0.013, 0.028, 0.038))
+    lip = shade(skin, (0.82, 0.55, 0.55) if fem else (0.8, 0.6, 0.58))
+    build_head(p, shape, {"skin": skin, "lip": lip, "mouth": shade(skin, (0.35, 0.22, 0.22))})
+    build_eyes(p, shape, {"sclera": (0.93, 0.91, 0.86, 1), "pupil": (0.02, 0.015, 0.015, 1), "glint": (1, 1, 1, 1),
+                          "lid": shade(skin, (0.9, 0.86, 0.86)), "lid_low": shade(skin, (0.95, 0.93, 0.93)), "lash": (0.05, 0.04, 0.04, 1)})
     brow = col(spec.get("brows", spec.get("hair_color", "black")))
-    dark = (skin[0] * 0.45, skin[1] * 0.4, skin[2] * 0.4, 1)
-    for sx in (-1, 1):
-        ex = sx * 0.034 * s
-        p.ico(1.0, (ex, hc.y - 0.088 * s, hc.z + 0.012 * s), "MAT_Eye_A", col((0.94, 0.92, 0.87)), subdiv=1, scale=(0.017, 0.008, 0.011))
-        p.ico(1.0, (ex, hc.y - 0.095 * s, hc.z + 0.012 * s), "MAT_Eye_A", col((0.16, 0.09, 0.05)), subdiv=1, scale=(0.009, 0.004, 0.009))
-        p.box((0.036, 0.012, 0.009), (ex, hc.y - 0.096 * s, hc.z + 0.040 * s), "MAT_Hair_A", brow, rot_z=sx * 0.08)
-    lip = (skin[0] * 0.78, skin[1] * 0.5, skin[2] * 0.48, 1)
-    p.ico(1.0, (0, hc.y - 0.104 * s, hc.z - 0.054 * s), "MAT_Skin_A", lip, subdiv=1, scale=(0.022, 0.008, 0.006))
-    p.ico(1.0, (0, hc.y - 0.1 * s, hc.z - 0.066 * s), "MAT_Skin_A", lip, subdiv=1, scale=(0.019, 0.009, 0.007))
+    build_brows(p, shape, brow, thickness=0.8 if fem else 1.15, arch=1.25 if fem else 0.8)
+    build_ears(p, shape, skin, shade(skin, (0.7, 0.6, 0.58)))
     if spec.get("moustache"):
-        p.box((0.06, 0.016, 0.012), (0, hc.y - 0.108 * s, hc.z - 0.042 * s), "MAT_Hair_A", col(spec["moustache"]), taper=(0.75, 1.0))
+        m = col(spec["moustache"])
+        pts = [shape.landmark(x, -0.455 - abs(x) * 0.12) for x in (-0.24, -0.16, -0.08, 0.0, 0.08, 0.16, 0.24)]
+        p.ribbon([q + (q - hc).normalized() * 0.004 for q in pts], [0.008, 0.011, 0.012, 0.011, 0.012, 0.011, 0.008], V((0, 0, 1)), "MAT_Hair_A", m)
     if spec.get("beard"):
         b = col(spec["beard"])
         long = spec.get("beard_long", 0.0)
-        p.ico(1.0, (0, hc.y - 0.06, hc.z - 0.085 * s - long * 0.04), "MAT_Hair_A", b, subdiv=2, scale=(0.07, 0.055, 0.06 + long * 0.07), noise=0.06, rng=rng)
+        p.ico(1.0, tuple(shape.landmark(0, -0.84) + V((0, 0.03, -0.005 - long * 0.035))), "MAT_Hair_A", b, subdiv=2,
+              scale=(0.055, 0.042, 0.04 + long * 0.06), noise=0.05, rng=rng)
         for sx in (-1, 1):
-            p.ico(1.0, (sx * 0.06, hc.y - 0.03, hc.z - 0.05 * s), "MAT_Hair_A", b, subdiv=1, scale=(0.025, 0.05, 0.05), noise=0.05, rng=rng)
+            p.ico(1.0, tuple(shape.landmark(sx * 0.62, -0.55) + V((sx * 0.004, 0.012, 0))), "MAT_Hair_A", b, subdiv=2, scale=(0.02, 0.04, 0.045), noise=0.04, rng=rng)
     if spec.get("bindi"):
-        p.ico(1.0, (0, hc.y - 0.107 * s, hc.z + 0.05 * s), "MAT_Skin_A", col("cloth_red"), subdiv=1, scale=(0.006, 0.003, 0.006))
+        p.ico(1.0, tuple(shape.landmark(0, 0.2) + V((0, -0.002, 0))), "MAT_Skin_A", col("cloth_red"), subdiv=1, scale=(0.005, 0.002, 0.005))
     if spec.get("earrings"):
         for sx in (-1, 1):
-            p.ico(1.0, (sx * 0.094 * s, hc.y - 0.004, hc.z - 0.046), "MAT_Brass_A", col("brass"), subdiv=1, scale=(0.009, 0.009, 0.012))
+            p.ico(1.0, (sx * rx * 1.0, hc.y + ry * 0.08, hc.z - rz * 0.36), "MAT_Brass_A", col("brass"), subdiv=1, scale=(0.007, 0.007, 0.01))
 
     hair = col(spec.get("hair_color", "black"))
     style = spec.get("hair", "short")
     if style in ("topknot", "short", "bun", "side"):
-        # hair cap with a hairline set back from the forehead
-        p.ico(1.0, (0, hc.y + 0.012, hc.z + 0.026 * s), "MAT_Hair_A", hair, subdiv=2, scale=(0.095 * s, 0.108 * s, 0.108 * s))
-        p.ico(1.0, (0, hc.y - 0.068 * s, hc.z + 0.03 * s), "MAT_Skin_A", skin, subdiv=1, scale=(0.07 * s, 0.045, 0.048 * s))
+        # hair: a shell over the scalp ending at a hairline above the brow and ears
+        long_back = -0.6 if fem else -0.42
+        build_hair_cap(p, shape, hair, thick=0.014 if style != "short" else 0.009, front=0.52 if fem else 0.48, back=long_back)
     if style == "topknot":
-        p.ico(1.0, (0, hc.y + 0.05 * s, hc.z + 0.115 * s), "MAT_Hair_A", hair, subdiv=2, scale=(0.042, 0.042, 0.04))
-        p.lathe([(0.02, -0.01), (0.022, 0.0), (0.02, 0.01)], (0, hc.y + 0.05 * s, hc.z + 0.085 * s), "MAT_Thatch_A", col("thatch"), segments=8)
+        p.ico(1.0, tuple(hc + V((0, ry * 0.45, rz * 1.02))), "MAT_Hair_A", hair, subdiv=2, scale=(0.04, 0.04, 0.037))
+        p.lathe([(0.019, -0.01), (0.021, 0.0), (0.019, 0.01)], tuple(hc + V((0, ry * 0.45, rz * 0.8))), "MAT_Thatch_A", col("thatch"), segments=8)
     if style == "bun":
-        p.ico(1.0, (0, hc.y + 0.115 * s, hc.z - 0.03 * s), "MAT_Hair_A", hair, subdiv=2, scale=(0.052, 0.042, 0.05))
+        bc = hc + V((0, ry * 1.08, -rz * 0.18))
+        p.ico(1.0, tuple(bc), "MAT_Hair_A", hair, subdiv=2, scale=(0.05, 0.04, 0.047))
         if spec.get("flowers", True):
             for k in range(9):
                 a = math.pi * 0.15 + k * math.pi * 0.7 / 8
-                p.ico(1.0, (math.cos(a) * 0.058, hc.y + 0.115 * s + 0.002, hc.z - 0.03 * s + math.sin(a) * 0.05), "MAT_Foliage_A", col("jasmine"), subdiv=1, scale=(0.011, 0.011, 0.011))
+                p.ico(1.0, (math.cos(a) * 0.056, bc.y + 0.004, bc.z + math.sin(a) * 0.048), "MAT_Foliage_A", col("jasmine"), subdiv=1, scale=(0.01, 0.01, 0.01))
     if style == "bald_topknot":
         for sx in (-1, 1):
-            p.ico(1.0, (sx * 0.078 * s, hc.y + 0.03, hc.z - 0.005), "MAT_Hair_A", hair, subdiv=1, scale=(0.028, 0.065, 0.05), noise=0.08, rng=rng)
-        p.ico(1.0, (0, hc.y + 0.085, hc.z - 0.015), "MAT_Hair_A", hair, subdiv=1, scale=(0.068, 0.035, 0.05), noise=0.08, rng=rng)
-        p.ico(1.0, (0, hc.y + 0.075 * s, hc.z + 0.07 * s), "MAT_Hair_A", hair, subdiv=2, scale=(0.034, 0.034, 0.032))
+            p.ico(1.0, tuple(hc + V((sx * rx * 0.92, ry * 0.3, -rz * 0.05))), "MAT_Hair_A", hair, subdiv=2, scale=(0.022, 0.06, 0.045), noise=0.06, rng=rng)
+        p.ico(1.0, tuple(hc + V((0, ry * 0.85, -rz * 0.12))), "MAT_Hair_A", hair, subdiv=2, scale=(0.065, 0.03, 0.045), noise=0.06, rng=rng)
+        p.ico(1.0, tuple(hc + V((0, ry * 0.7, rz * 0.62))), "MAT_Hair_A", hair, subdiv=2, scale=(0.032, 0.032, 0.03))
     headwear = spec.get("headwear")
     if headwear == "towel":
         tw = col(spec.get("headwear_color", "cloth_white"))
-        p.lathe([(0.1 * s, 0.0), (0.112 * s, 0.02), (0.112 * s, 0.05), (0.1 * s, 0.07), (0.07 * s, 0.075)], (0, hc.y + 0.004, hc.z + 0.035 * s), "MAT_Cloth_A", tw, segments=14)
+        p.lathe([(rx * 1.16, 0.0), (rx * 1.26, 0.02), (rx * 1.26, 0.05), (rx * 1.14, 0.07), (rx * 0.8, 0.078)], tuple(hc + V((0, ry * 0.05, rz * 0.32))), "MAT_Cloth_A", tw, segments=16)
     return hc
 
 
@@ -146,8 +144,8 @@ def arms(p, body, spec, skin):
         r0 = (0.052 if not fem else 0.044) * (1 + m * 0.3 - thin * 0.12)
         p.ico(1.0, tuple(g("shoulder") + V((-sx * 0.012, 0, -0.004))), "MAT_Skin_A", skin, subdiv=2, scale=(r0 * 0.98, r0 * 0.98, r0 * 1.05))  # deltoid
         sh, el, wr = g("shoulder"), g("elbow"), g("wrist")
-        path = [sh, sh.lerp(el, 0.45), el, el.lerp(wr, 0.3), el.lerp(wr, 0.7), wr]
-        p.tube([tuple(v) for v in path], [r0, r0 * (1.02 + m * 0.12), r0 * 0.74, r0 * (0.84 + m * 0.08), r0 * 0.68, r0 * 0.56], "MAT_Skin_A", skin, segments=10)
+        path = [sh, sh.lerp(el, 0.45), el, el.lerp(wr, 0.3), el.lerp(wr, 0.7), wr + (wr - el).normalized() * 0.008]
+        p.tube([tuple(v) for v in path], [r0, r0 * (1.02 + m * 0.12), r0 * 0.74, r0 * (0.84 + m * 0.08), r0 * 0.66, r0 * 0.54], "MAT_Skin_A", skin, segments=12)
         if spec.get("wraps"):
             for k in range(3):
                 c = wr.lerp(el, 0.08 + k * 0.08)
@@ -155,20 +153,16 @@ def arms(p, body, spec, skin):
         if spec.get("bangles") or fem:
             for k in range(2 if not fem else 3):
                 p.lathe([(r0 * 0.64, -0.004), (r0 * 0.68, 0.0), (r0 * 0.64, 0.004)], tuple(wr.lerp(el, 0.06 + k * 0.03)), "MAT_Brass_A", col("brass"), segments=10)
-        # hand: palm, four slightly curled fingers, thumb
-        d = (g("hand_tip") - wr).normalized()
-        out = V((sx, 0, 0))
-        fwd = V((0, -1, 0))
-        palm = wr + d * 0.05
-        p.ico(1.0, tuple(palm), "MAT_Skin_A", skin, subdiv=1, scale=(0.02, 0.04, 0.045))
-        for f in range(4):
-            base = palm + d * 0.04 + fwd * (0.018 - f * 0.012) + out * 0.004
-            ln = (0.05, 0.058, 0.055, 0.044)[f]
-            mid = base + d * ln * 0.55 + out * 0.003
-            tip = mid + d * ln * 0.4 + out * 0.01
-            p.tube([tuple(base), tuple(mid), tuple(tip)], [0.0085, 0.0075, 0.006], "MAT_Skin_A", skin, segments=5)
-        tb = palm + fwd * 0.03 + d * 0.0
-        p.tube([tuple(tb), tuple(tb + fwd * 0.02 + d * 0.03), tuple(tb + fwd * 0.025 + d * 0.055)], [0.01, 0.009, 0.007], "MAT_Skin_A", skin, segments=5)
+        joints = finger_joints(body, side)
+        knuckle_mid = (joints["index"][0] + joints["pinky"][0]) / 2
+
+        def weight_for(part, side=side, joints=joints, knuckle_mid=knuckle_mid, el=el, wr=wr):
+            if part == "palm":
+                return chain_weights([(f"forearm_{side}", el, wr), (f"hand_{side}", wr, knuckle_mid)], blend=0.025)
+            a, mm, t = joints[part]
+            return chain_weights([(f"hand_{side}", wr, a), (f"{part}_01_{side}", a, mm), (f"{part}_02_{side}", mm, t)], blend=0.01)
+
+        build_hand(p, body, side, skin, shade(skin, (0.88, 0.8, 0.78)), weight_for)
 
 
 def legs(p, body, spec, skin, rng):

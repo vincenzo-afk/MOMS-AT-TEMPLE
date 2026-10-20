@@ -163,6 +163,7 @@ export const PLACEMENTS: Placement[] = [
   P("ENV_Tree_Platform_A", -8, 24),
   P("ENV_Festival_Station_A", 9, 14, -90, { id: "festival_station" }),
   P("PRP_Bench_Wood_A", -12.5, 36, 90, { id: "bench_courtyard" }),
+  P("PRP_Bench_Back_A", -12.5, 32, 90, { id: "bench_courtyard_back" }), // backrest + armrests
   P("PRP_Contribution_Chest_A", 6, 2.5, 180),
   // ---- core: west street
   P("ENV_House_Village_B", -26, -2, 90),
@@ -343,6 +344,7 @@ export const INTERACTABLES: InteractablePlacement[] = [
   { id: "int_water_well", kind: "water", refId: "ws_well", label: "the well", locationId: "loc_well", pos: [83.8, 0, 6.0], radius: 1.8 },
   ...[34, 38, 42, 46].map((x, i): IP => ({ id: `int_plot_${i + 1}`, kind: "plot", refId: `plot_${i + 1}`, label: "your plot", locationId: "loc_fields", pos: [x, 0, -64.6], radius: 1.6 })),
   { id: "int_sit_courtyard", kind: "sit", refId: "bench_courtyard", label: "bench", locationId: "loc_courtyard", pos: [-12.2, 0, 36], radius: 1.5, faceY: 90 },
+  { id: "int_sit_courtyard_back", kind: "sit", refId: "bench_courtyard_back", label: "bench", locationId: "loc_courtyard", pos: [-11.95, 0, 32], radius: 1.5, faceY: 90 },
   { id: "int_sit_well", kind: "sit", refId: "bench_well", label: "bench", locationId: "loc_well", pos: [82, 0, 15.2], radius: 1.5, faceY: 180 },
 ];
 

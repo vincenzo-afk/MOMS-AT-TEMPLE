@@ -211,6 +211,10 @@ export function SettingsForm({ onBack }: { onBack: () => void }) {
         </select>
       </label>
       <label className="setting">
+        <span>Ambient occlusion (slower)</span>
+        <input type="checkbox" checked={s.ambientOcclusion === true} onChange={(e) => update({ ambientOcclusion: e.target.checked })} data-testid="setting-ao" />
+      </label>
+      <label className="setting">
         <span>Play opening sequence</span>
         <input type="checkbox" checked={s.showIntro} onChange={(e) => update({ showIntro: e.target.checked })} />
       </label>

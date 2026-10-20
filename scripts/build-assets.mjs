@@ -1,4 +1,4 @@
-// Runs the Blender asset build headlessly, then regenerates the manifest and validates every GLB.
+// Runs the Blender asset build headlessly, optimises animated GLBs, then regenerates the manifest and validates every GLB.
 // Usage: npm run assets [-- --only NAME,NAME | --group architecture|buildings|nature|characters]
 // Set BLENDER to override the executable path.
 import { spawnSync } from "node:child_process";
@@ -20,6 +20,7 @@ if (r.error) {
   console.error(`Could not start Blender (${r.error.message}). Set the BLENDER environment variable to blender.exe.`);
   process.exit(1);
 }
+const o = spawnSync(process.execPath, [join(root, "scripts/optimize-animations.mjs")], { stdio: "inherit", cwd: root });
 const m = spawnSync(process.execPath, [join(root, "scripts/build-manifest.mjs")], { stdio: "inherit", cwd: root });
 const v = spawnSync(process.execPath, [join(root, "scripts/validate-glb.mjs")], { stdio: "inherit", cwd: root });
-process.exit(r.status || m.status || v.status || 0);
+process.exit(r.status || o.status || m.status || v.status || 0);

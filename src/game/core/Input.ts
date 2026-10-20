@@ -7,13 +7,16 @@ export const BINDINGS = {
   left: ["KeyA", "ArrowLeft"],
   right: ["KeyD", "ArrowRight"],
   run: ["ShiftLeft", "ShiftRight"],
+  jump: ["Space"],
+  // C rather than Ctrl: Ctrl+W while moving would close the browser tab
+  crouch: ["KeyC"],
   interact: ["KeyE"],
   secondary: ["KeyR"],
   inventory: ["KeyI"],
   journal: ["KeyJ"],
   record: ["KeyL"],
   map: ["KeyM"],
-  community: ["KeyC"],
+  community: ["KeyK"],
   pause: ["Escape"],
 } as const;
 
@@ -25,7 +28,9 @@ export const REMAPPABLE: Array<[Binding, string]> = [
   ["back", "Move back"],
   ["left", "Move left"],
   ["right", "Move right"],
-  ["run", "Run"],
+  ["run", "Run (hold to build into a sprint)"],
+  ["jump", "Jump / vault / climb"],
+  ["crouch", "Crouch (toggle)"],
   ["interact", "Interact"],
   ["secondary", "Secondary action"],
   ["inventory", "Inventory"],
@@ -37,8 +42,11 @@ export const REMAPPABLE: Array<[Binding, string]> = [
 
 export const CONTROLS_HELP: Array<[string, string]> = [
   ["W A S D", "Move"],
-  ["Shift", "Run"],
-  ["Mouse", "Look around (click the scene to capture the mouse, or hold the right button)"],
+  ["Shift", "Jog; keep holding to sprint"],
+  ["Space", "Jump; near a low wall: vault; at a ledge: climb"],
+  ["C", "Crouch (toggle)"],
+  ["Mouse", "Look around (click the scene to capture the mouse)"],
+  ["Right mouse (hold)", "Focus: face where the camera looks and strafe / backpedal"],
   ["Mouse wheel", "Camera distance"],
   ["E", "Interact"],
   ["R", "Secondary action (e.g. inspect)"],
@@ -46,9 +54,9 @@ export const CONTROLS_HELP: Array<[string, string]> = [
   ["J", "Journal"],
   ["L", "Living Record"],
   ["M", "Map"],
-  ["C", "Community and skills"],
+  ["K", "Community and skills"],
   ["Esc", "Pause / close panel"],
-  ["Gamepad", "Left stick move · right stick look · A interact · X secondary · B back · LT run · LB inventory · RB map · Y journal · View record · Start pause"],
+  ["Gamepad", "Left stick move · right stick look · A interact (or jump when nothing is targeted) · X secondary · B back · LT run · R3 crouch · LB inventory · RB map · Y journal · View record · Start pause"],
 ];
 
 /** Standard-mapping gamepad buttons per action. */
@@ -60,6 +68,7 @@ const PAD_BUTTONS: Partial<Record<Binding, number[]>> = {
   inventory: [4],
   map: [5],
   record: [8],
+  crouch: [11],
 };
 
 export type PadNav = "up" | "down" | "accept" | "back" | null;
@@ -77,6 +86,7 @@ export class Input {
   wheel = 0;
   enabled = true;
   private dragging = false;
+  private rightDown = false;
   private onLockChange: ((locked: boolean) => void) | null = null;
   // gamepad state
   private padPrev: boolean[] = [];
@@ -155,16 +165,34 @@ export class Input {
     return this.bindings[b].some((k) => this.pressed.has(k)) || (PAD_BUTTONS[b]?.some((i) => this.padPressed.has(i)) ?? false);
   }
 
-  /** Movement intent in camera space: x right, z back; length 0..1 (analog on a gamepad). */
+  private axis = { x: 0, z: 0 };
+  /** Movement intent in camera space: x right, z back; length 0..1 (analog on a gamepad). The object is reused. */
   moveAxis(): { x: number; z: number } {
-    if (!this.enabled) return { x: 0, z: 0 };
-    let x = (this.isDown("right") ? 1 : 0) - (this.isDown("left") ? 1 : 0);
-    let z = (this.isDown("back") ? 1 : 0) - (this.isDown("forward") ? 1 : 0);
+    const a = this.axis;
+    a.x = 0;
+    a.z = 0;
+    if (!this.enabled) return a;
+    const x = (this.isDown("right") ? 1 : 0) - (this.isDown("left") ? 1 : 0);
+    const z = (this.isDown("back") ? 1 : 0) - (this.isDown("forward") ? 1 : 0);
     const len = Math.hypot(x, z);
-    if (len > 0) return { x: x / len, z: z / len };
-    x = this.padMove.x;
-    z = this.padMove.z;
-    return { x, z };
+    if (len > 0) {
+      a.x = x / len;
+      a.z = z / len;
+      return a;
+    }
+    a.x = this.padMove.x;
+    a.z = this.padMove.z;
+    return a;
+  }
+
+  /** Right mouse held (focus / strafe mode). */
+  get focusHeld(): boolean {
+    return this.enabled && this.rightDown;
+  }
+
+  /** Gamepad A pressed this frame (contextual: interact when targeting something, else jump). */
+  padPressedButton(i: number): boolean {
+    return this.padPressed.has(i);
   }
 
   /** Poll the first connected gamepad (call once per frame before reading input). */
@@ -220,17 +248,27 @@ export class Input {
   private keyup = (e: KeyboardEvent) => {
     this.down.delete(e.code);
   };
-  private blur = () => this.down.clear();
+  private blur = () => {
+    this.down.clear();
+    this.rightDown = false;
+    this.dragging = false;
+  };
   private mousemove = (e: MouseEvent) => {
     if (!this.locked && !this.dragging) return;
     this.mouseDX += e.movementX;
     this.mouseDY += e.movementY;
   };
   private mousedown = (e: MouseEvent) => {
-    if (e.button === 2) this.dragging = true;
+    if (e.button === 2) {
+      this.dragging = true;
+      this.rightDown = true;
+    }
   };
   private mouseup = (e: MouseEvent) => {
-    if (e.button === 2) this.dragging = false;
+    if (e.button === 2) {
+      this.dragging = false;
+      this.rightDown = false;
+    }
   };
   private noMenu = (e: Event) => e.preventDefault();
   private wheelHandler = (e: WheelEvent) => {

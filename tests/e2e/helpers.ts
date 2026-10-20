@@ -66,3 +66,25 @@ export async function talkThrough(page: Page): Promise<void> {
     await page.waitForTimeout(150);
   }
 }
+
+/** Centre of open, flat ground with nothing within `radius` metres (searched over the map). */
+export async function findOpenGround(page: Page, radius = 6.5): Promise<[number, number]> {
+  const r = await page.evaluate((radius) => {
+    const c = window.__tom!.game.level.collision;
+    for (let x = -120; x <= 120; x += 6)
+      for (let z = -120; z <= 120; z += 6) {
+        let ok = true;
+        for (let k = 0; k < 24 && ok; k++)
+          for (const d of [0, radius * 0.4, radius * 0.75, radius]) {
+            const a = (k / 24) * Math.PI * 2;
+            const px = x + Math.cos(a) * d;
+            const pz = z + Math.sin(a) * d;
+            if (!c.clear(px, pz, 0, 0.5, 1.8) || c.groundHeight(px, pz, 0.3) > 0.05) ok = false;
+          }
+        if (ok) return [x, z] as [number, number];
+      }
+    return null;
+  }, radius);
+  if (!r) throw new Error("no open ground found");
+  return r;
+}

@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Valli",
   "glb": "public/assets/models/characters/CHR_NPC_Valli.glb",
   "blend": "blender/source/CHR_NPC_Valli.blend",
-  "bytes": 141476,
-  "triangles": 3606,
+  "bytes": 331108,
+  "triangles": 8888,
   "objects": [
     "CHR_NPC_Valli",
     "CHR_NPC_Valli_Mesh",
@@ -19,14 +19,14 @@
     "MAT_Skin_A"
   ],
   "boundsMin": [
-    -0.295,
+    -0.272,
     -0.205,
     -0.013
   ],
   "boundsMax": [
-    0.294,
-    0.15,
-    1.661
+    0.272,
+    0.149,
+    1.613
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

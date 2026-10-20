@@ -218,3 +218,30 @@ def PRP_Bench_Wood_A():
     collider("Bench", (1.6, 0.42, 0.45), (0, 0, 0.22), parent=rt)
     empty("SOCKET_Seat", (0, -0.05, 0.0), parent=rt)
     return export_asset("PRP_Bench_Wood_A", "props", rt), rt
+
+
+@asset
+def PRP_Bench_Back_A():
+    """Teak courtyard bench with a slatted backrest and armrests (seat 0.45 m, depth 0.45 m, back to 0.95 m)."""
+    rng = random.Random(8911)
+    rt = root("PRP_Bench_Back_A")
+    p = Part()
+    # seat boards (front is -Y), back legs run up into the backrest posts
+    for k in range(3):
+        plank(p, (1.5, 0.14, 0.045), (0, -0.15 + k * 0.15, 0.43), rng, "teak")
+    for sx in (-1, 1):
+        plank(p, (0.07, 0.07, 0.43), (sx * 0.7, -0.19, 0.215), rng, "teak_dark")  # front legs
+        plank(p, (0.07, 0.07, 0.95), (sx * 0.7, 0.2, 0.475), rng, "teak_dark")  # back posts
+        plank(p, (0.07, 0.45, 0.05), (sx * 0.7, 0.0, 0.66), rng, "teak")  # armrest
+        plank(p, (0.05, 0.05, 0.22), (sx * 0.7, -0.19, 0.54), rng, "teak_dark")  # armrest support
+    for k in range(4):  # backrest slats, leaning back slightly
+        plank(p, (1.34, 0.03, 0.08), (0, 0.205 + k * 0.012, 0.56 + k * 0.11), rng, "teak")
+    plank(p, (1.45, 0.06, 0.07), (0, 0.25, 0.95), rng, "teak_dark")  # top rail
+    plank(p, (1.3, 0.05, 0.06), (0, 0.0, 0.12), rng, "teak_dark")  # stretcher
+    p.to_object("PRP_Bench_Back_A_Mesh").parent = rt
+    collider("Seat", (1.5, 0.45, 0.45), (0, 0.0, 0.225), parent=rt)
+    collider("Backrest", (1.5, 0.12, 0.5), (0, 0.24, 0.72), parent=rt)
+    for sx in (-1, 1):
+        collider(f"Arm{'L' if sx > 0 else 'R'}", (0.08, 0.45, 0.24), (sx * 0.7, 0.0, 0.57), parent=rt)
+    empty("SOCKET_Seat", (0, -0.1, 0.45), parent=rt)
+    return export_asset("PRP_Bench_Back_A", "props", rt, required=["COL_Seat", "COL_Backrest"]), rt

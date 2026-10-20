@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Ponnan",
   "glb": "public/assets/models/characters/CHR_NPC_Ponnan.glb",
   "blend": "blender/source/CHR_NPC_Ponnan.blend",
-  "bytes": 121304,
-  "triangles": 3006,
+  "bytes": 301044,
+  "triangles": 8070,
   "objects": [
     "CHR_NPC_Ponnan",
     "CHR_NPC_Ponnan_Mesh",
@@ -23,9 +23,9 @@
     -0.011
   ],
   "boundsMax": [
-    0.327,
+    0.304,
     0.149,
-    1.708
+    1.656
   ],
   "blenderVersion": "5.2.2 LTS",
   "skeleton": "SK_Humanoid_A",

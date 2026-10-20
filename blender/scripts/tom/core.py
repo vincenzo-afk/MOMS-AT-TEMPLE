@@ -405,7 +405,7 @@ def export_asset(asset_id, subdir, rt, required=None, extra_report=None, animati
         export_def_bones=True,
     )
     if animations:
-        kwargs.update(export_animation_mode="ACTIONS", export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=True)
+        kwargs.update(export_animation_mode="ACTIONS", export_force_sampling=True, export_frame_step=2, export_optimize_animation_size=True)  # clips are keyed every 2-3 frames
     bpy.ops.export_scene.gltf(**kwargs)
 
     if not os.path.exists(glb_path) or os.path.getsize(glb_path) < 200:

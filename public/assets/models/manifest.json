@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-20T03:25:35.528Z",
+  "generatedAt": "2026-10-20T04:57:59.541Z",
   "assets": [
     {
       "id": "CHR_NPC_Amudha",
       "url": "/assets/models/characters/CHR_NPC_Amudha.glb",
       "type": "character",
-      "triangles": 3678,
-      "bytes": 145212,
+      "triangles": 8960,
+      "bytes": 335344,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -17,8 +17,8 @@
       "id": "CHR_NPC_Kaaval",
       "url": "/assets/models/characters/CHR_NPC_Kaaval.glb",
       "type": "character",
-      "triangles": 3158,
-      "bytes": 127056,
+      "triangles": 8472,
+      "bytes": 318860,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -29,8 +29,8 @@
       "id": "CHR_NPC_Meena",
       "url": "/assets/models/characters/CHR_NPC_Meena.glb",
       "type": "character",
-      "triangles": 3606,
-      "bytes": 141332,
+      "triangles": 8888,
+      "bytes": 331180,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -41,8 +41,8 @@
       "id": "CHR_NPC_Ponnan",
       "url": "/assets/models/characters/CHR_NPC_Ponnan.glb",
       "type": "character",
-      "triangles": 3006,
-      "bytes": 121304,
+      "triangles": 8070,
+      "bytes": 301044,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -53,8 +53,8 @@
       "id": "CHR_NPC_Selvam",
       "url": "/assets/models/characters/CHR_NPC_Selvam.glb",
       "type": "character",
-      "triangles": 3068,
-      "bytes": 124728,
+      "triangles": 8362,
+      "bytes": 316108,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -65,8 +65,8 @@
       "id": "CHR_NPC_Valli",
       "url": "/assets/models/characters/CHR_NPC_Valli.glb",
       "type": "character",
-      "triangles": 3606,
-      "bytes": 141476,
+      "triangles": 8888,
+      "bytes": 331108,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -77,8 +77,8 @@
       "id": "CHR_NPC_Velan",
       "url": "/assets/models/characters/CHR_NPC_Velan.glb",
       "type": "character",
-      "triangles": 3486,
-      "bytes": 134920,
+      "triangles": 8900,
+      "bytes": 329680,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -89,11 +89,11 @@
       "id": "CHR_Player_Base",
       "url": "/assets/models/characters/CHR_Player_Base.glb",
       "type": "character",
-      "triangles": 3074,
-      "bytes": 636348,
+      "triangles": 8356,
+      "bytes": 721564,
       "expect": {
         "nodes": [],
-        "maxBytes": 800000,
+        "maxBytes": 1500000,
         "maxTriangles": 12000,
         "animations": [
           "idle_relaxed",
@@ -123,7 +123,32 @@
           "trade_counter",
           "read_record",
           "sit_idle",
-          "rest_idle"
+          "rest_idle",
+          "sprint_forward",
+          "walk_back",
+          "strafe_left",
+          "strafe_right",
+          "crouch_idle",
+          "crouch_walk",
+          "jump_start",
+          "jump_air",
+          "fall_loop",
+          "land_soft",
+          "land_hard",
+          "vault",
+          "climb",
+          "sit_down",
+          "stand_up",
+          "idle_fidget_shift",
+          "idle_fidget_stretch",
+          "coconut_smash",
+          "pray_idle",
+          "light_lamp",
+          "apply_vibhuti",
+          "photo_pose",
+          "drive_seated",
+          "queue_shuffle",
+          "scold"
         ],
         "skinned": true
       },
@@ -267,6 +292,131 @@
           "name": "rest_idle",
           "duration": 4,
           "loop": true
+        },
+        {
+          "name": "sprint_forward",
+          "duration": 0.6,
+          "loop": true
+        },
+        {
+          "name": "walk_back",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "strafe_left",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "strafe_right",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "crouch_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "crouch_walk",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "jump_start",
+          "duration": 0.2,
+          "loop": false
+        },
+        {
+          "name": "jump_air",
+          "duration": 0.6,
+          "loop": false
+        },
+        {
+          "name": "fall_loop",
+          "duration": 1,
+          "loop": true
+        },
+        {
+          "name": "land_soft",
+          "duration": 0.3,
+          "loop": false
+        },
+        {
+          "name": "land_hard",
+          "duration": 0.8,
+          "loop": false
+        },
+        {
+          "name": "vault",
+          "duration": 0.667,
+          "loop": false
+        },
+        {
+          "name": "climb",
+          "duration": 1.1,
+          "loop": false
+        },
+        {
+          "name": "sit_down",
+          "duration": 0.9,
+          "loop": false
+        },
+        {
+          "name": "stand_up",
+          "duration": 0.8,
+          "loop": false
+        },
+        {
+          "name": "idle_fidget_shift",
+          "duration": 4,
+          "loop": false
+        },
+        {
+          "name": "idle_fidget_stretch",
+          "duration": 3.5,
+          "loop": false
+        },
+        {
+          "name": "coconut_smash",
+          "duration": 1.2,
+          "loop": false
+        },
+        {
+          "name": "pray_idle",
+          "duration": 3,
+          "loop": true
+        },
+        {
+          "name": "light_lamp",
+          "duration": 1.4,
+          "loop": false
+        },
+        {
+          "name": "apply_vibhuti",
+          "duration": 0.8,
+          "loop": false
+        },
+        {
+          "name": "photo_pose",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "drive_seated",
+          "duration": 2,
+          "loop": true
+        },
+        {
+          "name": "queue_shuffle",
+          "duration": 0.9,
+          "loop": true
+        },
+        {
+          "name": "scold",
+          "duration": 1.4,
+          "loop": false
         }
       ]
     },
@@ -274,8 +424,8 @@
       "id": "CHR_Villager_A",
       "url": "/assets/models/characters/CHR_Villager_A.glb",
       "type": "character",
-      "triangles": 2606,
-      "bytes": 102500,
+      "triangles": 7900,
+      "bytes": 293740,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -286,8 +436,8 @@
       "id": "CHR_Villager_B",
       "url": "/assets/models/characters/CHR_Villager_B.glb",
       "type": "character",
-      "triangles": 2742,
-      "bytes": 107004,
+      "triangles": 8056,
+      "bytes": 298840,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -298,8 +448,8 @@
       "id": "CHR_Villager_C",
       "url": "/assets/models/characters/CHR_Villager_C.glb",
       "type": "character",
-      "triangles": 3406,
-      "bytes": 133036,
+      "triangles": 8688,
+      "bytes": 323188,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -939,6 +1089,22 @@
       "bytes": 6988,
       "expect": {
         "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Bench_Back_A",
+      "url": "/assets/models/props/PRP_Bench_Back_A.glb",
+      "type": "prop",
+      "triangles": 204,
+      "bytes": 21732,
+      "expect": {
+        "nodes": [
+          "COL_ArmL",
+          "COL_ArmR",
+          "COL_Backrest"
+        ],
         "maxBytes": 800000,
         "maxTriangles": 12000
       }

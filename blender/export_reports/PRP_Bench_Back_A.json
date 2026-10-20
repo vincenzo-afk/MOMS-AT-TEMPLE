@@ -1,0 +1,36 @@
+{
+  "assetId": "PRP_Bench_Back_A",
+  "glb": "public/assets/models/props/PRP_Bench_Back_A.glb",
+  "blend": "blender/source/PRP_Bench_Back_A.blend",
+  "bytes": 21732,
+  "triangles": 204,
+  "objects": [
+    "COL_ArmL",
+    "COL_ArmR",
+    "COL_Backrest",
+    "COL_Seat",
+    "PRP_Bench_Back_A",
+    "PRP_Bench_Back_A_Mesh",
+    "SOCKET_Seat"
+  ],
+  "colliders": [
+    "COL_ArmL",
+    "COL_ArmR",
+    "COL_Backrest",
+    "COL_Seat"
+  ],
+  "materials": [
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.75,
+    -0.225,
+    0.0
+  ],
+  "boundsMax": [
+    0.75,
+    0.28,
+    0.985
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}
