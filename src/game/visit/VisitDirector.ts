@@ -57,6 +57,8 @@ export interface VisitUi {
   pradakshina: number;
   queue: QueueUi | null;
   driving: boolean;
+  /** while driving to the temple: metres to the gate and its bearing from the auto's heading (radians, + = left) */
+  guide: { distance: number; bearing: number } | null;
   mini: MiniGame | null;
   summary: (RunSummary & { ended: "exit" | "stress"; templeId: string; personalBest: number }) | null;
 }
@@ -114,6 +116,9 @@ export class VisitDirector {
   private gotra: string;
   private leftHome = false;
   private parked = false;
+  /** a light column over the temple gate, shown until the auto is parked */
+  private beacon: THREE.Mesh | null = null;
+  private guideTimer = 0;
   private chappalsOff = false;
   private chappalsBack = false;
   private bushKey: string | null = null;
@@ -176,6 +181,7 @@ export class VisitDirector {
       pradakshina: 0,
       queue: null,
       driving: false,
+      guide: null,
       mini: null,
       summary: null,
     };
@@ -228,6 +234,15 @@ export class VisitDirector {
     g.landListeners.push(this.onLand);
     this.refresh();
     g.toast(`${this.ui.momName} at the ${this.ui.templeName}${this.run.festival ? " - festival day: points and penalties doubled" : ""}.`, "info");
+    // road guidance: a warm light column over the gate, visible across the settlement
+    const geo = new THREE.CylinderGeometry(0.9, 0.9, 40, 16, 1, true);
+    geo.translate(0, 20, 0);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffc46b, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+    this.beacon = new THREE.Mesh(geo, mat);
+    this.beacon.name = "VisitBeacon";
+    this.beacon.position.set(...this.layout.gate);
+    this.beacon.visible = false;
+    g.scene.add(this.beacon);
   }
 
   /** Remove everything this visit added (props are hidden, people removed). */
@@ -237,6 +252,12 @@ export class VisitDirector {
     this.world.resetLamps();
     g.npcs.suppressed.delete("npc_archaka");
     g.scene.remove(this.family.group);
+    if (this.beacon) {
+      g.scene.remove(this.beacon);
+      this.beacon.geometry.dispose();
+      (this.beacon.material as THREE.Material).dispose();
+      this.beacon = null;
+    }
     for (const e of this.extras) g.scene.remove(e.object);
     for (const lane of this.crowd) for (const c of lane.people) g.scene.remove(c.person.object);
     const i = g.landListeners.indexOf(this.onLand);
@@ -924,6 +945,30 @@ export class VisitDirector {
   }
 
   // ------------------------------------------------------------------ per frame
+  /** The gate beacon (until parked) and, while driving, the HUD arrow and distance to the gate (4 updates a second). */
+  private updateGuide(dt: number): void {
+    const show = this.leftHome && !this.parked && !this.enteredTemple;
+    if (this.beacon) {
+      this.beacon.visible = show;
+      (this.beacon.material as THREE.MeshBasicMaterial).opacity = 0.16 + Math.sin(this.t * 2.2) * 0.06;
+    }
+    this.guideTimer -= dt;
+    if (this.guideTimer > 0) return;
+    this.guideTimer = 0.25;
+    let guide: VisitUi["guide"] = null;
+    if (show && this.driving && this.auto) {
+      const [gx, , gz] = this.layout.gate;
+      const dx = gx - this.auto.position.x;
+      const dz = gz - this.auto.position.z;
+      const b = Math.atan2(dx, dz) - this.auto.yaw;
+      guide = { distance: Math.round(Math.hypot(dx, dz)), bearing: Math.atan2(Math.sin(b), Math.cos(b)) };
+    }
+    if (guide?.distance !== this.ui.guide?.distance || Math.abs((guide?.bearing ?? 0) - (this.ui.guide?.bearing ?? 0)) > 0.05) {
+      this.ui.guide = guide;
+      this.refresh();
+    }
+  }
+
   /** Camera focus while driving: above the auto's canopy, so the boom never starts inside the cab. */
   cameraFocus(out: THREE.Vector3): THREE.Vector3 | null {
     if (!this.driving || !this.auto) return null;
@@ -965,6 +1010,7 @@ export class VisitDirector {
       g.player.animateInPlace(dt, 0);
       if (inp.wasPressed("interact") && Math.abs(this.auto.speed) < 1.2) this.exitAuto();
     } else if (this.q && !this.ui.mini) this.updateQueue(dt);
+    this.updateGuide(dt);
     this.layoutCrowd(dt);
     this.family.update(dt, p, g.player.yaw);
     for (const e of this.extras) e.update(dt);

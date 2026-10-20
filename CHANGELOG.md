@@ -37,6 +37,25 @@
 - **Karthigai Deepam** (Sundaram, after the lamp festival and the casting corner): cast a lamp for the sanctum door, gather three clay lamps, deliver both, help Valli line the walls. Lamp rows appear along the temple walls and a brass lamp stand at the sanctum door, lit from dusk. The Living Record entry links back to the casting corner and the lamp festival.
 - Notice-board hints, villager dialogue and Living Record texts for both quests.
 
+### Added: performance, guidance, CI
+- **Drive guidance in a Temple Visit.** A warm light column stands over the temple gate until the auto is parked. While you drive, the HUD shows an arrow and the distance to the gate, and says "park here" inside the 100 m parking bonus.
+- **No per-frame allocations in the lighting and environment update.** The sky and sun colours, the indoors ray, the temple bells and the lamp lights no longer create objects every frame. The lamp lights used to filter, map and sort every flame each frame (more than 200 flames after Karthigai Deepam). They now keep the six nearest flames in a reused list, use cached flame positions, and skip the search entirely in daylight.
+- **Smaller startup download.** The Temple Visit director, its followers and the auto are loaded on first use, keeping them out of the startup bundle.
+- **Performance budgets** (`tests/e2e/perf.spec.ts`), measured here:
+  - title in 4.3 s, new game in 0.3 s
+  - frame time while sprinting in circles: p50 10 ms, p95 20 ms, no hitch over 100 ms
+  - retained heap growth over 16 s of play after a forced GC: 0.2 MB
+  - 564 draw calls and 0.9 M triangles
+- **CI.** A GitHub Actions workflow (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, the production build and GLB validation on every push. The Playwright suite runs on demand with bundled Chromium. `netlify.toml` holds a static deploy configuration; nothing has been deployed.
+- **New browser tests:**
+  - the chappal-bush memory test (wrong bush, wrong spot, then the right one)
+  - vibhuti for the whole family against the clock, Lakshmi-aunty's gossip and the annadanam
+  - the drive guidance
+  - an NPC deliberately boxed in on her route, who re-plans and then steps past (stuck recovery is now tested)
+
+### Changed
+- A Temple Visit has no background music, following the music cue rules. It used to start the day bed and then fall silent at the next cue check.
+
 ### Fixed
 - **Pausing mid-conversation.** Pausing during a conversation (for example on focus loss) dropped the panel without ending the conversation. The villager stayed in "talking" mode and the player stayed locked. Resuming now returns you to the open panel.
 - **Hotkeys after Esc.** A hotkey pressed in the same frame as the Esc that closed a panel (M right after Esc) was dropped.

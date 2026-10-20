@@ -15,7 +15,7 @@ import { weatherAt, type Weather } from "../world/weather";
 import { PlayerController, RUN_SPEED, SPRINT_SPEED, WALK_SPEED, type LandKind } from "../player/PlayerController";
 import { measureSeat, SeatSession } from "../player/Seat";
 import { PostFX } from "../render/PostFX";
-import { VisitDirector, type VisitUi } from "../visit/VisitDirector";
+import type { VisitDirector, VisitUi } from "../visit/VisitDirector";
 import type { VisitWorld } from "../visit/VisitWorld";
 import { isFestivalDay } from "../visit/rules";
 import { visitAssetIds } from "../../data/visit";
@@ -83,6 +83,22 @@ export interface UiState {
 }
 
 const _listenDir = new THREE.Vector3();
+// per-frame scratch values and constants (the frame loop allocates nothing)
+const _ORIGIN = new THREE.Vector3();
+const _UP = new THREE.Vector3(0, 1, 0);
+const _head = new THREE.Vector3();
+const _sunDir = new THREE.Vector3();
+const _skyTop = new THREE.Color();
+const _skyHorizon = new THREE.Color();
+const _overcast = new THREE.Color();
+const TEMPLE_BELL = new THREE.Vector3(0, 0, -14.5);
+const C_MOON = new THREE.Color(0x9fb4dd);
+const C_HEMI_NIGHT = new THREE.Color(0x6a7cae);
+const C_TOP_NIGHT = new THREE.Color(0x0e1630);
+const C_DUSK = new THREE.Color(0xf09a5a);
+const C_HAZE = new THREE.Color(0xa3a7ab);
+const C_HORIZON_NIGHT = new THREE.Color(0x26304a);
+const LAMP_LIGHTS = 6;
 
 export class Game {
   readonly renderer: THREE.WebGLRenderer;
@@ -407,6 +423,8 @@ export class Game {
       this.ui.set({ mode: "loading", loading: { done: 0, total: missing.length, label: "Packing for the temple" } });
       await this.assets.loadAll(missing, (done, total) => this.ui.set({ loading: { done, total, label: "Packing for the temple" } }));
     }
+    // the visit director, its followers and the auto load on first use (kept out of the startup bundle)
+    const { VisitDirector } = await import("../visit/VisitDirector");
     this.session.replaceState(newGameState());
     this.applyStateToWorld();
     const profile = await this.saves.loadVisitProfile();
@@ -418,7 +436,7 @@ export class Game {
     visit.start();
     this.introCurve = null;
     this.ui.set({ mode: "play", caption: null, panel: null });
-    this.audio.setMusic("mus_exploration_day");
+    this.audio.setMusic(null); // bells, the crowd and the soundscape carry a visit (musicCueFor)
     this.audio.startLoop("amb_settlement_day");
     this.input.requestLock();
   }
@@ -837,8 +855,7 @@ export class Game {
     if (h === this.lastBellHour) return;
     this.lastBellHour = h;
     if (h !== 5 && h !== 17) return;
-    const temple = new THREE.Vector3(0, 0, -14.5);
-    if (this.player.position.distanceTo(temple) > 80) return;
+    if (this.player.position.distanceTo(TEMPLE_BELL) > 80) return;
     [0, 900, 1800].forEach((ms) => window.setTimeout(() => this.audio.visitCue("bell"), ms));
     this.npcs.say("npc_archaka", "bell");
   }
@@ -1047,8 +1064,8 @@ export class Game {
     }
     // indoors = a ceiling or roof collider directly overhead
     if (this.player) {
-      const head = this.player.position.clone().add(new THREE.Vector3(0, 1.7, 0));
-      const indoors = this.level.collision.raycast(head, new THREE.Vector3(0, 1, 0), 2.5) < 2.5;
+      _head.copy(this.player.position).y += 1.7;
+      const indoors = this.level.collision.raycast(_head, _UP, 2.5) < 2.5;
       if (indoors !== this.indoors) {
         this.indoors = indoors;
         this.ui.set({ indoors });
@@ -1139,10 +1156,14 @@ export class Game {
 
   /** Up to LAMP_LIGHTS warm point lights follow the nearest visible lit flames at dusk and night. */
   private lampLights: THREE.PointLight[] = [];
+  /** flame world positions (flames never move), measured once */
+  private flamePos = new Map<THREE.Object3D, THREE.Vector3>();
+  /** the nearest visible flames this frame, kept sorted by distance (reused every frame) */
+  private flameSlots = Array.from({ length: LAMP_LIGHTS }, () => ({ pos: null as THREE.Vector3 | null, d: Infinity }));
   private updateLampLights(day: number): void {
     if (!this.level) return;
     if (!this.lampLights.length) {
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < LAMP_LIGHTS; i++) {
         const l = new THREE.PointLight(0xffb060, 0, 9, 1.6);
         l.castShadow = false;
         this.lampLights.push(l);
@@ -1150,22 +1171,43 @@ export class Game {
       }
     }
     const strength = THREE.MathUtils.clamp(1 - day * 1.6, 0, 1) * 6;
-    const p = this.player?.position ?? new THREE.Vector3();
-    const lit = this.level.flames
-      .filter((f) => {
-        let o: THREE.Object3D | null = f;
-        while (o) {
-          if (!o.visible) return false;
-          o = o.parent;
-        }
-        return true;
-      })
-      .map((f) => ({ f, pos: f.getWorldPosition(new THREE.Vector3()) }))
-      .sort((a, b) => a.pos.distanceToSquared(p) - b.pos.distanceToSquared(p));
+    if (strength <= 0) {
+      for (const l of this.lampLights) l.intensity = 0;
+      return;
+    }
+    const p = this.player?.position ?? _ORIGIN;
+    const slots = this.flameSlots;
+    for (const s of slots) {
+      s.pos = null;
+      s.d = Infinity;
+    }
+    const last = slots.length - 1;
+    for (const f of this.level.flames) {
+      let shown = true;
+      for (let o: THREE.Object3D | null = f; o && shown; o = o.parent) shown = o.visible;
+      if (!shown) continue;
+      let pos = this.flamePos.get(f);
+      if (!pos) {
+        pos = f.getWorldPosition(new THREE.Vector3());
+        this.flamePos.set(f, pos);
+      }
+      const d = pos.distanceToSquared(p);
+      if (d >= slots[last]!.d) continue;
+      let i = last;
+      for (; i > 0 && slots[i - 1]!.d > d; i--) {
+        slots[i]!.pos = slots[i - 1]!.pos;
+        slots[i]!.d = slots[i - 1]!.d;
+      }
+      slots[i]!.pos = pos;
+      slots[i]!.d = d;
+    }
     this.lampLights.forEach((l, i) => {
-      const t = lit[i];
+      const t = slots[i]!.pos;
       l.intensity = t ? strength * (0.9 + Math.random() * 0.2) : 0;
-      if (t) l.position.copy(t.pos).add(new THREE.Vector3(0, 0.3, 0));
+      if (t) {
+        l.position.copy(t);
+        l.position.y += 0.3;
+      }
     });
   }
 
@@ -1193,21 +1235,18 @@ export class Game {
     const dusk = THREE.MathUtils.clamp(1 - Math.abs(dayK) * 4, 0, 1) * (dayK > -0.2 ? 1 : 0);
     const az = ((h - 6) / 12) * Math.PI;
     const elev = Math.max(0.12, dayK) * 1.15;
-    const center = this.player?.position ?? new THREE.Vector3();
-    const dir = new THREE.Vector3(Math.cos(az) * 0.8, elev, -0.45).normalize();
+    const center = this.player?.position ?? _ORIGIN;
+    const dir = _sunDir.set(Math.cos(az) * 0.8, elev, -0.45).normalize();
     this.sun.position.copy(center).addScaledVector(dir, 70);
     this.sun.target.position.copy(center);
     const cloud = this.weather.cloud;
     // overcast: the direct sun is diffused into sky light (soft, near-shadowless), and rain pulls the fog in
     this.sun.intensity = (0.55 + day * 1.8) * (1 - cloud * 0.8); // moonlight floor keeps nights readable
-    this.sun.color.setRGB(1, 0.92 - dusk * 0.25, 0.82 - dusk * 0.4).lerp(new THREE.Color(0x9fb4dd), 1 - day);
+    this.sun.color.setRGB(1, 0.92 - dusk * 0.25, 0.82 - dusk * 0.4).lerp(C_MOON, 1 - day);
     this.hemi.intensity = 0.8 + day * (0.4 + cloud * 0.45);
-    this.hemi.color.setHex(0xcfe3f5).lerp(new THREE.Color(0x6a7cae), 1 - day);
-    const top = new THREE.Color(0x7fb2dc).lerp(new THREE.Color(0x0e1630), 1 - day).lerp(new THREE.Color(0x6d7480).multiplyScalar(0.4 + day * 0.6), cloud * 0.7);
-    const horizon = new THREE.Color(0xf1dcb5)
-      .lerp(new THREE.Color(0xf09a5a), dusk * 0.6)
-      .lerp(new THREE.Color(0xa3a7ab), cloud * 0.65)
-      .lerp(new THREE.Color(0x26304a), 1 - day);
+    this.hemi.color.setHex(0xcfe3f5).lerp(C_HEMI_NIGHT, 1 - day);
+    const top = _skyTop.setHex(0x7fb2dc).lerp(C_TOP_NIGHT, 1 - day).lerp(_overcast.setHex(0x6d7480).multiplyScalar(0.4 + day * 0.6), cloud * 0.7);
+    const horizon = _skyHorizon.setHex(0xf1dcb5).lerp(C_DUSK, dusk * 0.6).lerp(C_HAZE, cloud * 0.65).lerp(C_HORIZON_NIGHT, 1 - day);
     const u = (this.sky.material as THREE.ShaderMaterial).uniforms;
     u.uTop!.value.copy(top);
     u.uHorizon!.value.copy(horizon);

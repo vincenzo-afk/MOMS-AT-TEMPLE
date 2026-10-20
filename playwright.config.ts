@@ -13,7 +13,7 @@ export default defineConfig({
     // Uses the installed Microsoft Edge (Chromium) by default; set PW_CHANNEL="" to use Playwright's bundled Chromium.
     channel: process.env.PW_CHANNEL ?? "msedge",
     screenshot: "only-on-failure",
-    launchOptions: { args: ["--ignore-gpu-blocklist", "--enable-unsafe-swiftshader"] },
+    launchOptions: { args: ["--ignore-gpu-blocklist", "--enable-unsafe-swiftshader", "--js-flags=--expose-gc"] },
   },
   webServer: {
     command: "npx vite --port 5173 --strictPort",

@@ -183,6 +183,16 @@ export function VisitHud() {
           <div className="small">{v.queue.hints.join(" · ") || "W shuffle · A/D switch lanes · hold R pray"}</div>
         </div>
       )}
+      {v.guide && (
+        <div className="drive-guide" data-testid="drive-guide">
+          <span className="arrow" style={{ transform: `rotate(${-v.guide.bearing}rad)` }}>
+            ▲
+          </span>
+          <span>
+            Temple gate <b data-testid="drive-distance">{v.guide.distance}</b> m{v.guide.distance <= 100 ? " · park here" : ""}
+          </span>
+        </div>
+      )}
       {v.driving && <div className="drive-hint small">W/S drive · A/D steer · Space brake · H horn · E get out</div>}
     </div>
   );

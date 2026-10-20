@@ -1081,6 +1081,25 @@ svg.map {
   border-color: var(--gold-bright);
   background: rgba(217, 163, 91, 0.2);
 }
+.drive-guide {
+  position: absolute;
+  top: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel);
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--gold);
+}
+.drive-guide .arrow {
+  display: inline-block;
+  color: var(--gold-bright);
+  font-size: 1.4rem;
+  transition: transform 0.25s ease-out;
+}
 .drive-hint {
   position: absolute;
   bottom: 2.6rem;

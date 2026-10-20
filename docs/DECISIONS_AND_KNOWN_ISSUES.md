@@ -75,9 +75,7 @@
 | Environment | the C: drive was full during session 2; npm installs need --cache on another drive | environment | free space on C: |
 | Characters | no UVs or textures | low | after modelling pass |
 | Animation | most README clips exist, including carry, door push and close container (see ANIMATION_SPEC); there are no walk start/stop transition clips (starts and stops are blended) | low | walk start/stop clips |
-| NPCs | stuck recovery (re-plan, skip a waypoint, step past) is implemented but no automated test forces an NPC into a stuck state; the sampled runs recorded 0 repaths | low | a test that blocks a route with a collider |
-| Temple Visit | gossip, annadanam, vibhuti and the chappal-bush memory test are implemented and reachable but not driven by a browser test (the full-visit test covers the stand route) | low | extend visit.spec |
-| Temple Visit | the drive from home to the temple is free driving through the settlement with no road guidance; the auto can scrape walls in narrow lanes | low | a road path with the map marker |
+| Temple Visit | the drive is guided by a gate beacon and a HUD arrow, not by a road path; the auto can scrape walls in narrow lanes | low | a road path the arrow follows |
 | Temple Visit | sound cues ("aiyyo", bells, nadaswaram, horn, engine) are synthesized placeholders | medium | recorded audio |
 | Characters | the saree pallu is a stylised band; there is no cloth simulation | low | production cloth pass |
 | Movement | cover snap not implemented (no combat or stealth in either design) | n/a | only if a stealth system is ever designed |

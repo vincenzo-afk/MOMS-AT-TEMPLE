@@ -1,0 +1,18 @@
+# Static deploy of the production build (the game is served from the site root; asset URLs are absolute).
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Bundles are content-hashed, models and audio are not: an hour of caching keeps redeploys visible quickly.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/*.glb"
+  [headers.values]
+    Content-Type = "model/gltf-binary"

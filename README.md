@@ -50,7 +50,7 @@ Controls: WASD move · Shift jog (keep holding to sprint) · Space jump / vault 
 | Saves | IndexedDB schema **v3** with tested migrations v1 → v2 → v3, rolling backup, corrupt-save recovery. |
 | Audio | Web Audio buses and 20 Lyria slots, each with a licence field. **No audio files supplied yet.** A **procedural placeholder soundscape** (wind, rain, water, market murmur, birds, crickets, surface footsteps, doors, alarm, Velan's chisel) and a **placeholder score** (a drone and flute-like phrases per cue: morning, day, workshop, evening, festival) are synthesized in code; each mutes once its recording exists. Positional loops use an HRTF panner that follows the camera. |
 
-Tests: 29 unit tests, 23 browser tests and 123 GLB validations pass; typecheck is clean; the production build succeeds. Details are in `docs/TEST_PLAN.md`; the session 3 audit and checklist are in `docs/PROGRESS_CHECKLIST.md`.
+Tests: 47 unit tests, 49 browser tests (including performance budgets) and 145 GLB validations pass; typecheck and lint are clean; the production build succeeds. CI runs the static checks, unit tests, build and asset validation on every push (`.github/workflows/ci.yml`). Details are in `docs/TEST_PLAN.md`; the session 3 audit and checklist are in `docs/PROGRESS_CHECKLIST.md`.
 
 ## Temple Visit (Moms at Temples)
 
@@ -58,7 +58,7 @@ Title screen → **Temple Visit**: pick one of five moms and one of three temple
 
 ## Documentation
 
-`docs/TECHNICAL_ARCHITECTURE.md` · `docs/GAMEPLAY_SYSTEMS.md` · `docs/SAVE_FORMAT.md` · `docs/ART_BIBLE.md` · `docs/CHARACTER_BIBLE.md` · `docs/ANIMATION_SPEC.md` · `docs/REFERENCE_COVERAGE.md` · `docs/ASSET_MANIFEST.md` (generated) · `docs/ASSET_GENERATION_QUEUE.md` · `docs/AUDIO_BIBLE.md` · `docs/TEST_PLAN.md` · `docs/DECISIONS_AND_KNOWN_ISSUES.md`
+`docs/TECHNICAL_ARCHITECTURE.md` · `docs/WORLD_DESIGN.md` · `docs/GAMEPLAY_SYSTEMS.md` · `docs/SAVE_FORMAT.md` · `docs/ART_BIBLE.md` · `docs/CHARACTER_BIBLE.md` · `docs/ANIMATION_SPEC.md` · `docs/REFERENCE_COVERAGE.md` · `docs/ASSET_MANIFEST.md` (generated) · `docs/ASSET_GENERATION_QUEUE.md` · `docs/AUDIO_BIBLE.md` · `docs/TEST_PLAN.md` · `docs/DECISIONS_AND_KNOWN_ISSUES.md`
 
 ## Not done yet
 
