@@ -1,0 +1,16 @@
+{
+  "name": "Temple of Monks",
+  "short_name": "Temple",
+  "description": "A calm 3D life sim in a South Indian temple settlement: restore, craft, garden, keep the festivals - and the Temple Visit mode.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#2a1d14",
+  "theme_color": "#2a1d14",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

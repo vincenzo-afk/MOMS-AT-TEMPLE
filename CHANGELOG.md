@@ -45,7 +45,7 @@
   - title in 4.3 s, new game in 0.3 s
   - frame time while sprinting in circles: p50 10 ms, p95 20 ms, no hitch over 100 ms
   - retained heap growth over 16 s of play after a forced GC: 0.2 MB
-  - 564 draw calls and 0.9 M triangles
+  - 564 draw calls and 0.9 M triangles (419 and 0.65 M after character culling, below)
 - **CI.** A GitHub Actions workflow (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, the production build and GLB validation on every push. The Playwright suite runs on demand with bundled Chromium. `netlify.toml` holds a static deploy configuration; nothing has been deployed.
 - **New browser tests:**
   - the chappal-bush memory test (wrong bush, wrong spot, then the right one)
@@ -56,6 +56,24 @@
 ### Added: icons and atmosphere
 - **Rendered inventory icons.** All 32 items have an icon rendered in Blender (`blender/scripts/render_icons.py`): a small model of each, in the world's vertex-colour palette, shown from a 3/4 view on a transparent background at 128 px. The icons appear in the bag, the chest and containers, shop rows, recipe inputs and the item details. An item without an icon falls back to its glyph.
 - **Drifting leaves.** A pool of 70 instanced leaves falls around the player outdoors. They flutter, drift downwind, tumble and rest on the ground for a moment. Fewer fall in rain, none indoors, and nothing is allocated per frame.
+
+### Added: stolen goods and cross-browser checks
+- **Stolen goods are recognised later.**
+  - Taking something from an owned container while nobody sees is remembered. The save schema is now v4, with a migration from older saves.
+  - If the owner later sees it in your bag (within 4.5 m with a clear line of sight), they say so and the watchman comes, as for a witnessed theft.
+  - Putting it back where it came from clears it quietly. Owners forget after a week.
+  - Covered by unit tests and a browser test.
+- **Cross-browser smoke test.** `XBROWSER=1` adds Firefox and WebKit projects that boot the game, render, move, talk, open the inventory and save. Both pass, using browsers installed on D:. The normal run stays on Edge.
+- `NpcSystem.witnessesOf` no longer allocates two vectors per villager per call.
+- **Villagers and the Temple Visit crowd are now frustum culled.** Every character had culling switched off, so every villager on the map was drawn each frame, and into the shadow map, even behind the camera. Each character now gets a fixed bounding sphere: its bind-pose bounds, enlarged 1.6× to cover animation. Measured in the courtyard: draw calls 565 → 419 and triangles 0.90 M → 0.65 M, with frame time unchanged.
+
+### Added: installable and offline
+- **An installable web app (PWA).** It adds a web manifest (fullscreen, landscape), app icons (the gopuram rendered in Blender on a dusk gradient, including a maskable icon and an Apple touch icon) and a service worker (`public/sw.js`). The service worker is registered only in production builds, so the dev server and tests run without it.
+  - Pages load from the network first and fall back to the cached shell.
+  - Hashed bundles are served from the cache.
+  - Models, audio and icons are refreshed in the background while the cached copy is served.
+- Checked against a production build: the worker activates, 146 files are cached after one load, and with the network disconnected the game still reaches the title screen.
+- This is the step toward mobile that `GAME_DESIGN.md` §9 asks for. Wrapping it with Capacitor still needs the Android and iOS toolchains.
 
 ### Changed
 - A Temple Visit has no background music, following the music cue rules. It used to start the day bed and then fall silent at the next cue check.

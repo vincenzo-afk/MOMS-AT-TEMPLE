@@ -660,6 +660,27 @@ export class Game {
     }
   }
 
+  /**
+   * Twice a second: an owner within a few metres who can see the player, while something taken from them unseen is
+   * in the bag, recognises it. That raises the alarm like a witnessed theft (the watchman comes).
+   */
+  private stolenCheck = 0;
+  private checkStolenGoods(dt: number): void {
+    this.stolenCheck -= dt;
+    if (this.stolenCheck > 0) return;
+    this.stolenCheck = 0.5;
+    for (const owner of this.session.stolenOwnersCarried()) {
+      if (!this.npcs.sees(owner, this.player.position, 4.5)) continue;
+      if (this.session.recogniseStolen(owner)) {
+        this.npcs.say(owner, "recognise");
+        this.npcs.reactToCrime([owner]);
+        this.audio.alarm();
+        if (this.ui.get().panel) this.closePanel();
+      }
+      return;
+    }
+  }
+
   /** The watchman caught up with the player: open his conversation (it offers return or fine). */
   private confront(npcId: string): void {
     const ui = this.ui.get();
@@ -1071,6 +1092,7 @@ export class Game {
         this.ui.set({ indoors });
       }
       this.checkTrespass(indoors);
+      if (!this.visit) this.checkStolenGoods(dt);
     }
     this.lodTimer -= dt;
     if (this.lodTimer <= 0) {

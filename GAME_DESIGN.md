@@ -217,7 +217,7 @@ Built in the existing **Three.js 3D game** (not Phaser 2D; see `PLAN.md` §0 for
 - §5 all five moms with their passives; §6 all three temples, including the hill steps stage and festival mode. **Done** (beyond the v1 MVP).
 - §7 Kumkum, unlocks (moms, temples, sarees), daily missions, badges, personal best per temple. **Done.**
 - §8 sounds: bell, nadaswaram sting and "aiyyo" are **procedural placeholders** until recordings exist. Hand-drawn 2D art is replaced by the 3D art of this game.
-- §9 local save (IndexedDB). **Done.** Touch controls: an on-screen stick and buttons on touch devices. Capacitor wrapping: not started.
+- §9 local save (IndexedDB). **Done.** Touch controls: an on-screen stick and buttons on touch devices. The game installs as a web app (manifest, icons, offline service worker; session 5). Capacitor wrapping: not started (it needs the Android and iOS toolchains).
 
 ## 11. Open questions
 

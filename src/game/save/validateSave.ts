@@ -1,4 +1,4 @@
-import type { GameState, ItemStack, LivingRecordEvent, PendingCrime, PlotState, QuestProgress, SkillId, TalkLogEntry } from "../core/types";
+import type { GameState, ItemStack, LivingRecordEvent, PendingCrime, PlotState, QuestProgress, SkillId, TalkLogEntry , StolenGoods } from "../core/types";
 import { INVENTORY_SLOTS, SCHEMA_VERSION, STORAGE_SLOTS, type Definitions } from "../core/defs";
 
 export type SaveCheck = { ok: true; state: GameState; warnings: string[] } | { ok: false; error: string };
@@ -36,6 +36,8 @@ const MIGRATIONS: Record<number, (raw: Record<string, unknown>) => Record<string
   // v2 -> v3: doors, world containers, pickups, the watchman's pending-crime record and the conversation log.
   // Containers start from their authored contents (filled in by GameSession.fillDefaults).
   2: (raw) => ({ ...raw, schemaVersion: 3, doors: {}, containers: {}, pickedUp: [], pendingCrime: null, talkLog: [] }),
+  // v3 -> v4: unseen thefts the owners may still recognise (none recorded before v4).
+  3: (raw) => ({ ...raw, schemaVersion: 4, stolen: [] }),
 };
 
 /**
@@ -195,6 +197,12 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
         .slice(-60)
         .map((t) => ({ npcId: t.npcId as string, text: t.text as string, day: t.day as number, minute: isNum(t.minute) ? t.minute : 0 }))
     : [];
+  const stolen: StolenGoods[] = Array.isArray(data.stolen)
+    ? data.stolen
+        .filter((t): t is Record<string, unknown> => isObj(t) && isStr(t.itemId) && defs.items.has(t.itemId) && isStr(t.containerId) && defs.containers.has(t.containerId) && isStr(t.ownerNpcId) && defs.npcs.has(t.ownerNpcId) && isNum(t.quantity) && isNum(t.day))
+        .slice(-20)
+        .map((t) => ({ itemId: t.itemId as string, quantity: Math.max(1, Math.floor(t.quantity as number)), ownerNpcId: t.ownerNpcId as string, containerId: t.containerId as string, day: t.day as number }))
+    : [];
   const skillsRaw = isObj(data.skills) ? data.skills : {};
   const skills = Object.fromEntries((["gardening", "masonry", "crafting"] as SkillId[]).map((k) => [k, isNum(skillsRaw[k]) ? Math.max(0, skillsRaw[k] as number) : 0])) as Record<SkillId, number>;
   return {
@@ -227,6 +235,7 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
       pickedUp: strList(data.pickedUp).filter((id) => defs.pickups.has(id)),
       pendingCrime,
       talkLog,
+      stolen,
     },
   };
 }

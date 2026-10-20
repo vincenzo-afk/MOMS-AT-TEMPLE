@@ -9,7 +9,7 @@ Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `sav
 | `settings` | `Settings` (volumes, sensitivity, FOV, text scale, quality, invert-Y, intro, key bindings, dialogue opacity, gradual text, target ring) |
 | `corrupt_<epoch ms>` | a copy of any main save that failed validation, kept for diagnosis |
 
-## GameState (schemaVersion 3)
+## GameState (schemaVersion 4)
 
 ```ts
 {
@@ -38,6 +38,7 @@ Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `sav
   pickedUp: string[],                              // v3: pickup ids already taken (never respawn)
   pendingCrime: { containerId, itemId, quantity, witnessId, day } | null,  // v3: unresolved theft
   talkLog: Array<{ npcId, text, day, minute }>     // v3: last 60 dialogue lines
+  stolen: Array<{ itemId, quantity, ownerNpcId, containerId, day }>  // v4: unseen thefts (last 20; forgotten after 7 days)
 }
 
 ```
@@ -47,6 +48,7 @@ Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `sav
 | From | To | Changes |
 |---|---|---|
 | 1 | 2 | NPC ids renamed to the new cast (npc_murugan -> npc_amudha, npc_kamala -> npc_velan) in relationships and record entries; "Garland for the Gate" lost its separate "learn" step, so an in-progress quest's objective index moves back by one and learned_garland is set; empty storage, plots, decor, talk days and skills are added. Covered by a unit test. |
+| 3 | 4 | Adds `stolen: []` (unseen thefts an owner can still recognise). Unknown items, containers or NPCs in it are dropped at load. Covered by unit tests (v1 → v4 and v2 → v4 run every step). |
 | 2 | 3 | Adds `doors: {}`, `containers: {}`, `pickedUp: []`, `pendingCrime: null` and `talkLog: []`. Containers missing from a save are filled from their data definitions at load, so old saves find the crates stocked. Covered by a unit test (v1 → v3 runs both steps). |
 
 `LivingRecordEvent`: `{ id: "<type>:<subjectId>", type, worldDay, worldMinute, locationId, actionId, affectedEntityIds[], previousState|null, resultingState|null, causeEventIds[], descriptionKey }`. IDs are deterministic, so recording the same event twice is a no-op.

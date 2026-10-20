@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { makeCharacterCullable } from "../render/characterBounds";
 import type { AssetLibrary } from "../core/AssetLibrary";
 import type { CollisionWorld } from "../world/CollisionWorld";
 import { CharacterAnimator, type LoopAction, type OneShot } from "../player/CharacterAnimator";
@@ -25,12 +26,7 @@ export class Person {
     private collision: CollisionWorld,
   ) {
     const model = assets.instantiate(modelId);
-    model.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) {
-        o.castShadow = true;
-        o.frustumCulled = false;
-      }
-    });
+    makeCharacterCullable(model);
     this.object.add(model);
     this.object.name = `Visit_${id}`;
     this.animator = new CharacterAnimator(model, assets.retargetClips(clipsFrom, modelId));

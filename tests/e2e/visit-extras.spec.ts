@@ -78,9 +78,13 @@ test("chappals in a secret bush: the wrong bush costs Stress, the right bush and
   expect(await stress(page)).toBeGreaterThanOrEqual(s1 + 6);
   await useStation(page, "bush2", /Look for your chappals here/);
   await page.getByTestId("mini-option-2").click();
-  // the bush has a small theft risk: a missing pair asks what to do
-  if (await page.getByTestId("minigame-choice").isVisible().catch(() => false)) await page.getByTestId("mini-option-1").click();
-  expect(await page.evaluate(() => (window.__tom!.game.visit as unknown as { chappalsBack: boolean }).chappalsBack)).toBe(true);
+  // the bush has a small theft risk: a missing pair asks what to do (the choice opens a moment later)
+  const back = () => page.evaluate(() => (window.__tom!.game.visit as unknown as { chappalsBack: boolean }).chappalsBack);
+  for (let i = 0; i < 20 && !(await back()); i++) {
+    if (await page.getByTestId("minigame-choice").isVisible().catch(() => false)) await page.getByTestId("mini-option-1").click();
+    await page.waitForTimeout(100);
+  }
+  expect(await back()).toBe(true);
   const d = await done(page);
   expect(d.some((x) => x === "chappals_found" || x === "chappals_missing" || x === "chappals_better")).toBe(true);
   expect(log.errors).toEqual([]);

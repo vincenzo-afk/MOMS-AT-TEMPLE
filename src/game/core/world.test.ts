@@ -172,7 +172,7 @@ describe("weather", () => {
   });
 });
 
-describe("save v3", () => {
+describe("save v3 and v4", () => {
   it("round-trips doors, containers, pickups, crime and talk log; migrates v2", () => {
     const s = new GameSession(defs);
     s.toggleDoor("door_home");
@@ -198,7 +198,8 @@ describe("save v3", () => {
     const m = validateSave(v2, defs);
     expect(m.ok).toBe(true);
     if (!m.ok) return;
-    expect(m.state.schemaVersion).toBe(3);
+    expect(m.state.schemaVersion).toBe(4); // v2 -> v3 -> v4
+    expect(m.state.stolen).toEqual([]);
     const fresh = new GameSession(defs, m.state);
     expect(countItem(fresh.containerSlots("ct_ruins_crate"), "timber")).toBe(2); // containers filled from data
   });

@@ -263,6 +263,16 @@ export interface GameState {
   pickedUp: string[]; // v3
   pendingCrime: PendingCrime | null; // v3
   talkLog: TalkLogEntry[]; // v3: recent conversation lines (newest last, capped)
+  /** v4: things taken from someone's container while nobody saw; the owner can still recognise them later */
+  stolen: StolenGoods[];
+}
+
+export interface StolenGoods {
+  itemId: string;
+  quantity: number;
+  ownerNpcId: string;
+  containerId: string;
+  day: number;
 }
 
 export interface Settings {
@@ -338,7 +348,7 @@ export interface TopicDefinition {
   answers: TopicAnswer[];
 }
 
-export type BarkTrigger = "greet" | "bump" | "rain" | "witness" | "festival" | "admire" | "missing" | "sprint" | "trespass" | "bell";
+export type BarkTrigger = "greet" | "bump" | "rain" | "witness" | "festival" | "admire" | "missing" | "sprint" | "trespass" | "bell" | "recognise";
 
 export interface BarkDefinition {
   id: string;

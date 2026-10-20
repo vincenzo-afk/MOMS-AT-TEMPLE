@@ -81,5 +81,7 @@ export function loadDefinitions(): Definitions {
 
 export const INVENTORY_SLOTS = 20;
 export const STORAGE_SLOTS = 24;
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
+/** How long an owner keeps an eye out for things that went missing (game days). */
+export const STOLEN_MEMORY_DAYS = 7;
 export const START_MINUTES = 7 * 60; // day 1, 07:00

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { makeCharacterCullable } from "../render/characterBounds";
 import type { GameSession } from "../core/GameSession";
 import type { AssetLibrary } from "../core/AssetLibrary";
 import type { BarkTrigger, NpcDefinition, ScheduleEntry } from "../core/types";
@@ -144,12 +145,7 @@ export class NpcSystem {
     this.group.name = "NPCs";
     for (const def of session.defs.npcs.values()) {
       const model = assets.instantiate(def.appearance.model);
-      model.traverse((o) => {
-        if ((o as THREE.Mesh).isMesh) {
-          o.castShadow = true;
-          o.frustumCulled = false; // skinned bounds are unreliable when animated
-        }
-      });
+      makeCharacterCullable(model);
       const own = assets.clips(def.appearance.model);
       const clips = own.length ? own : assets.retargetClips(sourceModelId, def.appearance.model);
       const animator = new CharacterAnimator(model, clips);
@@ -317,6 +313,20 @@ export class NpcSystem {
   }
 
   /** NPC ids that can currently see `pos` (distance + line of sight; asleep or absent NPCs see nothing). */
+  /** True when this NPC is out, within `range` and has a clear line of sight to the player's chest. */
+  sees(npcId: string, pos: THREE.Vector3, range: number): boolean {
+    const rt = this.npcs.get(npcId);
+    if (!rt || !rt.present || rt.indoors || rt.mode === "talking") return false;
+    if (rt.object.position.distanceTo(pos) > range) return false;
+    tmpA.copy(rt.object.position);
+    tmpA.y += 1.55;
+    tmpB.copy(pos);
+    tmpB.y += 1.2;
+    tmpB.sub(tmpA);
+    const len = tmpB.length();
+    return this.collision.raycast(tmpA, tmpB.normalize(), len) >= len - 0.4;
+  }
+
   witnessesOf(pos: THREE.Vector3): string[] {
     const out: string[] = [];
     for (const rt of this.npcs.values()) {
@@ -324,8 +334,11 @@ export class NpcSystem {
       const range = rt.def.id === "npc_kaaval" ? 22 : 14;
       const d = rt.object.position.distanceTo(pos);
       if (d > range) continue;
-      tmpA.copy(rt.object.position).add(new THREE.Vector3(0, 1.55, 0));
-      tmpB.copy(pos).add(new THREE.Vector3(0, 1.2, 0)).sub(tmpA);
+      tmpA.copy(rt.object.position);
+      tmpA.y += 1.55;
+      tmpB.copy(pos);
+      tmpB.y += 1.2;
+      tmpB.sub(tmpA);
       const len = tmpB.length();
       const hit = this.collision.raycast(tmpA, tmpB.normalize(), len);
       if (hit >= len - 0.4) out.push(rt.def.id);

@@ -141,6 +141,8 @@ export const BARKS: BarkDefinition[] = [
   { id: "b_rain", who: "any", trigger: "rain", priority: 1, conditions: [], lines: ["Rain! Under the roof, quick.", "The fields will be glad of this.", "Ayyo, my washing!"] },
   { id: "b_witness", who: "any", trigger: "witness", priority: 1, conditions: [], lines: ["Hey! That isn't yours!", "Thief! Kannan!", "I saw that!"] },
   { id: "b_witness_owner", who: "npc_selvam", trigger: "witness", priority: 5, conditions: [], lines: ["That's my stock! Kannan!"] },
+  { id: "b_recognise", who: "any", trigger: "recognise", priority: 1, conditions: [], lines: ["Wait - that's mine! That went missing from my crate!", "I know that. That's from my crate. Kannan!"] },
+  { id: "b_recognise_selvam", who: "npc_selvam", trigger: "recognise", priority: 5, conditions: [], lines: ["That came out of my granary crate. I count my stock, you know. Kannan!"] },
   { id: "b_missing_raman", who: "npc_villager_raman", trigger: "missing", priority: 5, conditions: [{ type: "flag", id: "kept_pouch", value: true }], lines: ["Has anyone seen my pouch? Red cloth, a few coins...", "My pouch... I had it at the stall."] },
   { id: "b_admire_garden", who: "any", trigger: "admire", priority: 3, conditions: [{ type: "flag", id: "garden_blooming", value: true }], lines: ["Smell those marigolds.", "Garden looks alive again."] },
   { id: "b_admire_fields", who: "any", trigger: "admire", priority: 4, conditions: [{ type: "flag", id: "fields_irrigated", value: true }], lines: ["Water in the paddies!", "Good harvest coming."] },

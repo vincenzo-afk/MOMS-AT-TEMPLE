@@ -64,7 +64,8 @@ describe("save system", () => {
     const r = validateSave(v1, defs);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.state.schemaVersion).toBe(3);
+    expect(r.state.schemaVersion).toBe(4);
+    expect(r.state.stolen).toEqual([]);
     expect(r.state.relationships).toEqual({ npc_amudha: 25, npc_velan: 10 });
     expect(r.state.quests.q_garland?.objectiveIndex).toBe(2);
     expect(r.state.flags.learned_garland).toBe(true);

@@ -122,7 +122,8 @@ Since session 4 or 5, all of these exist:
 - daily rotating stock from Selvam's cart
 - remarks when you sprint past villagers or walk into their houses
 
+Session 5 also added **stolen goods recognised later**. Something taken unseen from an owned container is remembered for a week. If its owner sees it in your bag within about 4.5 m with a clear line of sight, they recognise it, and the watchman comes as for a witnessed theft (return it or pay the fine). Putting it back where it came from clears it quietly.
+
 Still missing:
-- **Stolen goods:** nobody recognises stolen goods you carry later. Only theft that someone sees happen is a crime.
 - **Festival calendar:** festivals do not recur on a seasonal calendar. Festival evenings follow once the festival has been held.
 - **Locked containers and lock-picking:** deliberately not planned.

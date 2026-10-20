@@ -10,7 +10,7 @@ import type {
   QuestDefinition,
   SkillId,
 } from "./types";
-import { INVENTORY_SLOTS, SCHEMA_VERSION, START_MINUTES, STORAGE_SLOTS, type Definitions } from "./defs";
+import { INVENTORY_SLOTS, SCHEMA_VERSION, START_MINUTES, STOLEN_MEMORY_DAYS, STORAGE_SLOTS, type Definitions } from "./defs";
 import type { InteractableDef, InteractionAction, Verb } from "./interactables";
 import { addItems, countItem, exchange, hasItems, removeItems } from "../inventory/inventory";
 import { evaluate, evaluateAll } from "../world/conditions";
@@ -70,6 +70,7 @@ export function newGameState(now = new Date()): GameState {
     pickedUp: [],
     pendingCrime: null,
     talkLog: [],
+    stolen: [],
   };
 }
 
@@ -950,8 +951,9 @@ export class GameSession {
         this.emit({ type: "crime", witnessId: witness, containerId });
         this.notify(`${this.defs.npcs.get(witness)?.name ?? "Someone"} saw you take that!`, "bad");
       } else {
-        // Nobody saw. The owner notices later; there is no confrontation, but it is remembered.
+        // Nobody saw. The owner notices it is missing, and will know it again if they see it in your hands.
         this.state.flags = { ...this.state.flags, [`missing_from_${c.ownerNpcId}`]: true };
+        this.state.stolen = [...this.state.stolen, { itemId: stack.itemId, quantity: stack.quantity, ownerNpcId: c.ownerNpcId!, containerId, day: this.worldDay }].slice(-20);
       }
     }
     this.commit();
@@ -965,8 +967,40 @@ export class GameSession {
     if (!added.ok) return { ok: false, reason: "It's full." };
     this.state.containers = { ...this.state.containers, [containerId]: added.inventory };
     this.state.inventory = this.state.inventory.map((s, i) => (i === invSlot ? null : s));
+    // putting it back where it came from, quietly: nobody will ever know
+    const i = this.state.stolen.findIndex((t) => t.containerId === containerId && t.itemId === stack.itemId);
+    if (i >= 0) this.state.stolen = this.state.stolen.filter((_, k) => k !== i);
     this.commit();
     return { ok: true };
+  }
+
+  /**
+   * An owner who can see the player (the engine checks distance and line of sight) recognises something taken
+   * from them unseen, if it is in the player's bag. It becomes a crime like a witnessed theft: the watchman
+   * comes, and it is settled by returning it or paying the fine. Returns the item id recognised, or null.
+   */
+  recogniseStolen(ownerNpcId: string): string | null {
+    if (this.state.pendingCrime || !this.isNpcPresent(ownerNpcId)) return null;
+    const day = this.worldDay;
+    this.state.stolen = this.state.stolen.filter((t) => day - t.day <= STOLEN_MEMORY_DAYS);
+    const t = this.state.stolen.find((x) => x.ownerNpcId === ownerNpcId && countItem(this.state.inventory, x.itemId) > 0);
+    if (!t) return null;
+    this.state.stolen = this.state.stolen.filter((x) => x !== t);
+    this.state.pendingCrime = { containerId: t.containerId, itemId: t.itemId, quantity: Math.min(t.quantity, countItem(this.state.inventory, t.itemId)), witnessId: ownerNpcId, day };
+    this.changeRelationship(ownerNpcId, -10);
+    this.state.flags = { ...this.state.flags, seen_stealing: true };
+    this.emit({ type: "crime", witnessId: ownerNpcId, containerId: t.containerId });
+    this.notify(`${this.defs.npcs.get(ownerNpcId)?.name ?? "Someone"} knows that ${this.defs.items.get(t.itemId)?.name.toLowerCase() ?? "thing"} is theirs!`, "bad");
+    this.commit();
+    return t.itemId;
+  }
+
+  /** Owners still looking for something that is in the player's bag right now (the engine checks them for sight). */
+  stolenOwnersCarried(): string[] {
+    if (this.state.pendingCrime || !this.state.stolen.length) return [];
+    const out: string[] = [];
+    for (const t of this.state.stolen) if (!out.includes(t.ownerNpcId) && countItem(this.state.inventory, t.itemId) > 0) out.push(t.ownerNpcId);
+    return out;
   }
   private resolveCrime(mode: "return" | "fine"): void {
     const crime = this.state.pendingCrime;

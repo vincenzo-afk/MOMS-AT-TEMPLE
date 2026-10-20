@@ -71,7 +71,7 @@
 | Area | Issue | Severity | Next step |
 |---|---|---|---|
 | Characters | cloth stretches on wide strides (no cloth simulation); faces have jaw, eye and lid bones (blink, gaze, talking jaw) but no lip shapes or expressions; procedural, not hand-modelled | medium | hand-modelled pass keeping SK_Humanoid_A |
-| Performance | about 710 draw calls and 0.82M triangles per frame in the courtyard (67-101 fps headless on an AMD iGPU, depending on what else shares the GPU); draw-call bound; not measured on low-end hardware. Palm and neem LOD (session 3) cut triangles by about 26% in that view | medium | merge static props per chunk, LOD for walls and houses |
+| Performance | about 420 draw calls and 0.65M triangles per frame in the courtyard (p95 frame 20 ms on an AMD iGPU); villagers and crowds are frustum culled; 622 of 843 placements are instanced in 60 m cells; palms and neem have LOD; not measured on low-end hardware | low | LOD for walls and houses; a low-end device check |
 | Environment | the C: drive was full during session 2; npm installs need --cache on another drive | environment | free space on C: |
 | Characters | no UVs or textures | low | after modelling pass |
 | Animation | most README clips exist, including carry, door push and close container (see ANIMATION_SPEC); there are no walk start/stop transition clips (starts and stops are blended) | low | walk start/stop clips |
@@ -80,7 +80,6 @@
 | Characters | the saree pallu is a stylised band; there is no cloth simulation | low | production cloth pass |
 | Movement | cover snap not implemented (no combat or stealth in either design) | n/a | only if a stealth system is ever designed |
 | Touch | the touch controls are tested with mouse-driven pointer events, not on a physical phone | low | manual check on a phone |
-| NPCs | villagers remark on sprinting past them and on entering a house uninvited, but nobody notices stolen goods carried later; only witnessed container theft is a crime | low | recognise stolen items on sight |
 | Input | gamepad tested only with a scripted `navigator.getGamepads()` stub, not a physical controller | low | manual check with an Xbox/PS pad |
 | Audio | the procedural soundscape and the synthesized placeholder score have not been mixed or listened to by a person or a musician; stings do not duck the music bed | medium | Lyria recordings, mix pass, ducking |
 | Characters | Kannan the watchman is a first-pass procedural character like the others | low | production pass |
