@@ -1,0 +1,32 @@
+{
+  "assetId": "PRP_Water_Trough_A",
+  "glb": "public/assets/models/props/PRP_Water_Trough_A.glb",
+  "blend": "blender/source/PRP_Water_Trough_A.blend",
+  "bytes": 16804,
+  "triangles": 168,
+  "objects": [
+    "COL_Trough",
+    "PRP_Water_Trough_A",
+    "PRP_Water_Trough_A_Mesh",
+    "WATER_Trough"
+  ],
+  "colliders": [
+    "COL_Trough"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -1.04,
+    -0.34,
+    0.0
+  ],
+  "boundsMax": [
+    1.04,
+    0.34,
+    0.52
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

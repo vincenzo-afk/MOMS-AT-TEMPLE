@@ -15,7 +15,32 @@ Clips are keyed procedurally in `blender/scripts/tom/character.py` (`CLIPS`) at 
 | craft_at_station | 60 | 2.0 s | yes | two-handed work at bench height |
 | repair_channel | 48 | 1.6 s | yes | kneel and work low (also the gardener's work loop) |
 
-Not yet produced (listed in README §7.1): `idle_look_around`, `walk_start/stop`, `walk_backward`, strafes, `pickup_table`, `place_object`, carry, `inspect_object`, container open/close, `talk_explain/listen`, `greet`, give/receive, `gather_flower`, `water_plant`, `craft_garland`, `read_record`, `sit_idle`, `rest_idle`, and NPC-specific variants.
+Added in session 2 from asserts_img/MAIN NPC ACTIONS.jpg:
+
+| Clip | Frames | Loop | Used for |
+|---|---|---|---|
+| idle_look_around | 120 | no | ACT_002, shades the eyes and scans |
+| gather_flower | 54 | no | picking jasmine, marigold, hibiscus |
+| water_plant | 72 | no | watering a plot |
+| plant_seed | 60 | no | planting |
+| harvest_plant | 54 | no / loop | harvesting; clearing the overgrown path |
+| make_garland | 60 | yes | Meena at work (seated, hands knotting) |
+| open_container | 42 | no | opening the storage chest |
+| inspect_object | 72 | no | inspecting restorations and discoveries |
+| place_object | 42 | no / loop | fitting the well rope |
+| greet | 54 | no | palms together at the start of every conversation (player and NPC) |
+| talk_listen | 90 | yes | NPCs at "work" listening |
+| give_item / receive_item | 42 / 48 | no | available for deliveries |
+| trade_counter | 60 | yes | Selvam and bazaar sellers |
+| read_record | 90 | yes | Elder Ponnan in the old grounds |
+| sit_idle | 90 | yes | benches (seat 0.45 m) for player and NPCs |
+| rest_idle | 120 | yes | sitting on the ground |
+
+Total: **28 clips**. Not yet produced: walk_start/stop, walk_backward, strafes, pickup_table, carry_idle/walk, close_container, sweep_designated_area.
+
+## Sharing clips across characters
+
+Every character is exported with the same deform-only skeleton (`scripts/validate-glb.mjs` checks that each character's joint list equals the player's). NPC GLBs carry **no clips**: at runtime `AssetLibrary.retargetClips()` clones the player's clips and offsets the hips translation track by the difference in rest hip position, so shorter and taller characters keep their feet on the ground. This cut each NPC file from about 300 kB to about 130 kB.
 
 ## Runtime rules (`CharacterAnimator`)
 

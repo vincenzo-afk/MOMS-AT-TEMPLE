@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Pottery_Display_A",
+  "glb": "public/assets/models/props/PRP_Pottery_Display_A.glb",
+  "blend": "blender/source/PRP_Pottery_Display_A.blend",
+  "bytes": 47324,
+  "triangles": 1908,
+  "objects": [
+    "PRP_Pottery_Display_A",
+    "PRP_Pottery_Display_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Terracotta_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -0.81,
+    -0.56,
+    0.0
+  ],
+  "boundsMax": [
+    0.81,
+    0.518,
+    0.544
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -4,7 +4,7 @@ import random
 from .core import Part, rgb
 
 
-def rect_lathe(p, profile, hw, hd, loc, mat, color, color_fn=None):
+def rect_lathe(p, profile, hw, hd, loc, mat, color, color_fn=None, caps=True):
     """Sweep a moulding profile [(offset, z), ...] around a rectangle of half-size (hw, hd).
 
     offset grows the rectangle outward (negative = inset). Produces a closed ring with sharp corners,
@@ -21,8 +21,9 @@ def rect_lathe(p, profile, hw, hd, loc, mat, color, color_fn=None):
         for i in range(4):
             j = (i + 1) % 4
             bm.faces.new((a[i], a[j], b[j], b[i]))
-    bm.faces.new(list(reversed(rings[0])))
-    bm.faces.new(rings[-1])
+    if caps:
+        bm.faces.new(list(reversed(rings[0])))
+        bm.faces.new(rings[-1])
     new = [f for f in bm.faces if f not in before]
     p._finish(new, mat, color)
     if color_fn:

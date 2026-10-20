@@ -1,7 +1,16 @@
 {
   "blender": "5.2.2 LTS",
   "exported": [
-    "CHR_Player_Base"
+    "CHR_Player_Base",
+    "CHR_NPC_Amudha",
+    "CHR_NPC_Velan",
+    "CHR_NPC_Selvam",
+    "CHR_NPC_Ponnan",
+    "CHR_NPC_Valli",
+    "CHR_NPC_Meena",
+    "CHR_Villager_A",
+    "CHR_Villager_B",
+    "CHR_Villager_C"
   ],
   "failures": []
 }

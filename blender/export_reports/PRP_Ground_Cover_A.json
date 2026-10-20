@@ -1,0 +1,26 @@
+{
+  "assetId": "PRP_Ground_Cover_A",
+  "glb": "public/assets/models/environment/PRP_Ground_Cover_A.glb",
+  "blend": "blender/source/PRP_Ground_Cover_A.blend",
+  "bytes": 8744,
+  "triangles": 288,
+  "objects": [
+    "PRP_Ground_Cover_A",
+    "PRP_Ground_Cover_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.733,
+    -0.551,
+    -0.006
+  ],
+  "boundsMax": [
+    0.625,
+    0.529,
+    0.395
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

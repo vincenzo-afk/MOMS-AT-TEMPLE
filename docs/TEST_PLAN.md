@@ -13,9 +13,9 @@
 
 Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because Playwright's own Chromium download did not complete in this environment. Set `PW_CHANNEL=` (empty) to use the bundled Chromium after `npx playwright install chromium`.
 
-## Automated coverage (state at the end of session 1)
+## Automated coverage (state at the end of session 2)
 
-### Unit / integration (Vitest, 11 tests, all passing)
+### Unit / integration (Vitest, 17 tests, all passing)
 - Definitions cross-reference cleanly (`validateDefinitions`).
 - Inventory: never partially adds when full; never partially removes.
 - Full rules-engine loop: arrival → channel (inspect gate, recipe-knowledge gate, insufficient materials) → craft → repair → consequence restoration → report → garland via trade and craft → Living Record order and causes → rewards not re-granted when dialogue is replayed.
@@ -25,8 +25,13 @@ Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because
 - Save round trip through IndexedDB (fake-indexeddb): restored world + record + no repeat repair.
 - Corrupt main save → backup restored.
 - Newer schema rejected; unknown items dropped with a warning.
+- v1 -> v2 save migration (renamed NPCs, shortened garland quest, new state blocks).
+- Farming: no seeds / empty pot / dry well refusals, filling at the tank, watering, growth over world time, harvest, auto-watering after irrigation.
+- Storage and home: bag/chest transfers, home quest objectives, wrong-slot and missing-item refusals, kolam consumed versus lamp returned, item reward.
+- Well, sluice, fields and weaver: carpentry recipes, the repaired well becoming a water source, sluice -> fields consequence with its cause link, the absent NPC appearing after restoration, villager group dialogue reacting to flags.
+- Dialogue item gifts given only once; the festival offered only after the garland, fields and weaver.
 
-### Browser (Playwright + Edge, 11 tests, all passing)
+### Browser (Playwright + Edge, 15 tests, all passing)
 | Test | Verifies |
 |---|---|
 | boots to title | all manifest GLBs load, >100 colliders built, **no console errors** |
@@ -40,6 +45,10 @@ Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because
 | garland follow-up | learn → gather marigolds (only after restoration) → jasmine → **shop UI buy** → **craft UI** → deliver → garland appears on the gate, record entry caused by the garden recovery |
 | opening sequence | plays, can be skipped |
 | review shots + performance | screenshots of key locations, frame statistics |
+| notice board, chest, decoration, map, community | real key presses and clicks through each new panel; the placed lamp appears in the world |
+| farming through the world | plant -> fill the pot at the tank -> water -> the plot visual changes stage -> harvest |
+| state-dependent collision | the overgrown path blocks; clearing it with a sickle disables the blocker and the player walks through |
+| tour | screenshots of every area before and after restoration, the festival evening, the map and the community panel |
 
 Screenshots are written to `test-results/screens/` (ignored by git).
 
@@ -47,7 +56,7 @@ Screenshots are written to `test-results/screens/` (ignored by git).
 For every manifest entry: file exists; expected collider nodes exist; every visible primitive has non-placeholder vertex colours (this check caught 6 assets exported white); skinned characters have a skin and all 11 named clips; triangle and byte budgets. Results: `blender/export_reports/glb_validation.json`.
 
 ## Performance sample (measured, not a target)
-Headless Edge, AMD Radeon integrated GPU (ANGLE/D3D11), 1280×760, high quality, courtyard view: ~100 fps (likely the headless rAF cap), CPU frame ≈ 1.9 ms, 206 draw calls, ≈ 550k triangles per frame (shadow pass included), 113 geometries. **Budgets are not set yet.** Profiling on representative lower-end hardware is a next-milestone task.
+Headless Edge, AMD Radeon integrated GPU (ANGLE/D3D11), 1280x760, high quality, courtyard view. Session 1 (small map): ~100 fps (headless rAF cap), CPU frame 1.9 ms, 206 draw calls, 550k triangles. Session 2 (300 m map, 113 models, detail textures): ~100 fps, CPU frame 6.3 ms, 664 draw calls, 970k triangles (shadow pass included), 303 geometries, 89 textures. **Budgets are not set yet.** Profiling on representative lower-end hardware is a next-milestone task.
 
 ## Manual checks still required (not automatable here)
 - Pointer-lock mouse look in a headed browser (headless runs set the camera angle directly).

@@ -7,11 +7,13 @@ export interface Candidate {
   position: THREE.Vector3;
   actions: InteractionAction[];
   distance: number;
+  faceY?: number;
 }
 
 export interface InteractableSource {
   def: InteractableDef;
   position: () => THREE.Vector3;
+  faceY?: number;
 }
 
 /**
@@ -44,7 +46,7 @@ export class InteractionSystem {
         const actions = this.session.actionsFor(src.def);
         if (!actions.length) continue;
         bestScore = score;
-        best = { def: src.def, position: pos, actions, distance: dist };
+        best = { def: src.def, position: pos, actions, distance: dist, faceY: src.faceY };
       }
     }
     this.focus = best;

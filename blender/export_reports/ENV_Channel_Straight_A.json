@@ -1,0 +1,38 @@
+{
+  "assetId": "ENV_Channel_Straight_A",
+  "glb": "public/assets/models/environment/ENV_Channel_Straight_A.glb",
+  "blend": "blender/source/ENV_Channel_Straight_A.blend",
+  "bytes": 71580,
+  "triangles": 944,
+  "objects": [
+    "COL_Bed",
+    "COL_Wall_-1",
+    "COL_Wall_1",
+    "ENV_Channel_Straight_A",
+    "ENV_Channel_Straight_A_Mesh",
+    "STATE_dry",
+    "WATER_STATE_irrigated"
+  ],
+  "colliders": [
+    "COL_Bed",
+    "COL_Wall_-1",
+    "COL_Wall_1"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Soil_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -2.0,
+    -0.49,
+    -0.036
+  ],
+  "boundsMax": [
+    2.0,
+    0.49,
+    0.32
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

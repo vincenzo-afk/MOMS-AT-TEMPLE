@@ -1,0 +1,38 @@
+{
+  "assetId": "ENV_Channel_Corner_A",
+  "glb": "public/assets/models/environment/ENV_Channel_Corner_A.glb",
+  "blend": "blender/source/ENV_Channel_Corner_A.blend",
+  "bytes": 65008,
+  "triangles": 856,
+  "objects": [
+    "COL_Arm_-1_0",
+    "COL_Arm_0_1",
+    "COL_Core",
+    "ENV_Channel_Corner_A",
+    "ENV_Channel_Corner_A_Mesh",
+    "STATE_dry",
+    "WATER_STATE_irrigated"
+  ],
+  "colliders": [
+    "COL_Arm_-1_0",
+    "COL_Arm_0_1",
+    "COL_Core"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Soil_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -2.0,
+    -0.49,
+    -0.03
+  ],
+  "boundsMax": [
+    0.49,
+    2.0,
+    0.32
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -11,6 +11,8 @@ export const BINDINGS = {
   inventory: ["KeyI"],
   journal: ["KeyJ"],
   record: ["KeyL"],
+  map: ["KeyM"],
+  community: ["KeyC"],
   pause: ["Escape"],
 } as const;
 
@@ -26,6 +28,8 @@ export const CONTROLS_HELP: Array<[string, string]> = [
   ["I", "Inventory"],
   ["J", "Journal"],
   ["L", "Living Record"],
+  ["M", "Map"],
+  ["C", "Community and skills"],
   ["Esc", "Pause / close panel"],
 ];
 

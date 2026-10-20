@@ -284,9 +284,9 @@ def ENV_Tank_Stepped_A():
     for i in range(steps):
         half = S / 2 - 0.5 - i * 0.45
         z_top = -0.25 * i
-        rect_lathe(p, [(-0.45, z_top), (0, z_top), (0, z_top - 0.25)], half, half, (0, 0, 0), "MAT_Stone_Granite_A", rgb("granite" if i < 2 else "granite_dark", 0.05, rng))
+        rect_lathe(p, [(0, z_top), (-0.45, z_top), (-0.45, z_top - 0.25)], half, half, (0, 0, 0), "MAT_Stone_Granite_A", rgb("granite" if i < 2 else "granite_dark", 0.05, rng), caps=False)
     # rim slab
-    rect_lathe(p, [(-0.5, 0.0), (0.0, 0.0), (0.0, -0.08)], S / 2, S / 2, (0, 0, 0.08), "MAT_Stone_Granite_A", rgb("granite_new", 0.04, rng))
+    rect_lathe(p, [(0.0, -0.08), (0.0, 0.0), (-0.5, 0.0)], S / 2, S / 2, (0, 0, 0.08), "MAT_Stone_Granite_A", rgb("granite_new", 0.04, rng), caps=False)
     # parapet with an outlet gap on +X
     for side in range(4):
         for seg in range(4):

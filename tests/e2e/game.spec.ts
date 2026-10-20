@@ -74,7 +74,7 @@ test("complete loop: welcome, channel restoration, garden, Living Record, save a
     await teleport(page, -19, z, -Math.PI / 2);
     await expect(page.getByTestId("prompt")).toContainText("jasmine");
     await pressE(page);
-    await page.waitForTimeout(1300); // reach animation locks movement briefly
+    await page.waitForTimeout(2100); // gather_flower animation locks movement for 1.8 s
   }
   let s = await state();
   expect(s.inventory.filter(Boolean).find((x: { itemId: string }) => x.itemId === "jasmine_flower").quantity).toBe(3);
@@ -90,9 +90,9 @@ test("complete loop: welcome, channel restoration, garden, Living Record, save a
   expect(s.quests.q_arrival.status).toBe("completed");
   expect(s.coins).toBe(5);
 
-  // Murugan in the garden starts the channel quest
+  // Amudha in the garden starts the channel quest
   await teleport(page, 25, -20.2, Math.PI);
-  await expect(page.getByTestId("prompt")).toContainText("Murugan");
+  await expect(page.getByTestId("prompt")).toContainText("Amudha");
   await pressE(page);
   await talkThrough(page);
   expect((await state()).quests.q_channel.status).toBe("active");
@@ -105,12 +105,12 @@ test("complete loop: welcome, channel restoration, garden, Living Record, save a
   await expect(page.getByTestId("inspect")).toBeVisible();
   await page.keyboard.press("Escape");
 
-  // Kamala teaches mortar
+  // Velan teaches mortar
   await teleport(page, 25.4, 8, -Math.PI / 2);
-  await page.evaluate(() => window.__tom!.game.player.faceTowards(window.__tom!.game.npcs.positionOf("npc_kamala")));
-  // the bench is also near: target Kamala by standing beside her
+  await page.evaluate(() => window.__tom!.game.player.faceTowards(window.__tom!.game.npcs.positionOf("npc_velan")));
+  // the bench is also near: target Velan by standing beside him
   await teleport(page, 27.6, 5.6, 0);
-  await expect(page.getByTestId("prompt")).toContainText("Kamala");
+  await expect(page.getByTestId("prompt")).toContainText("Velan");
   await pressE(page);
   await talkThrough(page);
   expect((await state()).flags.learned_mortar).toBe(true);
@@ -157,7 +157,7 @@ test("complete loop: welcome, channel restoration, garden, Living Record, save a
   expect(visuals).toEqual({ blocked: false, restored: true, withered: false });
   await page.screenshot({ path: "test-results/screens/05-channel-restored.png" });
 
-  // follow-up objective appears after reporting to Murugan
+  // follow-up objective appears after reporting to Amudha
   await teleport(page, 25, -20.2, Math.PI);
   await pressE(page);
   await talkThrough(page);
@@ -197,10 +197,10 @@ test("complete loop: welcome, channel restoration, garden, Living Record, save a
 
 test("missing optional model falls back without breaking the game", async ({ page }) => {
   const log = watchConsole(page);
-  await page.route("**/PRP_Banana_Plant_A.glb", (r) => r.fulfill({ status: 404, body: "missing" }));
+  await page.route("**/PRP_Banana_Plant_B.glb", (r) => r.fulfill({ status: 404, body: "missing" }));
   await waitForTitle(page);
   const problems = await page.evaluate(() => window.__tom!.game.assets.problems.map((p) => p.id));
-  expect(problems).toEqual(["PRP_Banana_Plant_A"]);
+  expect(problems).toEqual(["PRP_Banana_Plant_B"]);
   await expect(page.getByText(/Some assets failed to load/)).toBeVisible();
   const nonResource = log.errors.filter((e) => !e.includes("404") && !e.includes("Failed to load resource"));
   expect(nonResource).toEqual([]);

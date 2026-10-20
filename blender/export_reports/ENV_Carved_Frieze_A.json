@@ -1,0 +1,29 @@
+{
+  "assetId": "ENV_Carved_Frieze_A",
+  "glb": "public/assets/models/props/ENV_Carved_Frieze_A.glb",
+  "blend": "blender/source/ENV_Carved_Frieze_A.blend",
+  "bytes": 22356,
+  "triangles": 556,
+  "objects": [
+    "COL_Block",
+    "ENV_Carved_Frieze_A",
+    "ENV_Carved_Frieze_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Block"
+  ],
+  "materials": [
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -1.28,
+    -0.43,
+    0.0
+  ],
+  "boundsMax": [
+    1.28,
+    0.43,
+    1.05
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

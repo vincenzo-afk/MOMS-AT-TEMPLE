@@ -19,13 +19,15 @@ def asset(fn):
 
 
 def leaf_cluster(p, center, radius, rng, colors=("leaf", "leaf_light"), n=6, squash=0.8):
+    """Canopy clump built from many small, noisy lobes so the silhouette reads as foliage rather than a blob."""
     cx, cy, cz = center
-    for i in range(n):
+    for i in range(n * 3):
         a = rng.random() * math.tau
-        r = radius * (0.2 + rng.random() * 0.55)
-        loc = (cx + math.cos(a) * r, cy + math.sin(a) * r, cz + (rng.random() - 0.4) * radius * 0.5)
-        p.ico(radius * (0.45 + rng.random() * 0.3), loc, "MAT_Foliage_A", rgb(rng.choice(colors), 0.08, rng), subdiv=1,
-              scale=(1, 1, squash), noise=0.18, rng=rng)
+        e = (rng.random() - 0.35) * 1.2
+        r = radius * (0.35 + rng.random() * 0.6)
+        loc = (cx + math.cos(a) * math.cos(e) * r, cy + math.sin(a) * math.cos(e) * r, cz + math.sin(e) * r * squash)
+        p.ico(radius * (0.26 + rng.random() * 0.2), loc, "MAT_Foliage_A", rgb(rng.choice(colors), 0.1, rng), subdiv=1,
+              scale=(1, 1, squash), noise=0.28, rng=rng)
 
 
 @asset

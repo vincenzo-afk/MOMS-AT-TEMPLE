@@ -66,6 +66,9 @@ const manifestPath = join(root, "public/assets/models/manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 let failures = 0;
 const results = [];
+// every character must share the player's skeleton node-for-node (shared clips are retargeted by bone name)
+const playerEntry = manifest.assets.find((a) => a.id === "CHR_Player_Base");
+const playerJoints = playerEntry && existsSync(join(root, "public", playerEntry.url)) ? (await inspect(join(root, "public", playerEntry.url))).skins[0]?.joints.join(",") : null;
 for (const a of manifest.assets) {
   const file = join(root, "public", a.url);
   const problems = [];
@@ -76,6 +79,7 @@ for (const a of manifest.assets) {
     for (const n of a.expect?.nodes ?? []) if (!info.nodes.some((x) => x === n || x.startsWith(n))) problems.push(`missing node ${n}`);
     for (const c of a.expect?.animations ?? []) if (!info.animations.some((x) => x.name === c)) problems.push(`missing animation ${c}`);
     if (a.expect?.skinned && info.skins.length === 0) problems.push("no skin");
+    if (a.type === "character" && playerJoints && info.skins[0]?.joints.join(",") !== playerJoints) problems.push("skeleton differs from CHR_Player_Base (shared clips would not apply)");
     if (!info.hasColor) problems.push(`visible meshes without vertex colours: ${info.uncoloured.join(", ")}`);
     if (info.bytes > (a.expect?.maxBytes ?? 2_000_000)) problems.push(`file too large (${info.bytes} bytes)`);
     if (info.triangles > (a.expect?.maxTriangles ?? 60000)) problems.push(`too many triangles (${info.triangles})`);

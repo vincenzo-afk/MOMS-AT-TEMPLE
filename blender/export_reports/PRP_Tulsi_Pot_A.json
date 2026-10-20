@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Tulsi_Pot_A",
+  "glb": "public/assets/models/props/PRP_Tulsi_Pot_A.glb",
+  "blend": "blender/source/PRP_Tulsi_Pot_A.blend",
+  "bytes": 31660,
+  "triangles": 940,
+  "objects": [
+    "COL_Pot",
+    "PRP_Tulsi_Pot_A",
+    "PRP_Tulsi_Pot_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pot"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -0.26,
+    -0.296,
+    0.0
+  ],
+  "boundsMax": [
+    0.26,
+    0.26,
+    1.04
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

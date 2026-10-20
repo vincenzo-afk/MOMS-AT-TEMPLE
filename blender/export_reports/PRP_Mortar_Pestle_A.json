@@ -1,0 +1,32 @@
+{
+  "assetId": "PRP_Mortar_Pestle_A",
+  "glb": "public/assets/models/props/PRP_Mortar_Pestle_A.glb",
+  "blend": "blender/source/PRP_Mortar_Pestle_A.blend",
+  "bytes": 14048,
+  "triangles": 324,
+  "objects": [
+    "COL_Group",
+    "PRP_Mortar_Pestle_A",
+    "PRP_Mortar_Pestle_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Group"
+  ],
+  "materials": [
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Terracotta_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.26,
+    -0.46,
+    0.0
+  ],
+  "boundsMax": [
+    1.16,
+    0.46,
+    0.61
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

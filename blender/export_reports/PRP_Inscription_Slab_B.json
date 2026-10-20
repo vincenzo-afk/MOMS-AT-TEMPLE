@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Inscription_Slab_B",
+  "glb": "public/assets/models/props/PRP_Inscription_Slab_B.glb",
+  "blend": "blender/source/PRP_Inscription_Slab_B.blend",
+  "bytes": 110636,
+  "triangles": 2426,
+  "objects": [
+    "COL_Slab",
+    "PRP_Inscription_Slab_B",
+    "PRP_Inscription_Slab_B_Mesh"
+  ],
+  "colliders": [
+    "COL_Slab"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.65,
+    -0.273,
+    0.0
+  ],
+  "boundsMax": [
+    0.65,
+    0.26,
+    1.675
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

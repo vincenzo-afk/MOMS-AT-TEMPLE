@@ -2,8 +2,8 @@
   "assetId": "ENV_Tank_Stepped_A",
   "glb": "public/assets/models/environment/ENV_Tank_Stepped_A.glb",
   "blend": "blender/source/ENV_Tank_Stepped_A.blend",
-  "bytes": 82660,
-  "triangles": 984,
+  "bytes": 75940,
+  "triangles": 888,
   "objects": [
     "COL_Basin",
     "COL_Rim_E_-1",

@@ -1,0 +1,34 @@
+{
+  "assetId": "PRP_Water_Point_A",
+  "glb": "public/assets/models/props/PRP_Water_Point_A.glb",
+  "blend": "blender/source/PRP_Water_Point_A.blend",
+  "bytes": 40456,
+  "triangles": 768,
+  "objects": [
+    "COL_Basin",
+    "COL_Spout",
+    "PRP_Water_Point_A",
+    "PRP_Water_Point_A_Mesh",
+    "WATER_Point"
+  ],
+  "colliders": [
+    "COL_Basin",
+    "COL_Spout"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -1.0,
+    -1.23,
+    -0.005
+  ],
+  "boundsMax": [
+    1.0,
+    0.7,
+    1.56
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

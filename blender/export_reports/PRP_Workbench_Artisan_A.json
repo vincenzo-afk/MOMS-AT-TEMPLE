@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Workbench_Artisan_A",
+  "glb": "public/assets/models/props/PRP_Workbench_Artisan_A.glb",
+  "blend": "blender/source/PRP_Workbench_Artisan_A.blend",
+  "bytes": 24112,
+  "triangles": 480,
+  "objects": [
+    "COL_Bench",
+    "PRP_Workbench_Artisan_A",
+    "PRP_Workbench_Artisan_A_Mesh",
+    "SOCKET_Work"
+  ],
+  "colliders": [
+    "COL_Bench"
+  ],
+  "materials": [
+    "MAT_Iron_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.1,
+    -0.38,
+    0.0
+  ],
+  "boundsMax": [
+    1.418,
+    0.375,
+    1.1
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

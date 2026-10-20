@@ -1,0 +1,28 @@
+{
+  "assetId": "PRP_Festival_Bunting_A",
+  "glb": "public/assets/models/props/PRP_Festival_Bunting_A.glb",
+  "blend": "blender/source/PRP_Festival_Bunting_A.blend",
+  "bytes": 32108,
+  "triangles": 1048,
+  "objects": [
+    "PRP_Festival_Bunting_A",
+    "PRP_Festival_Bunting_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Foliage_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -4.027,
+    -0.01,
+    -0.818
+  ],
+  "boundsMax": [
+    4.027,
+    0.046,
+    0.009
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

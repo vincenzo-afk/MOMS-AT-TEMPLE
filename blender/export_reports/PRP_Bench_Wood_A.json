@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Bench_Wood_A",
+  "glb": "public/assets/models/props/PRP_Bench_Wood_A.glb",
+  "blend": "blender/source/PRP_Bench_Wood_A.blend",
+  "bytes": 6452,
+  "triangles": 48,
+  "objects": [
+    "COL_Bench",
+    "PRP_Bench_Wood_A",
+    "PRP_Bench_Wood_A_Mesh",
+    "SOCKET_Seat"
+  ],
+  "colliders": [
+    "COL_Bench"
+  ],
+  "materials": [
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.8,
+    -0.2,
+    0.0
+  ],
+  "boundsMax": [
+    0.8,
+    0.2,
+    0.455
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

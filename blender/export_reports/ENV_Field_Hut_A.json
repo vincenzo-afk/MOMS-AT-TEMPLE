@@ -1,0 +1,42 @@
+{
+  "assetId": "ENV_Field_Hut_A",
+  "glb": "public/assets/models/buildings/ENV_Field_Hut_A.glb",
+  "blend": "blender/source/ENV_Field_Hut_A.blend",
+  "bytes": 114208,
+  "triangles": 1822,
+  "objects": [
+    "COL_Post_-1_-1",
+    "COL_Post_-1_1",
+    "COL_Post_1_-1",
+    "COL_Post_1_1",
+    "ENV_Field_Hut_A",
+    "ENV_Field_Hut_A_Mesh",
+    "ENV_Field_Hut_A_Roof",
+    "WALK_Floor"
+  ],
+  "colliders": [
+    "COL_Post_-1_-1",
+    "COL_Post_-1_1",
+    "COL_Post_1_-1",
+    "COL_Post_1_1",
+    "WALK_Floor"
+  ],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.4,
+    -1.885,
+    0.0
+  ],
+  "boundsMax": [
+    2.4,
+    1.885,
+    3.88
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

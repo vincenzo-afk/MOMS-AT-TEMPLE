@@ -1,0 +1,26 @@
+{
+  "assetId": "PRP_Marigold_Plant_A",
+  "glb": "public/assets/models/props/PRP_Marigold_Plant_A.glb",
+  "blend": "blender/source/PRP_Marigold_Plant_A.blend",
+  "bytes": 76368,
+  "triangles": 2980,
+  "objects": [
+    "PRP_Marigold_Plant_A",
+    "PRP_Marigold_Plant_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.362,
+    -0.437,
+    0.149
+  ],
+  "boundsMax": [
+    0.423,
+    0.348,
+    0.638
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

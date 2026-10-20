@@ -1,0 +1,33 @@
+{
+  "assetId": "ENV_Pillar_Ruin_A",
+  "glb": "public/assets/models/environment/ENV_Pillar_Ruin_A.glb",
+  "blend": "blender/source/ENV_Pillar_Ruin_A.blend",
+  "bytes": 44856,
+  "triangles": 924,
+  "objects": [
+    "COL_Base",
+    "ENV_Pillar_Ruin_A",
+    "ENV_Pillar_Ruin_A_Base",
+    "SOCKET_Work",
+    "STATE_fallen",
+    "STATE_standing"
+  ],
+  "colliders": [
+    "COL_Base"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.506,
+    -1.185,
+    -0.051
+  ],
+  "boundsMax": [
+    3.3,
+    0.506,
+    3.31
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

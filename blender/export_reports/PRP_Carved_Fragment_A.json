@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Carved_Fragment_A",
+  "glb": "public/assets/models/props/PRP_Carved_Fragment_A.glb",
+  "blend": "blender/source/PRP_Carved_Fragment_A.blend",
+  "bytes": 24648,
+  "triangles": 508,
+  "objects": [
+    "COL_Block",
+    "PRP_Carved_Fragment_A",
+    "PRP_Carved_Fragment_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Block"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.65,
+    -0.327,
+    0.0
+  ],
+  "boundsMax": [
+    0.795,
+    0.255,
+    0.602
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

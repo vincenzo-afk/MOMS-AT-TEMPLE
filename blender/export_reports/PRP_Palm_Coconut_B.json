@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Palm_Coconut_B",
+  "glb": "public/assets/models/environment/PRP_Palm_Coconut_B.glb",
+  "blend": "blender/source/PRP_Palm_Coconut_B.blend",
+  "bytes": 292668,
+  "triangles": 5128,
+  "objects": [
+    "COL_Trunk",
+    "PRP_Palm_Coconut_B",
+    "PRP_Palm_Coconut_B_Mesh"
+  ],
+  "colliders": [
+    "COL_Trunk"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.347,
+    -3.513,
+    -0.052
+  ],
+  "boundsMax": [
+    5.364,
+    3.558,
+    9.469
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Pottery_Shards_A",
+  "glb": "public/assets/models/props/PRP_Pottery_Shards_A.glb",
+  "blend": "blender/source/PRP_Pottery_Shards_A.blend",
+  "bytes": 14384,
+  "triangles": 188,
+  "objects": [
+    "PRP_Pottery_Shards_A",
+    "PRP_Pottery_Shards_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Soil_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -0.505,
+    -0.443,
+    -0.091
+  ],
+  "boundsMax": [
+    0.475,
+    0.447,
+    0.11
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

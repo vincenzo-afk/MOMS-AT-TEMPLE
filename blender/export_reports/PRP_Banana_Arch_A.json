@@ -1,0 +1,32 @@
+{
+  "assetId": "PRP_Banana_Arch_A",
+  "glb": "public/assets/models/props/PRP_Banana_Arch_A.glb",
+  "blend": "blender/source/PRP_Banana_Arch_A.blend",
+  "bytes": 32996,
+  "triangles": 1048,
+  "objects": [
+    "COL_Stem_-1",
+    "COL_Stem_1",
+    "PRP_Banana_Arch_A",
+    "PRP_Banana_Arch_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Stem_-1",
+    "COL_Stem_1"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -2.088,
+    -0.88,
+    0.0
+  ],
+  "boundsMax": [
+    2.49,
+    1.018,
+    2.5
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

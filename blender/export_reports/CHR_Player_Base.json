@@ -2,8 +2,8 @@
   "assetId": "CHR_Player_Base",
   "glb": "public/assets/models/characters/CHR_Player_Base.glb",
   "blend": "blender/source/CHR_Player_Base.blend",
-  "bytes": 299232,
-  "triangles": 1984,
+  "bytes": 636348,
+  "triangles": 3074,
   "objects": [
     "CHR_Player_Base",
     "CHR_Player_Base_Mesh",
@@ -11,23 +11,27 @@
   ],
   "colliders": [],
   "materials": [
+    "MAT_Brass_A",
     "MAT_Cloth_A",
     "MAT_Eye_A",
     "MAT_Hair_A",
     "MAT_Skin_A",
-    "MAT_Wood_Teak_A"
+    "MAT_Thatch_A"
   ],
   "boundsMin": [
-    -0.323,
-    -0.203,
-    -0.006
+    -0.334,
+    -0.184,
+    -0.01
   ],
   "boundsMax": [
-    0.323,
-    0.145,
-    1.764
+    0.334,
+    0.172,
+    1.784
   ],
   "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.7,
+  "sharesClipsFrom": null,
   "clips": [
     {
       "name": "idle_relaxed",
@@ -83,8 +87,91 @@
       "name": "repair_channel",
       "duration": 1.6,
       "loop": true
+    },
+    {
+      "name": "idle_look_around",
+      "duration": 4.0,
+      "loop": false
+    },
+    {
+      "name": "gather_flower",
+      "duration": 1.8,
+      "loop": false
+    },
+    {
+      "name": "water_plant",
+      "duration": 2.4,
+      "loop": false
+    },
+    {
+      "name": "plant_seed",
+      "duration": 2.0,
+      "loop": false
+    },
+    {
+      "name": "harvest_plant",
+      "duration": 1.8,
+      "loop": false
+    },
+    {
+      "name": "make_garland",
+      "duration": 2.0,
+      "loop": true
+    },
+    {
+      "name": "open_container",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "inspect_object",
+      "duration": 2.4,
+      "loop": false
+    },
+    {
+      "name": "place_object",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "greet",
+      "duration": 1.8,
+      "loop": false
+    },
+    {
+      "name": "talk_listen",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "give_item",
+      "duration": 1.4,
+      "loop": false
+    },
+    {
+      "name": "receive_item",
+      "duration": 1.6,
+      "loop": false
+    },
+    {
+      "name": "trade_counter",
+      "duration": 2.0,
+      "loop": true
+    },
+    {
+      "name": "read_record",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "sit_idle",
+      "duration": 3.0,
+      "loop": true
+    },
+    {
+      "name": "rest_idle",
+      "duration": 4.0,
+      "loop": true
     }
-  ],
-  "skeleton": "SK_Humanoid_A",
-  "height": 1.7
+  ]
 }

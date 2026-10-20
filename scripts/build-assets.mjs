@@ -2,7 +2,7 @@
 // Usage: npm run assets [-- --only NAME,NAME | --group architecture|buildings|nature|characters]
 // Set BLENDER to override the executable path.
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,7 +11,11 @@ const candidates = [process.env.BLENDER, "D:/Blender/blender.exe", "C:/Program F
 const blender = candidates.find((c) => c === "blender" || existsSync(c));
 const extra = process.argv.slice(2);
 console.log(`Using Blender: ${blender}`);
-const r = spawnSync(blender, ["-b", "--factory-startup", "-P", join(root, "blender/scripts/build_assets.py"), "--", ...extra], { stdio: "inherit", cwd: root });
+// Keep Blender's temporary files on the project drive (the system drive may be full).
+const tmp = join(root, ".tmp");
+mkdirSync(tmp, { recursive: true });
+const env = { ...process.env, TEMP: tmp, TMP: tmp };
+const r = spawnSync(blender, ["-b", "--factory-startup", "-P", join(root, "blender/scripts/build_assets.py"), "--", ...extra], { stdio: "inherit", cwd: root, env });
 if (r.error) {
   console.error(`Could not start Blender (${r.error.message}). Set the BLENDER environment variable to blender.exe.`);
   process.exit(1);

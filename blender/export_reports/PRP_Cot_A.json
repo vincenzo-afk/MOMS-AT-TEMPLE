@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Cot_A",
+  "glb": "public/assets/models/props/PRP_Cot_A.glb",
+  "blend": "blender/source/PRP_Cot_A.blend",
+  "bytes": 25024,
+  "triangles": 772,
+  "objects": [
+    "COL_Cot",
+    "PRP_Cot_A",
+    "PRP_Cot_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Cot"
+  ],
+  "materials": [
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.04,
+    -0.54,
+    0.0
+  ],
+  "boundsMax": [
+    1.055,
+    0.54,
+    0.51
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

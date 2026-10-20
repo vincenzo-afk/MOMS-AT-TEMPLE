@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Brass_Lamp_Stand_A",
+  "glb": "public/assets/models/props/PRP_Brass_Lamp_Stand_A.glb",
+  "blend": "blender/source/PRP_Brass_Lamp_Stand_A.blend",
+  "bytes": 18536,
+  "triangles": 576,
+  "objects": [
+    "COL_Stand",
+    "FLAME_Stand",
+    "PRP_Brass_Lamp_Stand_A",
+    "PRP_Brass_Lamp_Stand_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Stand"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Emissive_A"
+  ],
+  "boundsMin": [
+    -0.28,
+    -0.273,
+    0.0
+  ],
+  "boundsMax": [
+    0.28,
+    0.273,
+    1.55
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

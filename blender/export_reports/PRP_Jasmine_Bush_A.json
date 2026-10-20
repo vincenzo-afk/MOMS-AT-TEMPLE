@@ -2,8 +2,8 @@
   "assetId": "PRP_Jasmine_Bush_A",
   "glb": "public/assets/models/props/PRP_Jasmine_Bush_A.glb",
   "blend": "blender/source/PRP_Jasmine_Bush_A.blend",
-  "bytes": 29580,
-  "triangles": 990,
+  "bytes": 38656,
+  "triangles": 1350,
   "objects": [
     "COL_Bush",
     "PICK_Flowers",
@@ -18,14 +18,14 @@
     "MAT_Wood_Teak_A"
   ],
   "boundsMin": [
-    -0.578,
-    -0.592,
+    -0.627,
+    -0.525,
     -0.011
   ],
   "boundsMax": [
-    0.506,
-    0.626,
-    1.011
+    0.564,
+    0.555,
+    1.0
   ],
   "blenderVersion": "5.2.2 LTS"
 }

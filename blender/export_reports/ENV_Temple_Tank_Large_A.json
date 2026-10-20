@@ -1,0 +1,41 @@
+{
+  "assetId": "ENV_Temple_Tank_Large_A",
+  "glb": "public/assets/models/landmarks/ENV_Temple_Tank_Large_A.glb",
+  "blend": "blender/source/ENV_Temple_Tank_Large_A.blend",
+  "bytes": 44004,
+  "triangles": 558,
+  "objects": [
+    "COL_Basin",
+    "COL_Rim_E",
+    "COL_Rim_N",
+    "COL_Rim_S",
+    "COL_Rim_W",
+    "ENV_Temple_Tank_Large_A",
+    "ENV_Temple_Tank_Large_A_Mesh",
+    "WATER_Tank"
+  ],
+  "colliders": [
+    "COL_Basin",
+    "COL_Rim_E",
+    "COL_Rim_N",
+    "COL_Rim_S",
+    "COL_Rim_W"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -13.475,
+    -13.475,
+    -2.0
+  ],
+  "boundsMax": [
+    13.475,
+    13.475,
+    2.7
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,0 +1,31 @@
+{
+  "assetId": "ENV_Paddy_Plot_A",
+  "glb": "public/assets/models/environment/ENV_Paddy_Plot_A.glb",
+  "blend": "blender/source/ENV_Paddy_Plot_A.blend",
+  "bytes": 151600,
+  "triangles": 1740,
+  "objects": [
+    "ENV_Paddy_Plot_A",
+    "ENV_Paddy_Plot_A_Mesh",
+    "STATE_dry",
+    "STATE_irrigated",
+    "WATER_STATE_irrigated"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Soil_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -5.3,
+    -5.3,
+    -0.07
+  ],
+  "boundsMax": [
+    5.3,
+    5.3,
+    0.439
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

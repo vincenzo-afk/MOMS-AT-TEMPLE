@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Valli",
   "glb": "public/assets/models/characters/CHR_NPC_Valli.glb",
   "blend": "blender/source/CHR_NPC_Valli.blend",
-  "bytes": 317488,
-  "triangles": 2588,
+  "bytes": 141476,
+  "triangles": 3606,
   "objects": [
     "CHR_NPC_Valli",
     "CHR_NPC_Valli_Mesh",
@@ -14,77 +14,22 @@
     "MAT_Brass_A",
     "MAT_Cloth_A",
     "MAT_Eye_A",
+    "MAT_Foliage_A",
     "MAT_Hair_A",
     "MAT_Skin_A"
   ],
   "boundsMin": [
-    -0.283,
-    -0.2,
-    -0.009
+    -0.295,
+    -0.205,
+    -0.013
   ],
   "boundsMax": [
-    0.283,
-    0.148,
+    0.294,
+    0.15,
     1.661
   ],
   "blenderVersion": "5.2.2 LTS",
-  "clips": [
-    {
-      "name": "idle_relaxed",
-      "duration": 4.0,
-      "loop": true
-    },
-    {
-      "name": "walk_forward",
-      "duration": 1.0,
-      "loop": true
-    },
-    {
-      "name": "run_forward",
-      "duration": 0.667,
-      "loop": true
-    },
-    {
-      "name": "turn_left",
-      "duration": 0.8,
-      "loop": true
-    },
-    {
-      "name": "turn_right",
-      "duration": 0.8,
-      "loop": true
-    },
-    {
-      "name": "interact_reach",
-      "duration": 1.0,
-      "loop": false
-    },
-    {
-      "name": "pickup_ground",
-      "duration": 1.4,
-      "loop": false
-    },
-    {
-      "name": "talk_idle",
-      "duration": 3.0,
-      "loop": true
-    },
-    {
-      "name": "talk_gesture",
-      "duration": 2.0,
-      "loop": false
-    },
-    {
-      "name": "craft_at_station",
-      "duration": 2.0,
-      "loop": true
-    },
-    {
-      "name": "repair_channel",
-      "duration": 1.6,
-      "loop": true
-    }
-  ],
   "skeleton": "SK_Humanoid_A",
-  "height": 1.6
+  "height": 1.6,
+  "sharesClipsFrom": "CHR_Player_Base"
 }

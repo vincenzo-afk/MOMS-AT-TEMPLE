@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Tool_Rack_A",
+  "glb": "public/assets/models/props/PRP_Tool_Rack_A.glb",
+  "blend": "blender/source/PRP_Tool_Rack_A.blend",
+  "bytes": 34904,
+  "triangles": 1012,
+  "objects": [
+    "COL_Rack",
+    "PRP_Tool_Rack_A",
+    "PRP_Tool_Rack_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Rack"
+  ],
+  "materials": [
+    "MAT_Iron_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.66,
+    -0.225,
+    0.0
+  ],
+  "boundsMax": [
+    0.66,
+    0.251,
+    1.3
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -445,6 +445,231 @@ def clip_repair(t):
     return rots, (0, 0.1 * k, -0.42 * k)
 
 
+def _crouch(e, depth=1.0):
+    """Shared knee-bend posture; e in [0,1]."""
+    k = e * depth
+    return {
+        "thigh_L": [("X", -64 * k)], "thigh_R": [("X", -50 * k), ("Z", -4 * k)],
+        "shin_L": [("X", 98 * k)], "shin_R": [("X", 84 * k)],
+        "foot_L": [("X", -34 * k)], "foot_R": [("X", -34 * k)],
+    }, (0, 0.06 * k, -0.40 * k)
+
+
+def clip_look_around(t):
+    """ACT_002: glance left, shade eyes with the right hand, glance right."""
+    shade = _env(t, 0.3, 0.42, 0.62, 0.74)
+    yaw = math.sin(2 * math.pi * t) * 35
+    rots = {
+        "spine": [("X", 1.5)], "chest": [("Z", yaw * 0.25)], "neck": [("Z", yaw * 0.35)], "head": [("Z", yaw * 0.45), ("X", -4 * shade)],
+        "upper_arm_R": [("X", -4 - 100 * shade), ("Y", -25 * shade)], "forearm_R": [("X", -10 - 95 * shade)], "hand_R": [("X", 20 * shade)],
+        "upper_arm_L": [("X", -4), ("Y", 2)], "forearm_L": [("X", -12)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_gather_flower(t):
+    """ACT_014: half crouch at a bush, right hand plucks twice, left hand holds a basket at the hip."""
+    e = _env(t, 0.05, 0.3, 0.72, 0.95)
+    pluck = math.sin(t * 2 * math.pi * 3) * e
+    rots, off = _crouch(e, 0.55)
+    rots.update({
+        "spine": [("X", 22 * e)], "chest": [("X", 6 * e), ("Z", 6 * e)], "neck": [("X", 4 * e)],
+        "upper_arm_R": [("X", -4 - 62 * e + pluck * 6), ("Y", 6 * e)], "forearm_R": [("X", -10 - 25 * e - pluck * 12)], "hand_R": [("X", -12 * e + pluck * 10)],
+        "upper_arm_L": [("X", -4 - 10 * e), ("Y", 22 * e)], "forearm_L": [("X", -10 - 70 * e)],
+    })
+    return rots, off
+
+
+def clip_water_plant(t):
+    """ACT_015: both hands hold a vessel forward and tip it."""
+    e = _env(t, 0.05, 0.25, 0.78, 0.96)
+    tip = _env(t, 0.3, 0.45, 0.68, 0.78)
+    rots = {
+        "spine": [("X", 18 * e)], "chest": [("X", 6 * e)], "neck": [("X", 8 * e)],
+        "upper_arm_R": [("X", -4 - 48 * e), ("Y", -6 * e)], "forearm_R": [("X", -10 - 45 * e + 30 * tip)], "hand_R": [("Y", -40 * tip)],
+        "upper_arm_L": [("X", -4 - 44 * e), ("Y", 8 * e)], "forearm_L": [("X", -10 - 55 * e + 20 * tip)], "hand_L": [("Y", 30 * tip)],
+        "thigh_L": [("X", -10 * e)], "shin_L": [("X", 14 * e)], "foot_L": [("X", -4 * e)],
+    }
+    return rots, (0, 0, -0.02 * e)
+
+
+def clip_plant_seed(t):
+    """ACT_016: crouch low, right hand presses seeds into the soil twice."""
+    e = _env(t, 0.05, 0.3, 0.75, 0.95)
+    poke = max(0.0, math.sin(t * 2 * math.pi * 2.5)) * e
+    rots, off = _crouch(e, 1.0)
+    rots.update({
+        "spine": [("X", 40 * e)], "chest": [("X", 14 * e)], "head": [("X", 8 * e)],
+        "upper_arm_R": [("X", -4 - 28 * e - poke * 10)], "forearm_R": [("X", -10 - 4 * e)], "hand_R": [("X", -15 * poke)],
+        "upper_arm_L": [("X", -4 - 18 * e), ("Y", 12 * e)], "forearm_L": [("X", -10 - 60 * e)],
+    })
+    return rots, off
+
+
+def clip_harvest(t):
+    """ACT_017: crouch, grip with both hands, pull up."""
+    e = _env(t, 0.05, 0.3, 0.8, 0.95)
+    pull = _env(t, 0.42, 0.55, 0.65, 0.8)
+    rots, off = _crouch(e * (1 - pull * 0.35), 1.0)
+    rots.update({
+        "spine": [("X", 36 * e - 10 * pull)], "chest": [("X", 12 * e)],
+        "upper_arm_R": [("X", -4 - 30 * e - 25 * pull)], "forearm_R": [("X", -10 - 10 * e - 40 * pull)],
+        "upper_arm_L": [("X", -4 - 30 * e - 25 * pull)], "forearm_L": [("X", -10 - 10 * e - 40 * pull)],
+    })
+    return rots, off
+
+
+def clip_make_garland(t):
+    """ACT_018: seated cross-legged, hands knotting flowers onto twine."""
+    a = _s(t * 2)
+    b = _s(t * 2, 0.5)
+    rots = {
+        "hips": [("X", -6)],
+        "thigh_L": [("X", -80), ("Z", 48)], "thigh_R": [("X", -80), ("Z", -48)],
+        "shin_L": [("X", 150), ("Z", -30)], "shin_R": [("X", 150), ("Z", 30)],
+        "foot_L": [("X", -20)], "foot_R": [("X", -20)],
+        "spine": [("X", 14)], "chest": [("X", 6)], "neck": [("X", 8)], "head": [("X", 14)],
+        "upper_arm_L": [("X", -30 + a * 5), ("Y", 8)], "upper_arm_R": [("X", -30 + b * 5), ("Y", -8)],
+        "forearm_L": [("X", -55 + a * 12), ("Z", -25)], "forearm_R": [("X", -55 + b * 12), ("Z", 25)],
+        "hand_L": [("X", 10 + a * 10)], "hand_R": [("X", 10 + b * 10)],
+    }
+    return rots, (0, 0.05, -0.72)
+
+
+def clip_open_chest(t):
+    """ACT_012: bend over, lift a lid with both hands."""
+    e = _env(t, 0.05, 0.35, 0.75, 0.97)
+    lift = _env(t, 0.35, 0.6, 0.8, 0.95)
+    rots = {
+        "spine": [("X", 34 * e - 10 * lift)], "chest": [("X", 10 * e)], "neck": [("X", 6 * e)],
+        "thigh_L": [("X", -22 * e)], "thigh_R": [("X", -22 * e)], "shin_L": [("X", 34 * e)], "shin_R": [("X", 34 * e)], "foot_L": [("X", -12 * e)], "foot_R": [("X", -12 * e)],
+        "upper_arm_R": [("X", -4 - 40 * e - 50 * lift)], "forearm_R": [("X", -10 - 20 * e)],
+        "upper_arm_L": [("X", -4 - 40 * e - 50 * lift)], "forearm_L": [("X", -10 - 20 * e)],
+    }
+    return rots, (0, 0.02 * e, -0.06 * e)
+
+
+def clip_inspect(t):
+    """ACT_011: lean in, hand to chin, slow head tilt."""
+    e = _env(t, 0.05, 0.25, 0.8, 0.97)
+    tilt = math.sin(t * 2 * math.pi) * 6 * e
+    rots = {
+        "spine": [("X", 12 * e)], "chest": [("X", 4 * e)], "neck": [("X", 10 * e)], "head": [("X", 8 * e), ("Y", tilt)],
+        "upper_arm_R": [("X", -4 - 28 * e), ("Y", -6 * e)], "forearm_R": [("X", -10 - 120 * e)], "hand_R": [("X", 20 * e)],
+        "upper_arm_L": [("X", -4 - 22 * e), ("Y", 12 * e)], "forearm_L": [("X", -10 - 70 * e), ("Z", -30 * e)],
+    }
+    return rots, (0, -0.02 * e, 0)
+
+
+def clip_place(t):
+    """ACT_010: crouch and set something down in front."""
+    e = _env(t, 0.05, 0.42, 0.6, 0.95)
+    rots, off = _crouch(e, 0.9)
+    rots.update({
+        "spine": [("X", 34 * e)], "chest": [("X", 12 * e)],
+        "upper_arm_R": [("X", -4 - 45 * e)], "forearm_R": [("X", -10 - 20 * e)],
+        "upper_arm_L": [("X", -4 - 45 * e)], "forearm_L": [("X", -10 - 20 * e)],
+    })
+    return rots, off
+
+
+def clip_greet(t):
+    """Palms pressed together at the chest with a slight bow (vanakkam)."""
+    e = _env(t, 0.05, 0.3, 0.75, 0.95)
+    bow = _env(t, 0.32, 0.45, 0.55, 0.7)
+    rots = {
+        "spine": [("X", 4 * e + 10 * bow)], "neck": [("X", 8 * bow)], "head": [("X", 10 * bow)],
+        "upper_arm_L": [("X", -4 - 28 * e), ("Y", 18 * e), ("Z", -14 * e)], "upper_arm_R": [("X", -4 - 28 * e), ("Y", -18 * e), ("Z", 14 * e)],
+        "forearm_L": [("X", -10 - 105 * e), ("Z", -55 * e)], "forearm_R": [("X", -10 - 105 * e), ("Z", 55 * e)],
+        "hand_L": [("Y", -30 * e)], "hand_R": [("Y", 30 * e)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_listen(t):
+    """ACT_022: arms loosely crossed, slow nods."""
+    nod = max(0.0, math.sin(t * 2 * math.pi * 2)) * 5
+    w = _s(t)
+    rots = {
+        "spine": [("X", 1)], "hips": [("Y", w * 2)], "head": [("X", nod), ("Z", 4)],
+        "upper_arm_L": [("X", -22), ("Y", 10)], "upper_arm_R": [("X", -22), ("Y", -10)],
+        "forearm_L": [("X", -85), ("Z", -55)], "forearm_R": [("X", -80), ("Z", 50)],
+    }
+    return rots, (w * 0.012, 0, 0)
+
+
+def clip_give(t):
+    """ACT_023: both hands offer an item forward at chest height."""
+    e = _env(t, 0.05, 0.4, 0.65, 0.95)
+    rots = {
+        "spine": [("X", 8 * e)], "head": [("X", 6 * e)],
+        "upper_arm_L": [("X", -4 - 50 * e), ("Y", 6 * e)], "upper_arm_R": [("X", -4 - 50 * e), ("Y", -6 * e)],
+        "forearm_L": [("X", -10 - 30 * e), ("Z", -20 * e)], "forearm_R": [("X", -10 - 30 * e), ("Z", 20 * e)],
+        "hand_L": [("Y", -40 * e)], "hand_R": [("Y", 40 * e)],
+    }
+    return rots, (0, -0.02 * e, 0)
+
+
+def clip_receive(t):
+    """ACT_024: hands come forward cupped, then draw back to the chest."""
+    out = _env(t, 0.05, 0.3, 0.45, 0.6)
+    back = _env(t, 0.45, 0.65, 0.8, 0.96)
+    rots = {
+        "spine": [("X", 6 * out)], "head": [("X", 6 * out)],
+        "upper_arm_L": [("X", -4 - 45 * out - 20 * back), ("Y", 6)], "upper_arm_R": [("X", -4 - 45 * out - 20 * back), ("Y", -6)],
+        "forearm_L": [("X", -10 - 25 * out - 80 * back), ("Z", -20)], "forearm_R": [("X", -10 - 25 * out - 80 * back), ("Z", 20)],
+        "hand_L": [("Y", -40 * (out + back))], "hand_R": [("Y", 40 * (out + back))],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_trade(t):
+    """ACT_025: one hand rests on the counter, the other counts / gestures."""
+    c = math.sin(t * 2 * math.pi * 3)
+    rots = {
+        "spine": [("X", 10)], "chest": [("Z", 4)], "head": [("X", 6), ("Z", c * 3)],
+        "upper_arm_L": [("X", -40), ("Y", 8)], "forearm_L": [("X", -30)], "hand_L": [("X", 20)],
+        "upper_arm_R": [("X", -35 + c * 4), ("Y", -12)], "forearm_R": [("X", -70 + c * 10), ("Z", 20)], "hand_R": [("X", c * 15)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_read(t):
+    """ACT_026: holds a palm-leaf record open with both hands, head down, slow page motion."""
+    p = math.sin(t * 2 * math.pi) * 4
+    rots = {
+        "spine": [("X", 4)], "neck": [("X", 14)], "head": [("X", 12 + p * 0.5)],
+        "upper_arm_L": [("X", -30), ("Y", 10)], "upper_arm_R": [("X", -30), ("Y", -10)],
+        "forearm_L": [("X", -75 + p), ("Z", -30)], "forearm_R": [("X", -75 - p), ("Z", 30)],
+        "hand_L": [("X", -10)], "hand_R": [("X", -10)],
+    }
+    return rots, (0, 0, 0)
+
+
+def clip_sit(t):
+    """ACT_027: seated on a bench (seat 0.45 m), hands on thighs, breathing."""
+    br = _s(t) * 0.8
+    rots = {
+        "thigh_L": [("X", -88)], "thigh_R": [("X", -88)], "shin_L": [("X", 92)], "shin_R": [("X", 92)], "foot_L": [("X", -4)], "foot_R": [("X", -4)],
+        "spine": [("X", 4 + br)], "chest": [("X", br)], "head": [("X", 2), ("Z", math.sin(2 * math.pi * t * 2) * 3)],
+        "upper_arm_L": [("X", -24), ("Y", 4)], "upper_arm_R": [("X", -24), ("Y", -4)], "forearm_L": [("X", -40)], "forearm_R": [("X", -40)],
+    }
+    return rots, (0, 0.06, -0.46)
+
+
+def clip_rest(t):
+    """ACT_028: seated on the ground leaning back on the hands, one knee raised."""
+    br = _s(t) * 1.0
+    rots = {
+        "thigh_L": [("X", -60), ("Z", 8)], "shin_L": [("X", 95)], "foot_L": [("X", -30)],
+        "thigh_R": [("X", -85), ("Z", -4)], "shin_R": [("X", 12)], "foot_R": [("X", 10)],
+        "spine": [("X", -18 + br)], "chest": [("X", -4)], "neck": [("X", 10)], "head": [("X", 4)],
+        "upper_arm_L": [("X", 30), ("Y", -14)], "upper_arm_R": [("X", 30), ("Y", 14)],
+        "forearm_L": [("X", 4)], "forearm_R": [("X", 4)], "hand_L": [("X", -60)], "hand_R": [("X", -60)],
+    }
+    return rots, (0, 0.12, -0.74)
+
+
 CLIPS = [
     # name, frames @30fps, function, loop
     ("idle_relaxed", 120, clip_idle, True),
@@ -458,4 +683,21 @@ CLIPS = [
     ("talk_gesture", 60, clip_talk_gesture, False),
     ("craft_at_station", 60, clip_craft, True),
     ("repair_channel", 48, clip_repair, True),
+    ("idle_look_around", 120, clip_look_around, False),
+    ("gather_flower", 54, clip_gather_flower, False),
+    ("water_plant", 72, clip_water_plant, False),
+    ("plant_seed", 60, clip_plant_seed, False),
+    ("harvest_plant", 54, clip_harvest, False),
+    ("make_garland", 60, clip_make_garland, True),
+    ("open_container", 42, clip_open_chest, False),
+    ("inspect_object", 72, clip_inspect, False),
+    ("place_object", 42, clip_place, False),
+    ("greet", 54, clip_greet, False),
+    ("talk_listen", 90, clip_listen, True),
+    ("give_item", 42, clip_give, False),
+    ("receive_item", 48, clip_receive, False),
+    ("trade_counter", 60, clip_trade, True),
+    ("read_record", 90, clip_read, True),
+    ("sit_idle", 90, clip_sit, True),
+    ("rest_idle", 120, clip_rest, True),
 ]

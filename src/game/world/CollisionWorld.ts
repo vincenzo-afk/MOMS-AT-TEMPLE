@@ -12,6 +12,8 @@ export interface Box {
   yMax: number;
   walk: boolean;
   name: string;
+  /** State-dependent proxies (e.g. overgrowth) are switched off by WorldView. */
+  enabled?: boolean;
 }
 
 const STEP = 0.36;
@@ -23,7 +25,7 @@ export class CollisionWorld {
   private readonly cell = 8;
 
   /** Register a box proxy from its geometry's local bounds and a world matrix (yaw + uniform scale only). */
-  addProxy(geo: THREE.BufferGeometry, matrixWorld: THREE.Matrix4, walk: boolean, name: string): void {
+  addProxy(geo: THREE.BufferGeometry, matrixWorld: THREE.Matrix4, walk: boolean, name: string): Box {
     if (!geo.boundingBox) geo.computeBoundingBox();
     const bb = geo.boundingBox!;
     const pos = new THREE.Vector3();
@@ -33,7 +35,9 @@ export class CollisionWorld {
     const yaw = new THREE.Euler().setFromQuaternion(quat, "YXZ").y;
     const c = bb.getCenter(new THREE.Vector3()).applyMatrix4(matrixWorld);
     const size = bb.getSize(new THREE.Vector3()).multiply(scale);
-    this.add({ cx: c.x, cz: c.z, hx: size.x / 2, hz: size.z / 2, cos: Math.cos(yaw), sin: Math.sin(yaw), yMin: c.y - size.y / 2, yMax: c.y + size.y / 2, walk, name });
+    const box: Box = { cx: c.x, cz: c.z, hx: size.x / 2, hz: size.z / 2, cos: Math.cos(yaw), sin: Math.sin(yaw), yMin: c.y - size.y / 2, yMax: c.y + size.y / 2, walk, name };
+    this.add(box);
+    return box;
   }
 
   add(b: Box): void {
@@ -63,7 +67,7 @@ export class CollisionWorld {
   groundHeight(x: number, z: number, feetY: number, margin = 0.05): number {
     let h = 0;
     for (const b of this.near(x, z)) {
-      if (!b.walk || b.yMax > feetY + STEP) continue;
+      if (b.enabled === false || !b.walk || b.yMax > feetY + STEP) continue;
       const [lx, lz] = this.toLocal(b, x, z);
       if (Math.abs(lx) <= b.hx + margin && Math.abs(lz) <= b.hz + margin && b.yMax > h) h = b.yMax;
     }
@@ -75,6 +79,7 @@ export class CollisionWorld {
     for (let iter = 0; iter < 3; iter++) {
       let moved = false;
       for (const b of this.near(x, z)) {
+        if (b.enabled === false) continue;
         // Walkable surfaces block only when too high to step onto; obstacle proxies always block.
         const blocks = b.walk ? b.yMax > feetY + STEP : b.yMax > feetY + 0.05 && b.yMin < feetY + height;
         if (!blocks) continue;
@@ -131,7 +136,7 @@ export class CollisionWorld {
       for (const b of this.near(tmpV.x, tmpV.z)) seen.add(b);
     }
     for (const b of seen) {
-      if (b.yMax - b.yMin < 0.3) continue; // ignore thin floor slabs
+      if (b.enabled === false || b.yMax - b.yMin < 0.3) continue; // ignore disabled proxies and thin floor slabs
       const [ox, oz] = this.toLocal(b, origin.x, origin.z);
       if (Math.abs(ox) < b.hx && Math.abs(oz) < b.hz && origin.y > b.yMin && origin.y < b.yMax) continue;
       const ldx = dir.x * b.cos - dir.z * b.sin;

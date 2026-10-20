@@ -61,6 +61,8 @@ export function Hud() {
         <span><kbd>I</kbd> Inventory</span>
         <span><kbd>J</kbd> Journal</span>
         <span><kbd>L</kbd> Living Record</span>
+        <span><kbd>M</kbd> Map</span>
+        <span><kbd>C</kbd> Community</span>
       </div>
 
       <div className="toasts" aria-live="polite">

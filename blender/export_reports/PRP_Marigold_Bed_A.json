@@ -2,8 +2,8 @@
   "assetId": "PRP_Marigold_Bed_A",
   "glb": "public/assets/models/props/PRP_Marigold_Bed_A.glb",
   "blend": "blender/source/PRP_Marigold_Bed_A.blend",
-  "bytes": 116436,
-  "triangles": 4180,
+  "bytes": 156764,
+  "triangles": 5780,
   "objects": [
     "COL_Bed",
     "PICK_Blooms",
@@ -28,7 +28,7 @@
   "boundsMax": [
     1.6,
     0.77,
-    0.709
+    0.71
   ],
   "blenderVersion": "5.2.2 LTS"
 }

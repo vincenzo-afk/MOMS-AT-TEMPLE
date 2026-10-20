@@ -1,0 +1,35 @@
+{
+  "assetId": "CHR_NPC_Meena",
+  "glb": "public/assets/models/characters/CHR_NPC_Meena.glb",
+  "blend": "blender/source/CHR_NPC_Meena.blend",
+  "bytes": 141332,
+  "triangles": 3606,
+  "objects": [
+    "CHR_NPC_Meena",
+    "CHR_NPC_Meena_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Foliage_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.298,
+    -0.205,
+    -0.012
+  ],
+  "boundsMax": [
+    0.297,
+    0.151,
+    1.681
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.62,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

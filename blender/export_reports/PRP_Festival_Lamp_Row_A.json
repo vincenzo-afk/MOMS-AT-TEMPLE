@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Festival_Lamp_Row_A",
+  "glb": "public/assets/models/props/PRP_Festival_Lamp_Row_A.glb",
+  "blend": "blender/source/PRP_Festival_Lamp_Row_A.blend",
+  "bytes": 20992,
+  "triangles": 652,
+  "objects": [
+    "FLAME_Row",
+    "PRP_Festival_Lamp_Row_A",
+    "PRP_Festival_Lamp_Row_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Emissive_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -1.0,
+    -0.15,
+    0.0
+  ],
+  "boundsMax": [
+    1.0,
+    0.15,
+    0.265
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

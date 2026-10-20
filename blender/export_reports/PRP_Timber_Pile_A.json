@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Timber_Pile_A",
+  "glb": "public/assets/models/props/PRP_Timber_Pile_A.glb",
+  "blend": "blender/source/PRP_Timber_Pile_A.blend",
+  "bytes": 15676,
+  "triangles": 442,
+  "objects": [
+    "COL_Pile",
+    "PICK_Log",
+    "PRP_Timber_Pile_A",
+    "PRP_Timber_Pile_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pile"
+  ],
+  "materials": [
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.003,
+    -0.37,
+    0.002
+  ],
+  "boundsMax": [
+    1.01,
+    0.363,
+    0.658
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

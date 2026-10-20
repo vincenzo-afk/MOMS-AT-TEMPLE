@@ -7,6 +7,7 @@ import { NPCS } from "../../data/npcs";
 import { DIALOGUE } from "../../data/dialogue";
 import { SHOPS } from "../../data/shops";
 import { DISCOVERIES, type DiscoveryDefinition } from "../../data/discoveries";
+import { CROPS, DECOR_SLOTS, PLOTS, WATER_SOURCES } from "../../data/farming";
 import type {
   DialogueNode,
   GatherNodeDefinition,
@@ -16,6 +17,10 @@ import type {
   RecipeDefinition,
   RestorationDefinition,
   ShopDefinition,
+  PlotDefinition,
+  CropDefinition,
+  WaterSourceDefinition,
+  DecorSlotDefinition,
 } from "./types";
 
 export interface Definitions {
@@ -28,6 +33,10 @@ export interface Definitions {
   dialogue: Map<string, DialogueNode>;
   shops: Map<string, ShopDefinition>;
   discoveries: Map<string, DiscoveryDefinition>;
+  plots: Map<string, PlotDefinition>;
+  crops: Map<string, CropDefinition>;
+  waterSources: Map<string, WaterSourceDefinition>;
+  decorSlots: Map<string, DecorSlotDefinition>;
 }
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
@@ -43,9 +52,14 @@ export function loadDefinitions(): Definitions {
     dialogue: byId(DIALOGUE),
     shops: byId(SHOPS),
     discoveries: byId(DISCOVERIES),
+    plots: byId(PLOTS),
+    crops: new Map(CROPS.map((c) => [c.seedItemId, c])),
+    waterSources: byId(WATER_SOURCES),
+    decorSlots: byId(DECOR_SLOTS),
   };
 }
 
-export const INVENTORY_SLOTS = 16;
-export const SCHEMA_VERSION = 1;
+export const INVENTORY_SLOTS = 20;
+export const STORAGE_SLOTS = 24;
+export const SCHEMA_VERSION = 2;
 export const START_MINUTES = 7 * 60; // day 1, 07:00

@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Stone_Work_Surface_A",
+  "glb": "public/assets/models/props/PRP_Stone_Work_Surface_A.glb",
+  "blend": "blender/source/PRP_Stone_Work_Surface_A.blend",
+  "bytes": 52360,
+  "triangles": 1740,
+  "objects": [
+    "COL_Slab",
+    "PRP_Stone_Work_Surface_A",
+    "PRP_Stone_Work_Surface_A_Mesh",
+    "SOCKET_Work"
+  ],
+  "colliders": [
+    "COL_Slab"
+  ],
+  "materials": [
+    "MAT_Soil_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -0.894,
+    -0.951,
+    -0.026
+  ],
+  "boundsMax": [
+    0.893,
+    0.517,
+    0.905
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

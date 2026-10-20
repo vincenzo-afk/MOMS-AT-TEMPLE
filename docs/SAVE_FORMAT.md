@@ -9,14 +9,14 @@ Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `sav
 | `settings` | `Settings` (volumes, sensitivity, FOV, text scale, quality, invert-Y, intro) |
 | `corrupt_<epoch ms>` | a copy of any main save that failed validation, kept for diagnosis |
 
-## GameState (schemaVersion 1)
+## GameState (schemaVersion 2)
 
 ```ts
 {
-  schemaVersion: 1,
+  schemaVersion: 2,
   createdAt, updatedAt: ISO strings,
   player: { position: [x, y, z], yaw },
-  inventory: Array<{ itemId, quantity } | null>,   // 16 slots
+  inventory: Array<{ itemId, quantity } | null>,   // 20 slots
   coins: number,
   quests: { [questId]: { status: "active"|"completed", objectiveIndex, counts, startedDay, completedDay|null } },
   flags: { [flag]: boolean },
@@ -27,9 +27,21 @@ Storage: **IndexedDB** database `temple-of-monks` (version 1), object store `sav
   record: LivingRecordEvent[],                     // see below
   claimedRewards: string[],                        // "<questId>#<rewardIndex>" - prevents duplicate rewards
   craftedCounts: { [itemId]: number },
-  worldMinutes: number                             // minutes since day 1 00:00; 1 real second = 1 minute
+  worldMinutes: number,                            // minutes since day 1 00:00; 1 real second = 1 minute
+  storage: Array<{ itemId, quantity } | null>,     // 24-slot chest (v2)
+  plots: { [plotId]: { stage, seedItemId | null, plantedAt, wateredAt | null } },  // v2
+  decor: { [slotId]: itemId | null },              // v2
+  lastTalkDay: { [npcId]: day },                   // v2: daily relationship growth
+  skills: { gardening, masonry, crafting }         // v2: experience points
 }
+
 ```
+
+## Migrations
+
+| From | To | Changes |
+|---|---|---|
+| 1 | 2 | NPC ids renamed to the new cast (npc_murugan -> npc_amudha, npc_kamala -> npc_velan) in relationships and record entries; "Garland for the Gate" lost its separate "learn" step, so an in-progress quest's objective index moves back by one and learned_garland is set; empty storage, plots, decor, talk days and skills are added. Covered by a unit test. |
 
 `LivingRecordEvent`: `{ id: "<type>:<subjectId>", type, worldDay, worldMinute, locationId, actionId, affectedEntityIds[], previousState|null, resultingState|null, causeEventIds[], descriptionKey }`. IDs are deterministic, so recording the same event twice is a no-op.
 

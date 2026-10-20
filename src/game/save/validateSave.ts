@@ -1,5 +1,5 @@
-import type { GameState, LivingRecordEvent, QuestProgress } from "../core/types";
-import { INVENTORY_SLOTS, SCHEMA_VERSION, type Definitions } from "../core/defs";
+import type { GameState, ItemStack, LivingRecordEvent, PlotState, QuestProgress, SkillId } from "../core/types";
+import { INVENTORY_SLOTS, SCHEMA_VERSION, STORAGE_SLOTS, type Definitions } from "../core/defs";
 
 export type SaveCheck = { ok: true; state: GameState; warnings: string[] } | { ok: false; error: string };
 
@@ -8,7 +8,32 @@ const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFin
 const isStr = (v: unknown): v is string => typeof v === "string";
 
 /** Migrations keyed by the version they upgrade FROM. */
-const MIGRATIONS: Record<number, (raw: Record<string, unknown>) => Record<string, unknown>> = {};
+const RENAMED_NPCS: Record<string, string> = { npc_murugan: "npc_amudha", npc_kamala: "npc_velan" };
+const MIGRATIONS: Record<number, (raw: Record<string, unknown>) => Record<string, unknown>> = {
+  // v1 -> v2: the gardener and artisan were re-cast to the reference sheet (Murugan -> Amudha, Kamala -> Velan);
+  // "Garland for the Gate" lost its separate "learn" step (now taught in dialogue). New state blocks are added empty.
+  1: (raw) => {
+    const out: Record<string, unknown> = { ...raw, schemaVersion: 2 };
+    if (isObj(raw.relationships)) {
+      out.relationships = Object.fromEntries(Object.entries(raw.relationships).map(([k, v]) => [RENAMED_NPCS[k] ?? k, v]));
+    }
+    if (Array.isArray(raw.record)) {
+      out.record = raw.record.map((e) => (isObj(e) && Array.isArray(e.affectedEntityIds) ? { ...e, affectedEntityIds: e.affectedEntityIds.map((id) => (typeof id === "string" ? RENAMED_NPCS[id] ?? id : id)) } : e));
+    }
+    if (isObj(raw.quests) && isObj(raw.quests.q_garland)) {
+      const g = raw.quests.q_garland;
+      const idx = isNum(g.objectiveIndex) ? g.objectiveIndex : 0;
+      out.quests = { ...raw.quests, q_garland: { ...g, objectiveIndex: Math.max(0, idx - 1) } };
+      out.flags = { ...(isObj(raw.flags) ? raw.flags : {}), learned_garland: true };
+    }
+    out.storage = [];
+    out.plots = {};
+    out.decor = {};
+    out.lastTalkDay = {};
+    out.skills = { gardening: 0, masonry: 0, crafting: 0 };
+    return out;
+  },
+};
 
 /**
  * Validates untrusted save data (from IndexedDB or an import) into a GameState.
@@ -115,6 +140,43 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
   }
 
   const strList = (v: unknown) => (Array.isArray(v) ? v.filter(isStr) : []);
+
+  const readStacks = (v: unknown, size: number, label: string): Array<ItemStack | null> => {
+    const out: Array<ItemStack | null> = Array.from({ length: size }, () => null);
+    if (!Array.isArray(v)) return out;
+    v.slice(0, size).forEach((st, i) => {
+      if (st === null) return;
+      if (!isObj(st) || !isStr(st.itemId) || !isNum(st.quantity) || st.quantity <= 0) return warnings.push(`Dropped invalid ${label} slot ${i}.`);
+      const def = defs.items.get(st.itemId);
+      if (!def) return warnings.push(`Dropped unknown item ${st.itemId}.`);
+      out[i] = { itemId: st.itemId, quantity: Math.min(Math.floor(st.quantity), def.maxStack) };
+    });
+    return out;
+  };
+
+  const plots: Record<string, PlotState> = {};
+  if (isObj(data.plots)) {
+    for (const [id, pl] of Object.entries(data.plots)) {
+      if (!defs.plots.has(id) || !isObj(pl)) continue;
+      const stage = pl.stage;
+      if (stage !== "empty" && stage !== "planted" && stage !== "growing" && stage !== "ripe") continue;
+      plots[id] = {
+        stage,
+        seedItemId: isStr(pl.seedItemId) && defs.items.has(pl.seedItemId) ? pl.seedItemId : null,
+        plantedAt: isNum(pl.plantedAt) ? pl.plantedAt : 0,
+        wateredAt: isNum(pl.wateredAt) ? pl.wateredAt : null,
+      };
+    }
+  }
+  const decor: Record<string, string | null> = {};
+  if (isObj(data.decor)) {
+    for (const [slot, item] of Object.entries(data.decor)) {
+      const def = defs.decorSlots.get(slot);
+      if (def) decor[slot] = isStr(item) && def.accepts.includes(item) ? item : null;
+    }
+  }
+  const skillsRaw = isObj(data.skills) ? data.skills : {};
+  const skills = Object.fromEntries((["gardening", "masonry", "crafting"] as SkillId[]).map((k) => [k, isNum(skillsRaw[k]) ? Math.max(0, skillsRaw[k] as number) : 0])) as Record<SkillId, number>;
   return {
     ok: true,
     warnings,
@@ -135,6 +197,11 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
       claimedRewards: strList(data.claimedRewards),
       craftedCounts: numRecord(data.craftedCounts),
       worldMinutes: data.worldMinutes,
+      storage: readStacks(data.storage, STORAGE_SLOTS, "storage"),
+      plots,
+      decor,
+      lastTalkDay: numRecord(data.lastTalkDay),
+      skills,
     },
   };
 }

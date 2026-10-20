@@ -2,8 +2,8 @@
   "assetId": "PRP_Tree_Neem_A",
   "glb": "public/assets/models/environment/PRP_Tree_Neem_A.glb",
   "blend": "blender/source/PRP_Tree_Neem_A.blend",
-  "bytes": 30124,
-  "triangles": 1056,
+  "bytes": 67424,
+  "triangles": 2536,
   "objects": [
     "COL_Trunk",
     "PRP_Tree_Neem_A",
@@ -17,14 +17,14 @@
     "MAT_Wood_Teak_A"
   ],
   "boundsMin": [
-    -2.877,
-    -2.827,
+    -3.278,
+    -2.981,
     -0.05
   ],
   "boundsMax": [
-    2.477,
-    2.884,
-    6.566
+    3.032,
+    3.206,
+    6.483
   ],
   "blenderVersion": "5.2.2 LTS"
 }

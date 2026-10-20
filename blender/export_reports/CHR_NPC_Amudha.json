@@ -1,0 +1,36 @@
+{
+  "assetId": "CHR_NPC_Amudha",
+  "glb": "public/assets/models/characters/CHR_NPC_Amudha.glb",
+  "blend": "blender/source/CHR_NPC_Amudha.blend",
+  "bytes": 145212,
+  "triangles": 3678,
+  "objects": [
+    "CHR_NPC_Amudha",
+    "CHR_NPC_Amudha_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Foliage_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -0.292,
+    -0.205,
+    -0.013
+  ],
+  "boundsMax": [
+    0.291,
+    0.168,
+    1.64
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.58,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

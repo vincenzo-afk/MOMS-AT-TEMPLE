@@ -1,0 +1,28 @@
+{
+  "assetId": "PRP_Dry_Grass_A",
+  "glb": "public/assets/models/props/PRP_Dry_Grass_A.glb",
+  "blend": "blender/source/PRP_Dry_Grass_A.blend",
+  "bytes": 10820,
+  "triangles": 100,
+  "objects": [
+    "PICK_Grass",
+    "PRP_Dry_Grass_A",
+    "PRP_Dry_Grass_A_Base"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Soil_A"
+  ],
+  "boundsMin": [
+    -0.436,
+    -0.509,
+    -0.04
+  ],
+  "boundsMax": [
+    0.421,
+    0.452,
+    1.272
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

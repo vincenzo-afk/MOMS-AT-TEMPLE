@@ -1,0 +1,34 @@
+{
+  "assetId": "CHR_Villager_C",
+  "glb": "public/assets/models/characters/CHR_Villager_C.glb",
+  "blend": "blender/source/CHR_Villager_C.blend",
+  "bytes": 133036,
+  "triangles": 3406,
+  "objects": [
+    "CHR_Villager_C",
+    "CHR_Villager_C_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.284,
+    -0.204,
+    -0.014
+  ],
+  "boundsMax": [
+    0.284,
+    0.147,
+    1.619
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.56,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

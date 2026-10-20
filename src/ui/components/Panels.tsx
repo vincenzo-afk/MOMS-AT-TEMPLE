@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, RECORD_TEXT } from "../../data/text";
 import { countItem } from "../../game/inventory/inventory";
+import { CommunityPanel, DecorPanel, MapPanel, NoticesPanel, StoragePanel } from "./WorldPanels";
+import { SKILL_NAMES, skillLevel } from "../../data/farming";
+import type { SkillId } from "../../game/core/types";
 
 export function Panels() {
   const ui = useUi();
@@ -22,6 +25,16 @@ export function Panels() {
       return <ReadingPanel />;
     case "inspect":
       return <InspectPanel />;
+    case "storage":
+      return <StoragePanel />;
+    case "decor":
+      return <DecorPanel />;
+    case "notices":
+      return <NoticesPanel />;
+    case "map":
+      return <MapPanel />;
+    case "community":
+      return <CommunityPanel />;
     default:
       return null;
   }
@@ -182,6 +195,10 @@ function JournalPanel() {
           </article>
         );
       })}
+      <h4 className="section">Skills</h4>
+      <p className="muted small">
+        {(Object.keys(SKILL_NAMES) as SkillId[]).map((k) => `${SKILL_NAMES[k]} ${skillLevel(s.skills[k])}`).join(" · ")}
+      </p>
       {done.length > 0 && <h4 className="section">Completed</h4>}
       {done.map(([id, q]) => (
         <article key={id} className="quest done">
@@ -195,6 +212,7 @@ function JournalPanel() {
 
 // ------------------------------------------------------------------ Living Record
 function RecordPanel() {
+  const game = useGame();
   const s = useGameState();
   const byId = new Map(s.record.map((e) => [e.id, e]));
   return (
@@ -221,6 +239,9 @@ function RecordPanel() {
                   <div className="links">Because: {e.causeEventIds.map((c) => RECORD_TEXT[byId.get(c)?.descriptionKey ?? ""]?.title ?? c).join("; ")}</div>
                 )}
                 {effects.length > 0 && <div className="links">Led to: {effects.map((x) => RECORD_TEXT[x.descriptionKey]?.title ?? x.id).join("; ")}</div>}
+                <button className="link-btn" onClick={() => game.showOnMap(e.id)}>
+                  Show on map
+                </button>
               </li>
             );
           })}
@@ -237,7 +258,7 @@ function CraftPanel() {
   const s = useGameState();
   const recipes = game.session.recipesForStation(ui.stationId ?? "");
   return (
-    <Frame title="Workbench" testId="craft">
+    <Frame title={ui.stationId === "st_festival_station" ? "Festival table" : "Workbench"} testId="craft">
       {recipes.map((r) => {
         const known = game.session.isRecipeKnown(r.id);
         const check = game.session.canCraft(r.id);

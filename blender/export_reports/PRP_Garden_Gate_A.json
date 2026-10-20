@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Garden_Gate_A",
+  "glb": "public/assets/models/props/PRP_Garden_Gate_A.glb",
+  "blend": "blender/source/PRP_Garden_Gate_A.blend",
+  "bytes": 16900,
+  "triangles": 504,
+  "objects": [
+    "COL_Post_-1",
+    "COL_Post_1",
+    "PRP_Garden_Gate_A",
+    "PRP_Garden_Gate_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Post_-1",
+    "COL_Post_1"
+  ],
+  "materials": [
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.8,
+    -0.047,
+    0.0
+  ],
+  "boundsMax": [
+    0.8,
+    0.75,
+    1.4
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

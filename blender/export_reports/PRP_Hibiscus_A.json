@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Hibiscus_A",
+  "glb": "public/assets/models/props/PRP_Hibiscus_A.glb",
+  "blend": "blender/source/PRP_Hibiscus_A.blend",
+  "bytes": 71420,
+  "triangles": 2650,
+  "objects": [
+    "COL_Bush",
+    "PICK_Flowers",
+    "PRP_Hibiscus_A",
+    "PRP_Hibiscus_A_Leaves"
+  ],
+  "colliders": [
+    "COL_Bush"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.714,
+    -0.665,
+    -0.012
+  ],
+  "boundsMax": [
+    0.69,
+    0.703,
+    1.204
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

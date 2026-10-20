@@ -1,0 +1,31 @@
+{
+  "assetId": "PRP_Fence_Bamboo_A",
+  "glb": "public/assets/models/props/PRP_Fence_Bamboo_A.glb",
+  "blend": "blender/source/PRP_Fence_Bamboo_A.blend",
+  "bytes": 34368,
+  "triangles": 1200,
+  "objects": [
+    "COL_Fence",
+    "PRP_Fence_Bamboo_A",
+    "STATE_damaged",
+    "STATE_repaired"
+  ],
+  "colliders": [
+    "COL_Fence"
+  ],
+  "materials": [
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.601,
+    -0.042,
+    -0.017
+  ],
+  "boundsMax": [
+    1.613,
+    0.376,
+    1.15
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

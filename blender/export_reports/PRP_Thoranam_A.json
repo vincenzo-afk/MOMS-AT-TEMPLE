@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Thoranam_A",
+  "glb": "public/assets/models/props/PRP_Thoranam_A.glb",
+  "blend": "blender/source/PRP_Thoranam_A.blend",
+  "bytes": 26500,
+  "triangles": 640,
+  "objects": [
+    "PRP_Thoranam_A",
+    "PRP_Thoranam_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -0.827,
+    -0.026,
+    -0.28
+  ],
+  "boundsMax": [
+    0.827,
+    0.026,
+    0.03
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

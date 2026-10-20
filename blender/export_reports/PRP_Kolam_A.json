@@ -1,0 +1,26 @@
+{
+  "assetId": "PRP_Kolam_A",
+  "glb": "public/assets/models/props/PRP_Kolam_A.glb",
+  "blend": "blender/source/PRP_Kolam_A.blend",
+  "bytes": 83556,
+  "triangles": 1420,
+  "objects": [
+    "PRP_Kolam_A",
+    "PRP_Kolam_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Soil_A"
+  ],
+  "boundsMin": [
+    -0.663,
+    -0.661,
+    0.012
+  ],
+  "boundsMax": [
+    0.663,
+    0.661,
+    0.02
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

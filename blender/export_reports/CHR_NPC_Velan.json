@@ -1,0 +1,35 @@
+{
+  "assetId": "CHR_NPC_Velan",
+  "glb": "public/assets/models/characters/CHR_NPC_Velan.glb",
+  "blend": "blender/source/CHR_NPC_Velan.blend",
+  "bytes": 134920,
+  "triangles": 3486,
+  "objects": [
+    "CHR_NPC_Velan",
+    "CHR_NPC_Velan_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.369,
+    -0.192,
+    -0.009
+  ],
+  "boundsMax": [
+    0.369,
+    0.18,
+    1.845
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.76,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

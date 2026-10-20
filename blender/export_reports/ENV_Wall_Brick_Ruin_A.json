@@ -1,0 +1,35 @@
+{
+  "assetId": "ENV_Wall_Brick_Ruin_A",
+  "glb": "public/assets/models/environment/ENV_Wall_Brick_Ruin_A.glb",
+  "blend": "blender/source/ENV_Wall_Brick_Ruin_A.blend",
+  "bytes": 102928,
+  "triangles": 1648,
+  "objects": [
+    "COL_Wall",
+    "ENV_Wall_Brick_Ruin_A",
+    "ENV_Wall_Brick_Ruin_A_Base",
+    "SOCKET_Work",
+    "STATE_broken",
+    "STATE_repaired"
+  ],
+  "colliders": [
+    "COL_Wall"
+  ],
+  "materials": [
+    "MAT_Brick_A",
+    "MAT_Foliage_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -2.95,
+    -1.27,
+    -0.056
+  ],
+  "boundsMax": [
+    2.95,
+    0.423,
+    2.42
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

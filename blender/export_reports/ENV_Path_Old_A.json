@@ -1,0 +1,33 @@
+{
+  "assetId": "ENV_Path_Old_A",
+  "glb": "public/assets/models/environment/ENV_Path_Old_A.glb",
+  "blend": "blender/source/ENV_Path_Old_A.blend",
+  "bytes": 80008,
+  "triangles": 1716,
+  "objects": [
+    "COL_Overgrowth",
+    "ENV_Path_Old_A",
+    "ENV_Path_Old_A_Mesh",
+    "STATE_cleared",
+    "STATE_overgrown"
+  ],
+  "colliders": [
+    "COL_Overgrowth"
+  ],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.378,
+    -4.159,
+    -0.311
+  ],
+  "boundsMax": [
+    2.071,
+    4.386,
+    0.81
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
+import { applyDetail } from "../world/DetailMaterials";
 
 export interface ModelManifestEntry {
   id: string;
@@ -67,6 +68,10 @@ export class AssetLibrary {
   }
 
   private prepare(gltf: GLTF): void {
+    let skinned = false;
+    gltf.scene.traverse((o) => {
+      if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned = true;
+    });
     gltf.scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
@@ -84,6 +89,7 @@ export class AssetLibrary {
           sm.vertexColors = !!mesh.geometry.getAttribute("color");
           sm.envMapIntensity = 0.6;
           if (sm.name === "MAT_Foliage_A" || sm.name === "MAT_Cloth_A") sm.side = THREE.DoubleSide;
+          applyDetail(sm, sm.name, skinned);
         }
       }
     });
@@ -107,6 +113,45 @@ export class AssetLibrary {
   clips(id: string): THREE.AnimationClip[] {
     return this.models.get(id)?.gltf.animations ?? [];
   }
+
+  /**
+   * Re-bases a source character's clips onto another character on the same skeleton (SK_Humanoid_A).
+   * Rotation tracks are shared as-is; the hips translation track is offset by the difference in rest
+   * hip position so shorter or taller characters keep their feet on the ground.
+   */
+  retargetClips(sourceId: string, targetId: string): THREE.AnimationClip[] {
+    const key = `${sourceId}->${targetId}`;
+    const cached = this.retargetCache.get(key);
+    if (cached) return cached;
+    const src = this.models.get(sourceId);
+    const tgt = this.models.get(targetId);
+    if (!src || !tgt) return [];
+    const restOf = (root: THREE.Object3D) => {
+      let p: THREE.Vector3 | null = null;
+      root.traverse((o) => {
+        if (!p && (o as THREE.Bone).isBone && o.name === "hips") p = o.position.clone();
+      });
+      return p as THREE.Vector3 | null;
+    };
+    const a = restOf(src.gltf.scene);
+    const b = restOf(tgt.gltf.scene);
+    const d = a && b ? b.clone().sub(a) : new THREE.Vector3();
+    const out = src.gltf.animations.map((clip) => {
+      const c = clip.clone();
+      for (const t of c.tracks) {
+        if (t.name !== "hips.position") continue;
+        for (let i = 0; i < t.values.length; i += 3) {
+          t.values[i]! += d.x;
+          t.values[i + 1]! += d.y;
+          t.values[i + 2]! += d.z;
+        }
+      }
+      return c;
+    });
+    this.retargetCache.set(key, out);
+    return out;
+  }
+  private retargetCache = new Map<string, THREE.AnimationClip[]>();
 }
 
 export function fallbackBox(id: string): THREE.Object3D {

@@ -1,7 +1,7 @@
 // Shared data contracts for definitions (authored data) and runtime state (saved data).
 // Definitions are validated at boot by src/data/validate.ts; state is validated on load by save/validateSave.ts.
 
-export type ItemCategory = "flower" | "material" | "crafted" | "trade" | "quest";
+export type ItemCategory = "flower" | "material" | "crafted" | "trade" | "quest" | "tool" | "produce" | "decor";
 
 export interface ItemDefinition {
   id: string;
@@ -36,7 +36,9 @@ export type Condition =
   | { type: "flag"; id: string; value: boolean }
   | { type: "restoration"; id: string; state: string }
   | { type: "hasItem"; itemId: string; count: number }
-  | { type: "discovered"; id: string; value: boolean };
+  | { type: "discovered"; id: string; value: boolean }
+  | { type: "relationship"; npcId: string; min: number }
+  | { type: "plot"; id: string; stage: PlotStage };
 
 export type Effect =
   | { type: "startQuest"; questId: string }
@@ -44,9 +46,10 @@ export type Effect =
   | { type: "deliver"; questId: string; objectiveId: string }
   | { type: "setFlag"; id: string }
   | { type: "relationship"; npcId: string; amount: number }
-  | { type: "openShop"; shopId: string };
+  | { type: "openShop"; shopId: string }
+  | { type: "giveItem"; itemId: string; quantity: number; once: string };
 
-export type ObjectiveType = "talk" | "collect" | "deliver" | "craft" | "restore" | "inspect";
+export type ObjectiveType = "talk" | "collect" | "deliver" | "craft" | "restore" | "inspect" | "store" | "decorate";
 
 export interface ObjectiveDefinition {
   id: string;
@@ -61,7 +64,8 @@ export interface ObjectiveDefinition {
 export type Reward =
   | { type: "coins"; amount: number }
   | { type: "relationship"; npcId: string; amount: number }
-  | { type: "flag"; id: string };
+  | { type: "flag"; id: string }
+  | { type: "item"; itemId: string; quantity: number };
 
 export interface QuestDefinition {
   id: string;
@@ -89,6 +93,8 @@ export interface RestorationDefinition {
   interactableId?: string;
   inspectFlag?: string; // set when the player inspects it
   inspectText?: { before: string[]; after: string[] };
+  /** Presentation of the player's repair work (animation clip and duration). */
+  action?: { anim: "repair_channel" | "craft_at_station" | "place_object" | "harvest_plant"; seconds: number; label: string };
   // When set, the restoration is a consequence: it happens automatically once these flags exist.
   triggeredByFlags?: string[];
   causeEventIds: string[];
@@ -104,16 +110,22 @@ export interface GatherNodeDefinition {
 }
 
 export interface ScheduleEntry {
-  fromHour: number; // inclusive, 0-24
+  fromHour: number; // inclusive, 0-24 (values past 24 wrap to the next morning)
   toHour: number; // exclusive
   anchorId: string;
-  activity: "work" | "rest" | "talk" | "home";
+  activity: "work" | "rest" | "talk" | "home" | "sit" | "garden" | "craft" | "trade" | "festival";
+  /** Optional: entry only applies while these hold (checked before unconditional entries). */
+  when?: Condition[];
 }
 
 export interface NpcDefinition {
   id: string;
   name: string;
   role: string;
+  /** Dialogue nodes addressed to "group:<group>" apply to every NPC of the group. */
+  group?: string;
+  /** NPC is absent from the world until these hold (e.g. the weaver returns after her house is restored). */
+  appearsWhen?: Condition[];
   appearance: { model: string; tint: string; accent: string };
   homeAnchorId: string;
   workAnchorId: string;
@@ -144,7 +156,47 @@ export interface ShopDefinition {
   buys: Array<{ itemId: string; price: number }>;
 }
 
-export type LivingRecordEventType = "arrival" | "restoration" | "consequence" | "discovery" | "community" | "craft";
+export type LivingRecordEventType = "arrival" | "restoration" | "consequence" | "discovery" | "community" | "craft" | "home" | "festival";
+
+export type PlotStage = "empty" | "planted" | "growing" | "ripe";
+
+export interface PlotDefinition {
+  id: string;
+  locationId: string;
+  growMinutes: number;
+  /** When this flag is set the plot is watered by the field channels automatically. */
+  autoWaterFlag?: string;
+}
+
+export interface CropDefinition {
+  seedItemId: string;
+  produceItemId: string;
+  yield: number;
+}
+
+export interface WaterSourceDefinition {
+  id: string;
+  label: string;
+  conditions: Condition[];
+  locationId: string;
+}
+
+export interface DecorSlotDefinition {
+  id: string;
+  label: string;
+  accepts: string[]; // item ids that can be placed here
+  /** Consumed items (kolam powder) cannot be taken back once placed. */
+  consumes?: boolean;
+}
+
+export type SkillId = "gardening" | "masonry" | "crafting";
+
+export interface PlotState {
+  stage: PlotStage;
+  seedItemId: string | null;
+  plantedAt: number;
+  wateredAt: number | null;
+}
 
 export interface LivingRecordEvent {
   id: string;
@@ -187,6 +239,11 @@ export interface GameState {
   claimedRewards: string[];
   craftedCounts: Record<string, number>;
   worldMinutes: number; // minutes since day 1 00:00
+  storage: Array<ItemStack | null>;
+  plots: Record<string, PlotState>;
+  decor: Record<string, string | null>;
+  lastTalkDay: Record<string, number>;
+  skills: Record<SkillId, number>;
 }
 
 export interface Settings {

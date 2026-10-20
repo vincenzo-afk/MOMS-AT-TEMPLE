@@ -50,6 +50,26 @@ PALETTE = {
     "basket": (0.62, 0.48, 0.28),
     "clay_lime": (0.80, 0.76, 0.66),
     "dark_recess": (0.08, 0.06, 0.05),
+    "brick": (0.70, 0.36, 0.24),
+    "brick_old": (0.60, 0.38, 0.28),
+    "bamboo": (0.72, 0.62, 0.38),
+    "bamboo_dark": (0.55, 0.45, 0.26),
+    "rope": (0.66, 0.54, 0.34),
+    "iron": (0.22, 0.21, 0.20),
+    "paddy": (0.42, 0.62, 0.22),
+    "paddy_dry": (0.62, 0.55, 0.32),
+    "mud_wet": (0.30, 0.24, 0.17),
+    "hibiscus": (0.84, 0.12, 0.16),
+    "mango_leaf": (0.20, 0.45, 0.14),
+    "kolam_white": (0.96, 0.95, 0.90),
+    "kolam_pink": (0.92, 0.36, 0.52),
+    "kolam_green": (0.30, 0.66, 0.34),
+    "flame": (1.0, 0.72, 0.25),
+    "banana_fruit": (0.90, 0.80, 0.24),
+    "coconut": (0.42, 0.34, 0.16),
+    "vegetable_purple": (0.38, 0.16, 0.36),
+    "mango": (0.95, 0.66, 0.16),
+    "grain": (0.86, 0.74, 0.44),
 }
 
 MATERIAL_DEFS = {
@@ -67,6 +87,9 @@ MATERIAL_DEFS = {
     "MAT_Skin_A": (0.62, 0.0),
     "MAT_Hair_A": (0.55, 0.0),
     "MAT_Eye_A": (0.25, 0.0),
+    "MAT_Brick_A": (0.86, 0.0),
+    "MAT_Iron_A": (0.55, 0.8),
+    "MAT_Emissive_A": (0.5, 0.0),
 }
 
 
@@ -116,6 +139,9 @@ def material(name):
     attr = nt.nodes.new("ShaderNodeVertexColor")
     attr.layer_name = "Col"
     nt.links.new(attr.outputs["Color"], bsdf.inputs["Base Color"])
+    if name == "MAT_Emissive_A":  # lamp flames: exported as an emissive glTF material
+        bsdf.inputs["Emission Color"].default_value = (1.0, 0.7, 0.25, 1.0)
+        bsdf.inputs["Emission Strength"].default_value = 3.0
     return m
 
 
@@ -373,9 +399,13 @@ def export_asset(asset_id, subdir, rt, required=None, extra_report=None, animati
         export_lights=False,
         export_vertex_color="ACTIVE",
         export_animations=animations,
+        # Same skeleton export for every character: deforming bones only (drops the non-deforming 'root'), so
+        # NPC rigs match the player's rig node-for-node and shared clips apply in the same bone spaces.
+        export_skins=True,
+        export_def_bones=True,
     )
     if animations:
-        kwargs.update(export_animation_mode="ACTIONS", export_force_sampling=True, export_frame_step=1, export_skins=True, export_def_bones=True, export_optimize_animation_size=True)
+        kwargs.update(export_animation_mode="ACTIONS", export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=True)
     bpy.ops.export_scene.gltf(**kwargs)
 
     if not os.path.exists(glb_path) or os.path.getsize(glb_path) < 200:

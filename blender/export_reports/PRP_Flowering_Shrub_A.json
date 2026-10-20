@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Flowering_Shrub_A",
+  "glb": "public/assets/models/environment/PRP_Flowering_Shrub_A.glb",
+  "blend": "blender/source/PRP_Flowering_Shrub_A.blend",
+  "bytes": 27176,
+  "triangles": 960,
+  "objects": [
+    "COL_Shrub",
+    "PRP_Flowering_Shrub_A",
+    "PRP_Flowering_Shrub_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Shrub"
+  ],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.718,
+    -0.675,
+    0.154
+  ],
+  "boundsMax": [
+    0.765,
+    0.708,
+    0.848
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

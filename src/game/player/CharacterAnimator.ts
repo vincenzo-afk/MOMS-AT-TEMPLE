@@ -6,8 +6,22 @@ export const RUN_STRIDE_PER_CYCLE = 2.6; // run_forward, 0.667 s cycle -> 3.9 m/
 export const AUTHORED_WALK_SPEED = 1.65;
 export const AUTHORED_RUN_SPEED = 3.9;
 
-export type OneShot = "interact_reach" | "pickup_ground" | "talk_gesture";
-export type LoopAction = "talk_idle" | "craft_at_station" | "repair_channel";
+export type OneShot =
+  | "interact_reach"
+  | "pickup_ground"
+  | "talk_gesture"
+  | "greet"
+  | "gather_flower"
+  | "water_plant"
+  | "plant_seed"
+  | "harvest_plant"
+  | "open_container"
+  | "inspect_object"
+  | "place_object"
+  | "give_item"
+  | "receive_item"
+  | "idle_look_around";
+export type LoopAction = "talk_idle" | "talk_listen" | "craft_at_station" | "repair_channel" | "make_garland" | "trade_counter" | "read_record" | "sit_idle" | "rest_idle" | "harvest_plant" | "place_object";
 
 const FADE = 0.22;
 

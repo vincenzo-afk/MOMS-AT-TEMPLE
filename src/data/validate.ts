@@ -1,6 +1,7 @@
 import type { Definitions } from "../game/core/defs";
 import type { Condition, Effect } from "../game/core/types";
-import { RECORD_TEXT, LOCATIONS } from "./text";
+import { RECORD_TEXT, LOCATIONS, NOTICE_HINTS } from "./text";
+import { ANCHORS } from "./level";
 
 /** Cross-reference check for all authored data. Returns a list of human-readable problems. */
 export function validateDefinitions(d: Definitions): string[] {
@@ -19,6 +20,8 @@ export function validateDefinitions(d: Definitions): string[] {
     if (c.type === "restoration") need(!!d.restorations.get(c.id)?.states.includes(c.state), `${ctx}: bad restoration state ${c.id}=${c.state}`);
     if (c.type === "hasItem") item(c.itemId, ctx);
     if (c.type === "discovered") need(d.discoveries.has(c.id), `${ctx}: unknown discovery ${c.id}`);
+    if (c.type === "relationship") need(d.npcs.has(c.npcId), `${ctx}: unknown npc ${c.npcId}`);
+    if (c.type === "plot") need(d.plots.has(c.id), `${ctx}: unknown plot ${c.id}`);
   };
   const effect = (e: Effect, ctx: string) => {
     if (e.type === "startQuest") need(d.quests.has(e.questId), `${ctx}: unknown quest ${e.questId}`);
@@ -26,7 +29,9 @@ export function validateDefinitions(d: Definitions): string[] {
       need(!!d.quests.get(e.questId)?.objectives.some((o) => o.id === e.objectiveId), `${ctx}: unknown objective ${e.questId}/${e.objectiveId}`);
     if (e.type === "relationship") need(d.npcs.has(e.npcId), `${ctx}: unknown npc ${e.npcId}`);
     if (e.type === "openShop") need(d.shops.has(e.shopId), `${ctx}: unknown shop ${e.shopId}`);
+    if (e.type === "giveItem") item(e.itemId, ctx);
   };
+  const groups = new Set([...d.npcs.values()].map((n) => n.group).filter(Boolean).map((g) => `group:${g}`));
 
   for (const i of d.items.values()) need(i.maxStack > 0, `item ${i.id}: maxStack must be > 0`);
   for (const r of d.recipes.values()) {
@@ -37,6 +42,11 @@ export function validateDefinitions(d: Definitions): string[] {
   }
   for (const q of d.quests.values()) {
     q.prerequisites.forEach((p) => need(d.quests.has(p), `quest ${q.id}: unknown prerequisite ${p}`));
+    need(q.id in NOTICE_HINTS, `quest ${q.id}: missing notice board hint`);
+    for (const r of q.rewards) {
+      if (r.type === "item") item(r.itemId, `quest ${q.id} reward`);
+      if (r.type === "relationship") need(d.npcs.has(r.npcId), `quest ${q.id}: reward for unknown npc ${r.npcId}`);
+    }
     need(d.npcs.has(q.giverNpcId), `quest ${q.id}: unknown giver ${q.giverNpcId}`);
     const ids = new Set<string>();
     for (const o of q.objectives) {
@@ -64,7 +74,7 @@ export function validateDefinitions(d: Definitions): string[] {
     n.conditions.forEach((c) => cond(c, `gather node ${n.id}`));
   }
   for (const n of d.dialogue.values()) {
-    need(d.npcs.has(n.npcId), `dialogue ${n.id}: unknown npc`);
+    need(d.npcs.has(n.npcId) || groups.has(n.npcId), `dialogue ${n.id}: unknown npc ${n.npcId}`);
     n.conditions.forEach((c) => cond(c, `dialogue ${n.id}`));
     n.effects.forEach((e) => effect(e, `dialogue ${n.id}`));
     for (const o of n.options) {
@@ -73,8 +83,19 @@ export function validateDefinitions(d: Definitions): string[] {
     }
   }
   for (const npc of d.npcs.values()) {
-    need([...d.dialogue.values()].some((n) => n.npcId === npc.id && n.root && n.conditions.length === 0), `npc ${npc.id}: needs an unconditional fallback dialogue node`);
+    need(
+      [...d.dialogue.values()].some((n) => (n.npcId === npc.id || n.npcId === `group:${npc.group}`) && n.root && n.conditions.length === 0),
+      `npc ${npc.id}: needs an unconditional fallback dialogue node`,
+    );
+    for (const e of npc.schedule) {
+      need(e.anchorId in ANCHORS, `npc ${npc.id}: unknown anchor ${e.anchorId}`);
+      (e.when ?? []).forEach((c) => cond(c, `npc ${npc.id} schedule`));
+    }
+    (npc.appearsWhen ?? []).forEach((c) => cond(c, `npc ${npc.id} appearsWhen`));
   }
+  for (const r of d.recipes.values()) need(["st_workshop_bench", "st_festival_station"].includes(r.stationId), `recipe ${r.id}: unknown station ${r.stationId}`);
+  for (const slot of d.decorSlots.values()) slot.accepts.forEach((i) => item(i, `decor slot ${slot.id}`));
+  for (const w of d.waterSources.values()) w.conditions.forEach((c) => cond(c, `water source ${w.id}`));
   for (const s of d.shops.values()) {
     need(d.npcs.has(s.npcId), `shop ${s.id}: unknown npc`);
     [...s.sells, ...s.buys].forEach((o) => item(o.itemId, `shop ${s.id}`));
@@ -82,6 +103,8 @@ export function validateDefinitions(d: Definitions): string[] {
   for (const disc of d.discoveries.values()) {
     text(disc.descriptionKey, `discovery ${disc.id}`);
     loc(disc.locationId, `discovery ${disc.id}`);
+    disc.conditions.forEach((c) => cond(c, `discovery ${disc.id}`));
+    if (disc.givesItem) item(disc.givesItem, `discovery ${disc.id}`);
   }
   return errors;
 }

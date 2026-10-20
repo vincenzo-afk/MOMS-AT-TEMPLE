@@ -1,0 +1,30 @@
+{
+  "assetId": "PRP_Balance_Scale_A",
+  "glb": "public/assets/models/props/PRP_Balance_Scale_A.glb",
+  "blend": "blender/source/PRP_Balance_Scale_A.blend",
+  "bytes": 30820,
+  "triangles": 972,
+  "objects": [
+    "PRP_Balance_Scale_A",
+    "PRP_Balance_Scale_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Foliage_A",
+    "MAT_Terracotta_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.45,
+    -0.3,
+    0.0
+  ],
+  "boundsMax": [
+    0.45,
+    0.3,
+    0.45
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

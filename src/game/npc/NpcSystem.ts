@@ -4,17 +4,28 @@ import type { AssetLibrary } from "../core/AssetLibrary";
 import type { NpcDefinition, ScheduleEntry } from "../core/types";
 import { CharacterAnimator, type LoopAction } from "../player/CharacterAnimator";
 import { ANCHORS, NAV_EDGES, NAV_NODES } from "../../data/level";
+import { evaluateAll } from "../world/conditions";
 import type { CollisionWorld } from "../world/CollisionWorld";
 
 const NPC_SPEED = 1.35;
 
-// Role-appropriate loops while an NPC is at its scheduled activity.
-const ACTIVITY_CLIP: Record<string, Partial<Record<ScheduleEntry["activity"], LoopAction | null>>> = {
-  npc_valli: { talk: "talk_idle" },
-  npc_murugan: { work: "repair_channel" },
-  npc_kamala: { work: "craft_at_station" },
-  npc_selvam: { work: "talk_idle" },
-  npc_ponnan: {},
+/** Role-appropriate loops for scheduled activities; per-NPC overrides first. */
+const ACTIVITY_CLIP: Record<ScheduleEntry["activity"], LoopAction | null> = {
+  talk: "talk_idle",
+  work: "talk_listen",
+  garden: "repair_channel",
+  craft: "craft_at_station",
+  trade: "trade_counter",
+  sit: "sit_idle",
+  rest: null,
+  home: null,
+  festival: "talk_idle",
+};
+const NPC_OVERRIDES: Record<string, Partial<Record<ScheduleEntry["activity"], LoopAction | null>>> = {
+  npc_ponnan: { work: "read_record", rest: null },
+  npc_meena: { craft: "make_garland" },
+  npc_villager_lakshmi: { work: "talk_listen" },
+  npc_villager_pandi: { work: "talk_listen", rest: "rest_idle" },
 };
 
 export interface NpcRuntime {
@@ -26,16 +37,20 @@ export interface NpcRuntime {
   activity: ScheduleEntry["activity"];
   talking: boolean;
   speed: number;
+  present: boolean;
 }
 
-export function scheduleAt(def: NpcDefinition, hour: number): ScheduleEntry {
+export function scheduleAt(def: NpcDefinition, hour: number, session?: GameSession): ScheduleEntry {
+  const inRange = (e: ScheduleEntry) => (hour >= e.fromHour && hour < e.toHour) || (hour + 24 >= e.fromHour && hour + 24 < e.toHour);
   for (const e of def.schedule) {
-    if ((hour >= e.fromHour && hour < e.toHour) || (hour + 24 >= e.fromHour && hour + 24 < e.toHour)) return e;
+    if (!inRange(e)) continue;
+    if (e.when && !(session && evaluateAll(e.when, session.state, session.defs))) continue;
+    return e;
   }
-  return def.schedule[0]!;
+  return def.schedule.find((e) => !e.when) ?? def.schedule[0]!;
 }
 
-/** Shortest route between two points via the navigation graph (Dijkstra over a dozen nodes). */
+/** Shortest route between two points via the navigation graph (Dijkstra over a few dozen nodes). */
 export function route(from: THREE.Vector3, to: THREE.Vector3): THREE.Vector3[] {
   const names = Object.keys(NAV_NODES);
   const pos = (n: string) => new THREE.Vector3(NAV_NODES[n]![0], 0, NAV_NODES[n]![1]);
@@ -50,7 +65,7 @@ export function route(from: THREE.Vector3, to: THREE.Vector3): THREE.Vector3[] {
   while (open.size) {
     const u = [...open].reduce((a, b) => (dist.get(a)! < dist.get(b)! ? a : b));
     open.delete(u);
-    if (u === goal) break;
+    if (u === goal || dist.get(u) === Infinity) break;
     for (const [a, b] of NAV_EDGES) {
       const v = a === u ? b : b === u ? a : null;
       if (!v || !open.has(v)) continue;
@@ -75,7 +90,7 @@ export class NpcSystem {
     private session: GameSession,
     assets: AssetLibrary,
     private collision: CollisionWorld,
-    sharedClips: THREE.AnimationClip[],
+    sourceModelId: string,
   ) {
     this.group.name = "NPCs";
     for (const def of session.defs.npcs.values()) {
@@ -87,13 +102,13 @@ export class NpcSystem {
         }
       });
       const own = assets.clips(def.appearance.model);
-      const animator = new CharacterAnimator(model, own.length ? own : sharedClips);
+      const clips = own.length ? own : assets.retargetClips(sourceModelId, def.appearance.model);
+      const animator = new CharacterAnimator(model, clips);
       const obj = new THREE.Group();
       obj.name = def.id;
       obj.add(model);
       this.group.add(obj);
-      const rt: NpcRuntime = { def, object: obj, animator, path: [], anchorId: "", activity: "rest", talking: false, speed: 0 };
-      this.npcs.set(def.id, rt);
+      this.npcs.set(def.id, { def, object: obj, animator, path: [], anchorId: "", activity: "rest", talking: false, speed: 0, present: true });
     }
     this.snapToSchedule();
   }
@@ -102,20 +117,35 @@ export class NpcSystem {
   snapToSchedule(): void {
     const hour = this.session.hourOfDay;
     for (const rt of this.npcs.values()) {
-      const e = scheduleAt(rt.def, hour);
+      const e = scheduleAt(rt.def, hour, this.session);
       const a = ANCHORS[e.anchorId]!;
       rt.object.position.set(...a.pos);
       rt.object.rotation.y = (a.faceY * Math.PI) / 180;
       rt.anchorId = e.anchorId;
       rt.activity = e.activity;
       rt.path = [];
+      rt.talking = false;
+      this.updatePresence(rt);
       this.startActivity(rt);
     }
   }
 
+  private updatePresence(rt: NpcRuntime): void {
+    rt.present = this.session.isNpcPresent(rt.def.id);
+    rt.object.visible = rt.present;
+  }
+
+  private clipFor(rt: NpcRuntime): LoopAction | null {
+    const o = NPC_OVERRIDES[rt.def.id];
+    let clip = o && rt.activity in o ? o[rt.activity]! : ACTIVITY_CLIP[rt.activity];
+    // sitting needs a seat: on the ground use the floor-sitting rest pose
+    if (clip === "sit_idle" && (ANCHORS[rt.anchorId]?.pos[1] ?? 0) < 0.3) clip = "rest_idle";
+    return clip;
+  }
+
   private startActivity(rt: NpcRuntime): void {
-    const clip = ACTIVITY_CLIP[rt.def.id]?.[rt.activity] ?? null;
-    if (clip) rt.animator.play(clip, { once: false });
+    const clip = this.clipFor(rt);
+    if (clip && rt.animator.has(clip)) rt.animator.play(clip, { once: false });
     else if (rt.animator.busy) rt.animator.stopAction();
   }
 
@@ -125,7 +155,7 @@ export class NpcSystem {
     rt.talking = true;
     rt.path = [];
     rt.object.rotation.y = Math.atan2(playerPos.x - rt.object.position.x, playerPos.z - rt.object.position.z);
-    rt.animator.play("talk_gesture", { once: true, onDone: () => rt.talking && rt.animator.play("talk_idle", { once: false }) });
+    rt.animator.play("greet", { once: true, onDone: () => rt.talking && rt.animator.play("talk_gesture", { once: true, onDone: () => rt.talking && rt.animator.play("talk_idle", { once: false }) }) });
   }
 
   endTalk(npcId: string): void {
@@ -142,13 +172,27 @@ export class NpcSystem {
   update(dt: number): void {
     const hour = this.session.hourOfDay;
     for (const rt of this.npcs.values()) {
-      const e = scheduleAt(rt.def, hour);
-      if (e.anchorId !== rt.anchorId && !rt.talking) {
+      const wasPresent = rt.present;
+      this.updatePresence(rt);
+      if (!rt.present) continue;
+      if (!wasPresent) {
+        // just arrived (e.g. the weaver returning): appear at the scheduled anchor
+        const e = scheduleAt(rt.def, hour, this.session);
         rt.anchorId = e.anchorId;
         rt.activity = e.activity;
-        const a = ANCHORS[e.anchorId]!;
-        rt.path = route(rt.object.position, new THREE.Vector3(...a.pos));
-        if (rt.animator.busy) rt.animator.stopAction();
+        rt.object.position.set(...ANCHORS[e.anchorId]!.pos);
+        this.startActivity(rt);
+      }
+      const e = scheduleAt(rt.def, hour, this.session);
+      if (!rt.talking && (e.anchorId !== rt.anchorId || e.activity !== rt.activity)) {
+        const moved = e.anchorId !== rt.anchorId;
+        rt.anchorId = e.anchorId;
+        rt.activity = e.activity;
+        if (moved) {
+          const a = ANCHORS[e.anchorId]!;
+          rt.path = route(rt.object.position, new THREE.Vector3(...a.pos));
+          if (rt.animator.busy) rt.animator.stopAction();
+        } else this.startActivity(rt);
       }
       let speed = 0;
       if (rt.path.length && !rt.talking) {

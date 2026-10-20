@@ -23,6 +23,21 @@
 | D17 | The temple placement is scaled ×1.25 in the level (asset authored at 11 × 15 m) | landmark read too small in the courtyard; collision scales with it | yes |
 | D18 | npm cache: this machine's global npm cache points at an unavailable `E:\.npm-cache`, so installs were run with `--cache <temp dir>` | the global config was not modified | — |
 
+## Decisions (session 2)
+
+| # | Decision | Why |
+|---|---|---|
+| D19 | The cast follows asserts_img/NPC.jpg: the gardener is Amudha and the artisan is Velan the stone carver; Murugan and Kamala were retired | the reference sheet is the art authority; saves migrate (v1 -> v2) |
+| D20 | Reference images are modelling references only. Surface detail comes from procedurally generated tileable grey detail maps applied triplanar at runtime and multiplied into the vertex-colour palette | consistent look on all 113 assets with no UV work; the generated sheets contain labels and perspective that cannot be used as textures |
+| D21 | NPCs share the player's clips through retargeting; every character exports the same deform-only skeleton | one animation library, smaller files; a validator check guarantees compatibility |
+| D22 | The map grew to 300 x 300 m around the original core, with four gates; instanced scenery is chunked into 60 m cells and the camera far plane matches the fog | room for the bazaar, fields, reservoir, ruins and woodland while keeping CPU frame time near 6 ms here |
+| D23 | Farming growth is world-time based (3 world hours), and plots auto-water once the fields are irrigated | makes the sluice restoration matter to daily play |
+| D24 | Restoration assets carry both states, and colliders can be state-specific (the overgrowth blocks the path until it is cleared) | the save file alone decides what is shown and what is walkable |
+| D25 | Festival dressing is placed in the level and shown by the festival_held flag; NPC schedules gain conditional festival entries | world change stays data-driven |
+| D26 | Offering corners, deities and ceremonial walkways from TEMPLE.jpg and HISTORIC DISCOVERY.jpg were not built | consistent with D16 until the cultural reference brief exists |
+| D27 | Git: the existing remote main (MIT LICENSE by Bharani Kumar S, README stub) is kept as the first commit and this project is committed on top; the README stub was replaced by the project README | no force-push; the LICENSE is preserved |
+| D28 | Blender and asset-build temp files go to .tmp/ on the project drive | the C: drive ran out of space during this session |
+
 ## Conflicts between README and reality
 
 - **README §14 file structure** lists `src/tests/` and per-system data folders; data lives in single files under `src/data/` (small enough), and unit tests sit beside the code they test. Browser tests are in `tests/e2e/`.
@@ -33,17 +48,19 @@
 
 | Area | Issue | Severity | Next step |
 |---|---|---|---|
-| Characters | skirt (veshti/saree) clipping on the widest run strides; mitten hands; no facial animation or blinking; simple hair | medium | production pass from reference sheets (queue priority 1) |
+| Characters | cloth stretches on wide strides (no cloth simulation); faces have no rig or blinking; procedural, not hand-modelled | medium | hand-modelled pass keeping SK_Humanoid_A |
+| Performance | the 300 m map draws about 650 calls and 1M triangles per frame (6 ms CPU here); not measured on low-end hardware | medium | LOD for palms and neems, merge static props per chunk |
+| Environment | the C: drive was full during session 2; npm installs need --cache on another drive | environment | free space on C: |
 | Characters | no UVs or textures | low | after modelling pass |
-| Animation | only 11 of the README's ~35 clips exist (see ANIMATION_SPEC) | medium | gather_flower, craft_garland, walk_start/stop, greet, talk_listen next |
+| Animation | 28 of the README's ~35 clips exist (see ANIMATION_SPEC) | low | walk start/stop, carry, close_container |
 | NPCs | no collision avoidance with the player or each other; they follow a nav graph but can brush past props | low | add simple separation steering |
-| NPCs | relationship values are stored but not yet used by dialogue or UI | low | relationship-gated lines |
+| NPCs | villagers can brush through props on some navigation segments (no avoidance) | low | separation steering |
 | Camera | mouse look requires pointer lock (click the canvas); no drag-to-look fallback | low | add right-drag fallback |
 | Rendering | ≈ 550k triangles/frame including the shadow pass; grass and palm instances cast shadows | low-medium | LOD for palms, no grass shadows, cascade or tighter shadow box |
 | Rendering | changing graphics quality at runtime toggles shadows; pixel ratio applies immediately, but some materials may need a reload to update shadow receiving | low | force `material.needsUpdate` on change |
 | Vegetation | palm fronds are flat strips (no leaflets) | low | leaflet cards in production pass |
 | Audio | no music or ambience files yet (all pending) | expected | generate with Lyria from AUDIO_BIBLE prompts |
-| Content | Phase 8 targets (festival, housing, 8–12 quests) not started | expected | next milestones |
+| Content | Phase 8 targets met (12 quests, 6 recipes, 26 items, festival, housing); no post-festival content yet | low | seasonal events, more professions |
 | Culture | historical and cultural reference brief not yet written; architecture vocabulary and clothing are generic | **high before content expansion** | write `docs/CULTURAL_RESEARCH.md` and review assets against it |
 | Build | single 960 kB JS chunk (262 kB gzip) | low | code-split UI panels and three/addons if startup matters |
 | Tests | headless runs never exercise real pointer-lock; Firefox/Safari untested | low | manual checklist in TEST_PLAN |

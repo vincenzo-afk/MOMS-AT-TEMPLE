@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Oil_Lamp_A",
+  "glb": "public/assets/models/props/PRP_Oil_Lamp_A.glb",
+  "blend": "blender/source/PRP_Oil_Lamp_A.blend",
+  "bytes": 11928,
+  "triangles": 324,
+  "objects": [
+    "FLAME_Lamp",
+    "PRP_Oil_Lamp_A",
+    "PRP_Oil_Lamp_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Emissive_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -0.12,
+    -0.12,
+    0.0
+  ],
+  "boundsMax": [
+    0.12,
+    0.12,
+    0.51
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -8,6 +8,7 @@ import type { InteractableDef, Verb } from "./interactables";
 import type { Settings } from "./types";
 import { buildLevel, type LevelHandles } from "../world/Level";
 import { WorldView } from "../world/WorldView";
+import { configureDetail } from "../world/DetailMaterials";
 import { PlayerController, RUN_SPEED, WALK_SPEED } from "../player/PlayerController";
 import { CharacterAnimator } from "../player/CharacterAnimator";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
@@ -22,7 +23,7 @@ export const MINUTES_PER_SECOND = 1; // one real second = one world minute (24 m
 const PLAYER_MODEL = "CHR_Player_Base";
 
 export type Mode = "loading" | "title" | "intro" | "play" | "paused" | "error";
-export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings";
+export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community";
 
 export interface Toast {
   id: number;
@@ -47,12 +48,14 @@ export interface UiState {
   pointerLocked: boolean;
   assetProblems: string[];
   hasSave: boolean;
+  /** Living Record entry to highlight on the map. */
+  mapFocus: string | null;
 }
 
 export class Game {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(55, 1, 0.1, 600);
+  readonly camera = new THREE.PerspectiveCamera(55, 1, 0.1, 280); // just beyond the fog: distant chunks are culled
   readonly assets = new AssetLibrary();
   readonly audio = new AudioManager();
   readonly ui = new Store<UiState>({
@@ -72,6 +75,7 @@ export class Game {
     pointerLocked: false,
     assetProblems: [],
     hasSave: false,
+    mapFocus: null,
   });
   input: Input;
   level!: LevelHandles;
@@ -91,6 +95,8 @@ export class Game {
   private titleT = 0;
   private actionTimer = 0;
   private talkingTo: string | null = null;
+  private seated = false;
+  private musicCheck = 0;
   private disposed = false;
   stats = { fps: 0, frameMs: 0, drawCalls: 0, triangles: 0 };
 
@@ -120,6 +126,7 @@ export class Game {
   async init(): Promise<void> {
     try {
       this.setupScene();
+      configureDetail({ anisotropy: Math.min(8, this.renderer.capabilities.getMaxAnisotropy()), enabled: this.settings.graphicsQuality !== "low" });
       this.ui.set({ loading: { done: 0, total: 1, label: "Reading asset manifest" } });
       await this.assets.loadManifest();
       const ids = [...new Set([...PLACEMENTS.map((p) => p.asset), PLAYER_MODEL, ...[...this.session.defs.npcs.values()].map((n) => n.appearance.model)])];
@@ -143,13 +150,13 @@ export class Game {
       this.player = new PlayerController(model, animator, this.level.collision);
       this.scene.add(this.player.object);
       this.cam = new ThirdPersonCamera(this.camera, this.level.collision);
-      this.npcs = new NpcSystem(this.session, this.assets, this.level.collision, clips);
+      this.npcs = new NpcSystem(this.session, this.assets, this.level.collision, PLAYER_MODEL);
       this.scene.add(this.npcs.group);
 
       this.interaction = new InteractionSystem(this.session);
       for (const p of INTERACTABLES) {
         const v = new THREE.Vector3(...p.pos);
-        this.interaction.register({ def: { id: p.id, kind: p.kind, refId: p.refId, label: p.label, locationId: p.locationId, radius: p.radius }, position: () => v });
+        this.interaction.register({ def: { id: p.id, kind: p.kind, refId: p.refId, label: p.label, locationId: p.locationId, radius: p.radius }, position: () => v, faceY: p.faceY });
       }
       for (const npc of this.session.defs.npcs.values()) {
         this.interaction.register({ def: { id: `int_${npc.id}`, kind: "npc", refId: npc.id, label: npc.name, locationId: "", radius: 2.6 }, position: () => this.npcs.positionOf(npc.id) });
@@ -170,7 +177,7 @@ export class Game {
   }
 
   private setupScene(): void {
-    this.scene.fog = new THREE.Fog(0xe9dcc0, 60, 230);
+    this.scene.fog = new THREE.Fog(0xe9dcc0, 70, 250);
     this.sun.castShadow = true;
     const q = this.settings.graphicsQuality;
     this.sun.shadow.mapSize.set(q === "high" ? 2048 : 1024, q === "high" ? 2048 : 1024);
@@ -184,7 +191,7 @@ export class Game {
     this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.04;
     this.scene.add(this.sun, this.sun.target, this.hemi);
-    const skyGeo = new THREE.SphereGeometry(400, 32, 16);
+    const skyGeo = new THREE.SphereGeometry(250, 32, 16); // inside the camera far plane
     const skyMat = new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
@@ -316,6 +323,7 @@ export class Game {
 
   closePanel(): void {
     const { panel } = this.ui.get();
+    if ((panel === "storage" || panel === "decor") && this.player.animator.currentAction === "open_container") this.player.animator.stopAction();
     if (panel === "dialogue") this.session.endConversation();
     if (this.talkingTo) {
       this.npcs.endTalk(this.talkingTo);
@@ -323,7 +331,7 @@ export class Game {
       if (this.player.animator.currentAction === "talk_idle") this.player.animator.stopAction();
       this.player.locked = false;
     }
-    this.ui.set({ panel: null, shopId: null, stationId: null, readingId: null });
+    this.ui.set({ panel: null, shopId: null, stationId: null, readingId: null, mapFocus: null });
     if (this.ui.get().mode === "play") this.input.requestLock();
   }
 
@@ -393,15 +401,24 @@ export class Game {
       this.toast(act.reason ?? "You can't do that yet.", "bad");
       return;
     }
-    this.perform(c.def, act.verb, c.position);
+    this.perform(c.def, act.verb, c.position, c.faceY);
   }
 
   /** Executes a verb: the GameSession validates and applies the state change; the animation is presentation. */
-  perform(def: InteractableDef, verb: Verb, at: THREE.Vector3): void {
+  perform(def: InteractableDef, verb: Verb, at: THREE.Vector3, faceY?: number): void {
     if (verb === "craft") {
       this.player.faceTowards(at);
       this.ui.set({ stationId: def.refId });
       this.openPanel("craft");
+      return;
+    }
+    if (verb === "notices") {
+      this.player.faceTowards(at);
+      this.openPanel("notices");
+      return;
+    }
+    if (verb === "sit") {
+      this.sitAt(at, faceY ?? 0);
       return;
     }
     const result = this.session.perform(def, verb);
@@ -416,31 +433,71 @@ export class Game {
         this.talkingTo = def.refId;
         this.npcs.beginTalk(def.refId, this.player.position);
         this.player.locked = true;
-        anim.play("talk_idle", { once: false });
+        anim.play("greet", { once: true, onDone: () => this.talkingTo && anim.play("talk_idle", { once: false }) });
         if (this.session.conversation) this.openPanel("dialogue");
         break;
-      case "gather":
-        this.lockFor(def.kind === "gather" && def.refId.startsWith("gn_jasmine") ? "interact_reach" : "pickup_ground");
+      case "gather": {
+        const cat = this.session.defs.items.get(this.session.defs.gatherNodes.get(def.refId)?.itemId ?? "")?.category;
+        this.lockFor(cat === "flower" ? "gather_flower" : "pickup_ground");
         break;
-      case "repair":
+      }
+      case "repair": {
+        const r = this.session.defs.restorations.get(def.refId);
+        const act = r?.action ?? { anim: "repair_channel" as const, seconds: 2.6, label: "Repairing..." };
         this.player.locked = true;
-        this.actionTimer = 2.6;
-        anim.play("repair_channel", { once: false });
-        this.ui.set({ busyLabel: "Rebuilding the channel wall..." });
+        this.actionTimer = act.seconds;
+        anim.play(act.anim, { once: false });
+        this.ui.set({ busyLabel: act.label });
+        break;
+      }
+      case "plant":
+        this.lockFor("plant_seed");
+        break;
+      case "water":
+        this.lockFor("water_plant");
+        break;
+      case "harvest":
+        this.lockFor("harvest_plant");
+        break;
+      case "fill":
+        this.lockFor("pickup_ground");
         break;
       case "inspect":
       case "read":
-        this.lockFor("interact_reach");
+        this.lockFor("inspect_object");
+        break;
+      case "store":
+        anim.play("open_container", { once: true });
+        this.openPanel("storage");
+        break;
+      case "decorate":
+        this.openPanel("decor");
         break;
       case "rest":
         break;
     }
   }
 
-  private lockFor(clip: "interact_reach" | "pickup_ground"): void {
+  private lockFor(clip: "interact_reach" | "pickup_ground" | "gather_flower" | "plant_seed" | "water_plant" | "harvest_plant" | "inspect_object"): void {
     this.player.locked = true;
     const ok = this.player.animator.play(clip, { once: true, onDone: () => (this.player.locked = false) });
     if (!ok) this.player.locked = false;
+  }
+
+  private sitAt(at: THREE.Vector3, faceY: number): void {
+    this.player.position.set(at.x, this.player.position.y, at.z);
+    this.player.yaw = (faceY * Math.PI) / 180;
+    this.player.object.rotation.y = this.player.yaw;
+    this.player.locked = true;
+    this.seated = true;
+    this.player.animator.play("sit_idle", { once: false });
+    this.toast("Press a movement key to stand up.", "info");
+  }
+
+  private standUp(): void {
+    this.seated = false;
+    this.player.animator.stopAction();
+    this.player.locked = false;
   }
 
   /** Called by the craft panel after the session accepted the craft. */
@@ -469,7 +526,10 @@ export class Game {
         if (this.input.wasPressed("inventory")) this.openPanel("inventory");
         else if (this.input.wasPressed("journal")) this.openPanel("journal");
         else if (this.input.wasPressed("record")) this.openPanel("record");
+        else if (this.input.wasPressed("map")) this.openPanel("map");
+        else if (this.input.wasPressed("community")) this.openPanel("community");
       }
+      if (this.seated && ui.panel === null && (this.input.isDown("forward") || this.input.isDown("back") || this.input.isDown("left") || this.input.isDown("right"))) this.standUp();
       const canAct = ui.panel === null && !this.player.locked;
       this.session.advanceTime(dt * MINUTES_PER_SECOND);
       this.player.update(dt, this.input, this.cam.yaw);
@@ -495,6 +555,11 @@ export class Game {
         void this.saveGame();
       }
       this.updateLocation();
+      this.musicCheck -= dt;
+      if (this.musicCheck <= 0) {
+        this.musicCheck = 5;
+        this.updateMusic();
+      }
     } else if (mode === "intro" && this.introCurve) {
       this.introT += dt / 11;
       const t = Math.min(1, this.introT);
@@ -518,6 +583,7 @@ export class Game {
     }
 
     this.updateLighting();
+    for (const f of this.level?.flames ?? []) f.scale.setScalar(0.85 + Math.random() * 0.3);
     this.level?.water && (this.level.water.uniforms.uTime!.value += dt);
     this.sky.position.copy(this.camera.position);
     this.renderer.render(this.scene, this.camera);
@@ -529,6 +595,57 @@ export class Game {
     this.stats.drawCalls = this.renderer.info.render.calls;
     this.stats.triangles = this.renderer.info.render.triangles;
   };
+
+  /** Evening ambience after 18:00; festival music on festival evenings. Missing tracks simply stay silent. */
+  private updateMusic(): void {
+    const h = this.session.hourOfDay;
+    const festival = this.session.state.flags.festival_held && h >= 17 && h < 23;
+    this.audio.setMusic(festival ? "mus_festival" : "mus_exploration_day");
+    if (h >= 18 || h < 6) {
+      this.audio.stopLoop("amb_settlement_day");
+      this.audio.startLoop("amb_evening");
+    } else {
+      this.audio.stopLoop("amb_evening");
+      this.audio.startLoop("amb_settlement_day");
+    }
+  }
+
+  /** Open the map focused on a Living Record entry's location. */
+  showOnMap(eventId: string): void {
+    this.ui.set({ panel: "map", mapFocus: eventId });
+  }
+
+  /** Up to LAMP_LIGHTS warm point lights follow the nearest visible lit flames at dusk and night. */
+  private lampLights: THREE.PointLight[] = [];
+  private updateLampLights(day: number): void {
+    if (!this.level) return;
+    if (!this.lampLights.length) {
+      for (let i = 0; i < 6; i++) {
+        const l = new THREE.PointLight(0xffb060, 0, 9, 1.6);
+        l.castShadow = false;
+        this.lampLights.push(l);
+        this.scene.add(l);
+      }
+    }
+    const strength = THREE.MathUtils.clamp(1 - day * 1.6, 0, 1) * 6;
+    const p = this.player?.position ?? new THREE.Vector3();
+    const lit = this.level.flames
+      .filter((f) => {
+        let o: THREE.Object3D | null = f;
+        while (o) {
+          if (!o.visible) return false;
+          o = o.parent;
+        }
+        return true;
+      })
+      .map((f) => ({ f, pos: f.getWorldPosition(new THREE.Vector3()) }))
+      .sort((a, b) => a.pos.distanceToSquared(p) - b.pos.distanceToSquared(p));
+    this.lampLights.forEach((l, i) => {
+      const t = lit[i];
+      l.intensity = t ? strength * (0.9 + Math.random() * 0.2) : 0;
+      if (t) l.position.copy(t.pos).add(new THREE.Vector3(0, 0.3, 0));
+    });
+  }
 
   private updatePrompt(focus: Candidate | null): void {
     const prev = this.ui.get().prompt;
@@ -558,10 +675,10 @@ export class Game {
     const dir = new THREE.Vector3(Math.cos(az) * 0.8, elev, -0.45).normalize();
     this.sun.position.copy(center).addScaledVector(dir, 70);
     this.sun.target.position.copy(center);
-    this.sun.intensity = 0.25 + day * 2.1;
+    this.sun.intensity = 0.55 + day * 1.8; // moonlight floor keeps nights readable
     this.sun.color.setRGB(1, 0.92 - dusk * 0.25, 0.82 - dusk * 0.4).lerp(new THREE.Color(0x9fb4dd), 1 - day);
-    this.hemi.intensity = 0.45 + day * 0.75;
-    this.hemi.color.setHex(0xcfe3f5).lerp(new THREE.Color(0x4a5a80), 1 - day);
+    this.hemi.intensity = 0.8 + day * 0.4;
+    this.hemi.color.setHex(0xcfe3f5).lerp(new THREE.Color(0x6a7cae), 1 - day);
     const top = new THREE.Color(0x7fb2dc).lerp(new THREE.Color(0x0e1630), 1 - day);
     const horizon = new THREE.Color(0xf1dcb5).lerp(new THREE.Color(0xf09a5a), dusk * 0.6).lerp(new THREE.Color(0x26304a), 1 - day);
     const u = (this.sky.material as THREE.ShaderMaterial).uniforms;
@@ -569,7 +686,8 @@ export class Game {
     u.uHorizon!.value.copy(horizon);
     u.uSun!.value.copy(dir);
     (this.scene.fog as THREE.Fog).color.copy(horizon);
-    this.renderer.toneMappingExposure = 0.85 + day * 0.25;
+    this.renderer.toneMappingExposure = 1.0 + day * 0.1;
+    this.updateLampLights(day);
   }
 
   dispose(): void {

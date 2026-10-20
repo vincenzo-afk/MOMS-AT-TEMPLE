@@ -1,52 +1,143 @@
 {
-  "checkedAt": "2026-10-19T16:44:36.751Z",
+  "checkedAt": "2026-10-20T02:35:55.342Z",
   "results": [
     {
-      "id": "CHR_NPC_Kamala",
-      "bytes": 317572,
-      "triangles": 2588,
-      "animations": 11,
+      "id": "CHR_NPC_Amudha",
+      "bytes": 145212,
+      "triangles": 3678,
+      "animations": 0,
       "problems": []
     },
     {
-      "id": "CHR_NPC_Murugan",
-      "bytes": 290824,
-      "triangles": 1876,
-      "animations": 11,
+      "id": "CHR_NPC_Meena",
+      "bytes": 141332,
+      "triangles": 3606,
+      "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Ponnan",
-      "bytes": 286260,
-      "triangles": 1700,
-      "animations": 11,
+      "bytes": 121304,
+      "triangles": 3006,
+      "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Selvam",
-      "bytes": 301376,
-      "triangles": 2116,
-      "animations": 11,
+      "bytes": 124728,
+      "triangles": 3068,
+      "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Valli",
-      "bytes": 317488,
-      "triangles": 2588,
-      "animations": 11,
+      "bytes": 141476,
+      "triangles": 3606,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_NPC_Velan",
+      "bytes": 134920,
+      "triangles": 3486,
+      "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Player_Base",
-      "bytes": 299232,
-      "triangles": 1984,
-      "animations": 11,
+      "bytes": 636348,
+      "triangles": 3074,
+      "animations": 28,
+      "problems": []
+    },
+    {
+      "id": "CHR_Villager_A",
+      "bytes": 102500,
+      "triangles": 2606,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_Villager_B",
+      "bytes": 107004,
+      "triangles": 2742,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_Villager_C",
+      "bytes": 133036,
+      "triangles": 3406,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Carved_Frieze_A",
+      "bytes": 22356,
+      "triangles": 568,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Channel_Corner_A",
+      "bytes": 65008,
+      "triangles": 892,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Channel_Junction_A",
+      "bytes": 93540,
+      "triangles": 1364,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Channel_Straight_A",
+      "bytes": 71580,
+      "triangles": 980,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Festival_Station_A",
+      "bytes": 56948,
+      "triangles": 1920,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Field_Hut_A",
+      "bytes": 114208,
+      "triangles": 1882,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Garden_Plot_A",
+      "bytes": 173612,
+      "triangles": 4320,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Gate_Brick_Ruin_A",
+      "bytes": 30060,
+      "triangles": 376,
+      "animations": 0,
       "problems": []
     },
     {
       "id": "ENV_Gopuram_Entrance_A",
       "bytes": 334484,
       "triangles": 9938,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_House_Thatch_A",
+      "bytes": 190432,
+      "triangles": 3100,
       "animations": 0,
       "problems": []
     },
@@ -79,9 +170,44 @@
       "problems": []
     },
     {
+      "id": "ENV_Market_Stall_B",
+      "bytes": 59716,
+      "triangles": 1672,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Notice_Board_A",
+      "bytes": 66328,
+      "triangles": 944,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Paddy_Plot_A",
+      "bytes": 151600,
+      "triangles": 1740,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Path_Old_A",
+      "bytes": 80008,
+      "triangles": 1728,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "ENV_Paving_Courtyard_A",
       "bytes": 62604,
       "triangles": 876,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Pillar_Ruin_A",
+      "bytes": 44856,
+      "triangles": 936,
       "animations": 0,
       "problems": []
     },
@@ -114,9 +240,23 @@
       "problems": []
     },
     {
+      "id": "ENV_Seating_Platform_A",
+      "bytes": 98556,
+      "triangles": 2394,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Sluice_Gate_A",
+      "bytes": 56356,
+      "triangles": 868,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "ENV_Tank_Stepped_A",
-      "bytes": 82660,
-      "triangles": 1056,
+      "bytes": 75940,
+      "triangles": 960,
       "animations": 0,
       "problems": []
     },
@@ -128,9 +268,23 @@
       "problems": []
     },
     {
+      "id": "ENV_Temple_Tank_Large_A",
+      "bytes": 44004,
+      "triangles": 618,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "ENV_Tree_Platform_A",
       "bytes": 32652,
       "triangles": 512,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Wall_Brick_Ruin_A",
+      "bytes": 102928,
+      "triangles": 1660,
       "animations": 0,
       "problems": []
     },
@@ -170,9 +324,51 @@
       "problems": []
     },
     {
+      "id": "PRP_Balance_Scale_A",
+      "bytes": 30820,
+      "triangles": 972,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Banana_Arch_A",
+      "bytes": 32996,
+      "triangles": 1072,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Banana_Plant_A",
       "bytes": 18536,
       "triangles": 392,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Banana_Plant_B",
+      "bytes": 45952,
+      "triangles": 998,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Bench_Wood_A",
+      "bytes": 6452,
+      "triangles": 60,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Brass_Lamp_Stand_A",
+      "bytes": 18536,
+      "triangles": 588,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Carved_Fragment_A",
+      "bytes": 24648,
+      "triangles": 520,
       "animations": 0,
       "problems": []
     },
@@ -198,6 +394,97 @@
       "problems": []
     },
     {
+      "id": "PRP_Cloth_Rolls_A",
+      "bytes": 18196,
+      "triangles": 312,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Contribution_Chest_A",
+      "bytes": 13400,
+      "triangles": 134,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Cot_A",
+      "bytes": 25024,
+      "triangles": 784,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Debris_Pile_A",
+      "bytes": 27884,
+      "triangles": 992,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Display_Flowers_A",
+      "bytes": 286448,
+      "triangles": 7686,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Display_Produce_A",
+      "bytes": 286448,
+      "triangles": 7686,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Dry_Grass_A",
+      "bytes": 10820,
+      "triangles": 100,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Fence_Bamboo_A",
+      "bytes": 34368,
+      "triangles": 1212,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Festival_Bunting_A",
+      "bytes": 32108,
+      "triangles": 1048,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Festival_Lamp_Row_A",
+      "bytes": 20992,
+      "triangles": 652,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Flowering_Shrub_A",
+      "bytes": 27176,
+      "triangles": 972,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Garden_Gate_A",
+      "bytes": 16900,
+      "triangles": 528,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Garden_Tools_A",
+      "bytes": 63160,
+      "triangles": 1850,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Garland_Gate_A",
       "bytes": 65720,
       "triangles": 2518,
@@ -205,9 +492,58 @@
       "problems": []
     },
     {
+      "id": "PRP_Garland_Station_A",
+      "bytes": 63284,
+      "triangles": 2296,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Goods_Packed_A",
+      "bytes": 21084,
+      "triangles": 524,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Grain_Sacks_A",
+      "bytes": 31076,
+      "triangles": 1100,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Grass_Clump_A",
       "bytes": 5720,
       "triangles": 44,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Ground_Cover_A",
+      "bytes": 8744,
+      "triangles": 288,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Hibiscus_A",
+      "bytes": 71420,
+      "triangles": 2662,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Household_Set_A",
+      "bytes": 46912,
+      "triangles": 1436,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Inscription_Slab_B",
+      "bytes": 110636,
+      "triangles": 2438,
       "animations": 0,
       "problems": []
     },
@@ -220,15 +556,85 @@
     },
     {
       "id": "PRP_Jasmine_Bush_A",
-      "bytes": 29580,
-      "triangles": 1002,
+      "bytes": 38656,
+      "triangles": 1362,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Kolam_A",
+      "bytes": 83556,
+      "triangles": 1420,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Kolam_Large_A",
+      "bytes": 90492,
+      "triangles": 1660,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Laundry_Line_A",
+      "bytes": 15744,
+      "triangles": 388,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Manuscript_Box_A",
+      "bytes": 24500,
+      "triangles": 404,
       "animations": 0,
       "problems": []
     },
     {
       "id": "PRP_Marigold_Bed_A",
-      "bytes": 116436,
-      "triangles": 4192,
+      "bytes": 156764,
+      "triangles": 5792,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Marigold_Plant_A",
+      "bytes": 76368,
+      "triangles": 2980,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Marker_Stone_A",
+      "bytes": 33740,
+      "triangles": 832,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Material_Stacks_A",
+      "bytes": 104992,
+      "triangles": 1560,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Mortar_Pestle_A",
+      "bytes": 14048,
+      "triangles": 336,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Neem_Tree_B",
+      "bytes": 158000,
+      "triangles": 6143,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Oil_Lamp_A",
+      "bytes": 11928,
+      "triangles": 324,
       "animations": 0,
       "problems": []
     },
@@ -240,6 +646,27 @@
       "problems": []
     },
     {
+      "id": "PRP_Palm_Coconut_B",
+      "bytes": 292668,
+      "triangles": 5140,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Pottery_Display_A",
+      "bytes": 47324,
+      "triangles": 1908,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Pottery_Shards_A",
+      "bytes": 14384,
+      "triangles": 188,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Rubble_Masonry_A",
       "bytes": 31888,
       "triangles": 490,
@@ -247,16 +674,121 @@
       "problems": []
     },
     {
+      "id": "PRP_Shelf_Bamboo_A",
+      "bytes": 102664,
+      "triangles": 3184,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Shrub_A",
-      "bytes": 7040,
-      "triangles": 172,
+      "bytes": 15112,
+      "triangles": 492,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Stone_Work_Surface_A",
+      "bytes": 52360,
+      "triangles": 1752,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Storage_Chest_A",
+      "bytes": 13492,
+      "triangles": 142,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Storage_Set_A",
+      "bytes": 90888,
+      "triangles": 2348,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Tally_Board_A",
+      "bytes": 31040,
+      "triangles": 548,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Thoranam_A",
+      "bytes": 26500,
+      "triangles": 640,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Timber_Pile_A",
+      "bytes": 15676,
+      "triangles": 454,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Tool_Rack_A",
+      "bytes": 34904,
+      "triangles": 1024,
       "animations": 0,
       "problems": []
     },
     {
       "id": "PRP_Tree_Neem_A",
-      "bytes": 30124,
-      "triangles": 1068,
+      "bytes": 67424,
+      "triangles": 2548,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Tulsi_Pot_A",
+      "bytes": 31660,
+      "triangles": 952,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Water_Point_A",
+      "bytes": 40456,
+      "triangles": 792,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Water_Trough_A",
+      "bytes": 16804,
+      "triangles": 180,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Water_Vessels_A",
+      "bytes": 51632,
+      "triangles": 1872,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Well_A",
+      "bytes": 141736,
+      "triangles": 3692,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Workbench_Artisan_A",
+      "bytes": 24112,
+      "triangles": 492,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Woven_Mat_A",
+      "bytes": 13024,
+      "triangles": 180,
       "animations": 0,
       "problems": []
     }

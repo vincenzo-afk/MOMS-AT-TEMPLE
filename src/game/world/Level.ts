@@ -1,19 +1,36 @@
 import * as THREE from "three";
 import type { AssetLibrary } from "../core/AssetLibrary";
-import { CollisionWorld } from "./CollisionWorld";
+import { CollisionWorld, type Box } from "./CollisionWorld";
 import { createWaterMaterial } from "./Water";
+import { applyDetail } from "./DetailMaterials";
 import { NAV_EDGES, NAV_NODES, PLACEMENTS, WORLD_BOUNDS, type Placement } from "../../data/level";
+
+export interface StateCollider {
+  box: Box;
+  placementId: string;
+  state: string;
+}
 
 export interface LevelHandles {
   root: THREE.Group;
   collision: CollisionWorld;
   byId: Map<string, THREE.Object3D>;
   sockets: Map<string, THREE.Vector3>;
+  stateColliders: StateCollider[];
+  flames: THREE.Object3D[];
   water: THREE.ShaderMaterial;
   stats: { placements: number; instancedDraws: number; colliders: number };
 }
 
 const DEG = Math.PI / 180;
+/** Flat or tiny assets whose shadows are not worth the shadow-pass cost. */
+const NO_SHADOW = /^(PRP_Grass|PRP_Ground_Cover|PRP_Kolam|ENV_Paving|PRP_Pottery_Shards|PRP_Festival_Bunting)/;
+
+/** "WATER_STATE_irrigated", "STATE_restored_Roof", "STATE_dry" -> the state name, else null. */
+export function stateOfNode(name: string): string | null {
+  const m = /STATE_([a-z]+)/.exec(name);
+  return m ? m[1]! : null;
+}
 
 function placementMatrix(p: Placement): THREE.Matrix4 {
   const m = new THREE.Matrix4();
@@ -29,21 +46,26 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
   const collision = new CollisionWorld();
   const byId = new Map<string, THREE.Object3D>();
   const sockets = new Map<string, THREE.Vector3>();
+  const stateColliders: StateCollider[] = [];
+  const flames: THREE.Object3D[] = [];
   const water = createWaterMaterial();
   let instancedDraws = 0;
 
   root.add(buildGround());
 
-  // ---- instanced placements, grouped by asset
+  // ---- instanced placements, grouped by asset and 60 m cell so frustum culling can skip distant chunks
+  const CELL = 60;
   const groups = new Map<string, Placement[]>();
   for (const p of PLACEMENTS) {
     if (p.instanced && assets.has(p.asset)) {
-      const list = groups.get(p.asset) ?? [];
+      const key = `${p.asset}|${Math.floor(p.pos[0] / CELL)}|${Math.floor(p.pos[2] / CELL)}`;
+      const list = groups.get(key) ?? [];
       list.push(p);
-      groups.set(p.asset, list);
+      groups.set(key, list);
     }
   }
-  for (const [assetId, list] of groups) {
+  for (const [key, list] of groups) {
+    const assetId = key.split("|")[0]!;
     const template = assets.get(assetId)!.gltf.scene;
     template.updateMatrixWorld(true);
     const matrices = list.map(placementMatrix);
@@ -56,7 +78,7 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
       }
       const inst = new THREE.InstancedMesh(mesh.geometry, mesh.material, matrices.length);
       matrices.forEach((m, i) => inst.setMatrixAt(i, m.clone().multiply(mesh.matrixWorld)));
-      inst.castShadow = quality !== "low" && !assetId.startsWith("PRP_Grass");
+      inst.castShadow = quality !== "low" && !NO_SHADOW.test(assetId);
       inst.receiveShadow = true;
       inst.name = `${assetId}__instanced`;
       inst.computeBoundingSphere();
@@ -79,32 +101,39 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
     const skipColliders = p.id === "channel_restored"; // shares its footprint with channel_blocked
     obj.traverse((o) => {
       if (o.name.startsWith("SOCKET_") && p.id) sockets.set(`${p.id}.${o.name}`, o.getWorldPosition(new THREE.Vector3()));
+      if (o.name.startsWith("FLAME_")) flames.push(o);
+      const st = stateOfNode(o.name);
+      if (p.state && st && !o.name.startsWith("COL_")) o.visible = st === p.state; // decorative copies show one fixed state
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
       if (mesh.name.startsWith("COL_") || mesh.name.startsWith("WALK_")) {
-        if (!skipColliders) collision.addProxy(mesh.geometry, mesh.matrixWorld, mesh.name.startsWith("WALK_"), mesh.name);
+        if (skipColliders) return;
+        const box = collision.addProxy(mesh.geometry, mesh.matrixWorld, mesh.name.startsWith("WALK_"), mesh.name);
+        const state = (mesh.userData as { state?: string }).state;
+        if (state && p.id) stateColliders.push({ box, placementId: p.id, state });
+        else if (state && p.state) box.enabled = state === p.state;
       } else if (mesh.name.startsWith("WATER_")) {
         mesh.material = water;
         mesh.castShadow = false;
         mesh.renderOrder = 2;
-      } else if (quality === "low") {
+      } else if (quality === "low" || NO_SHADOW.test(p.asset) || (p.id?.startsWith("paddy_") && mesh.name.startsWith("STATE_"))) {
         mesh.castShadow = false;
       }
     });
   }
 
-  // ---- world boundary (invisible): keeps the player near the settlement approach
+  // ---- world boundary (invisible)
   const W = WORLD_BOUNDS;
   for (const [cx, cz, hx, hz] of [[0, -W, W, 1], [0, W, W, 1], [-W, 0, 1, W], [W, 0, 1, W]] as Array<[number, number, number, number]>)
     collision.add({ cx, cz, hx, hz, cos: 1, sin: 0, yMin: -1, yMax: 10, walk: false, name: "BOUNDARY" });
 
-  return { root, collision, byId, sockets, water, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
+  return { root, collision, byId, sockets, stateColliders, flames, water, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
 }
 
-/** Earth ground with vertex-colour variation and worn paths along the NPC navigation graph. */
+/** Earth ground with vertex-colour variation, worn paths along the navigation graph and greener field margins. */
 function buildGround(): THREE.Mesh {
-  const size = 160;
-  const seg = 160;
+  const size = WORLD_BOUNDS * 2 + 40;
+  const seg = 190;
   const geo = new THREE.PlaneGeometry(size, size, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.getAttribute("position") as THREE.BufferAttribute;
@@ -122,19 +151,23 @@ function buildGround(): THREE.Mesh {
     const n = noise(x, z);
     c.copy(earth).lerp(grass, THREE.MathUtils.clamp(0.45 + n * 0.35, 0, 1));
     const inside = Math.abs(x) < 46 && Math.abs(z) < 46;
-    if (!inside) c.lerp(field, THREE.MathUtils.clamp(0.5 + n * 0.3, 0, 0.85));
+    if (!inside) c.lerp(field, THREE.MathUtils.clamp(0.45 + n * 0.3, 0, 0.8));
     let dmin = Infinity;
     for (const [a, b] of segs) dmin = Math.min(dmin, distToSeg(x, z, a[0], a[1], b[0], b[1]));
-    dmin = Math.min(dmin, Math.abs(x) < 3.5 && z > 30 && z < 70 ? 0 : Infinity); // approach road
-    if (dmin < 2.2) c.lerp(path, (1 - dmin / 2.2) * 0.85);
+    if (Math.abs(x) < 3.5 && z > 30 && z < WORLD_BOUNDS) dmin = 0; // approach road
+    if (Math.abs(z - 10) < 3.5 && x > 40 && x < 130) dmin = Math.min(dmin, 0.5); // bazaar street
+    if (dmin < 2.4) c.lerp(path, (1 - dmin / 2.4) * 0.85);
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;
-    pos.setY(i, inside ? 0 : Math.max(0, (Math.hypot(x, z) - 75) * 0.08) - 0.01);
+    const r = Math.max(Math.abs(x), Math.abs(z));
+    pos.setY(i, r > WORLD_BOUNDS + 2 ? (r - WORLD_BOUNDS) * 0.18 : -0.01);
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97 }));
+  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97 });
+  applyDetail(mat, "GROUND", false);
+  const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = "Ground";
   return mesh;

@@ -1,0 +1,34 @@
+{
+  "assetId": "ENV_Gate_Brick_Ruin_A",
+  "glb": "public/assets/models/landmarks/ENV_Gate_Brick_Ruin_A.glb",
+  "blend": "blender/source/ENV_Gate_Brick_Ruin_A.blend",
+  "bytes": 30060,
+  "triangles": 352,
+  "objects": [
+    "COL_Pier_-1",
+    "COL_Pier_1",
+    "ENV_Gate_Brick_Ruin_A",
+    "ENV_Gate_Brick_Ruin_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Pier_-1",
+    "COL_Pier_1"
+  ],
+  "materials": [
+    "MAT_Brick_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.88,
+    -1.4,
+    -0.026
+  ],
+  "boundsMax": [
+    2.88,
+    0.68,
+    4.435
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}
