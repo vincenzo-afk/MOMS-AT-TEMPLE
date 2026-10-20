@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGame, useUi } from "../hooks";
-import { CONTROLS_HELP } from "../../game/core/Input";
+import { CONTROLS_HELP, REMAPPABLE, keyLabel, type Binding } from "../../game/core/Input";
 import type { Settings } from "../../game/core/types";
 
 export function LoadingScreen() {
@@ -214,8 +214,60 @@ export function SettingsForm({ onBack }: { onBack: () => void }) {
         <span>Play opening sequence</span>
         <input type="checkbox" checked={s.showIntro} onChange={(e) => update({ showIntro: e.target.checked })} />
       </label>
-      <p className="muted small">Audio: music and ambience tracks are not yet supplied; volume applies to interface sounds now and to music once added.</p>
+      <label className="setting">
+        <span>Reveal dialogue gradually</span>
+        <input type="checkbox" checked={s.typewriter} onChange={(e) => update({ typewriter: e.target.checked })} data-testid="setting-typewriter" />
+      </label>
+      {slider("dialogueBackdrop", "Dialogue box opacity", 0.4, 1, 0.05)}
+      <label className="setting">
+        <span>Highlight interaction target</span>
+        <input type="checkbox" checked={s.showTargetRing} onChange={(e) => update({ showTargetRing: e.target.checked })} />
+      </label>
+      <KeyRemap settings={s} onChange={(keyBindings) => update({ keyBindings })} />
+      <p className="muted small">Audio: music and ambience recordings are not yet supplied. A procedural soundscape (wind, rain, water, birds, footsteps) plays in their place and follows the effects volume.</p>
       <button onClick={onBack}>Back</button>
     </div>
+  );
+}
+
+/** Click an action, then press the key to bind it. Esc cancels; "Reset" restores the defaults. */
+function KeyRemap({ settings, onChange }: { settings: Settings; onChange: (kb: Record<string, string[]>) => void }) {
+  const game = useGame();
+  const [listening, setListening] = useState<Binding | null>(null);
+  useEffect(() => {
+    if (!listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.code !== "Escape") {
+        // a key can drive only one action: remove it from any other binding
+        const next: Record<string, string[]> = {};
+        for (const [b] of REMAPPABLE) {
+          const keys = (settings.keyBindings[b] ?? [...game.input.keysFor(b)]).filter((k) => k !== e.code);
+          next[b] = keys;
+        }
+        next[listening] = [e.code];
+        onChange(next);
+      }
+      setListening(null);
+    };
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => window.removeEventListener("keydown", onKey, { capture: true });
+  }, [listening, settings, onChange, game]);
+  return (
+    <details className="remap-block" data-testid="remap">
+      <summary>Controls (remap keys)</summary>
+      <div className="remap">
+        {REMAPPABLE.map(([b, label]) => (
+          <div key={b} style={{ display: "contents" }}>
+            <span>{label}</span>
+            <button className={listening === b ? "listening" : ""} onClick={() => setListening(b)} data-testid={`remap-${b}`}>
+              {listening === b ? "Press a key..." : game.input.keysFor(b).map(keyLabel).join(" / ") || "(unbound)"}
+            </button>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => onChange({})}>Reset to defaults</button>
+    </details>
   );
 }

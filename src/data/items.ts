@@ -34,5 +34,9 @@ export const ITEMS: ItemDefinition[] = [
   { id: "oil_lamp", name: "Clay oil lamp", description: "A small lamp on a brass stand. Place it at your home.", category: "decor", icon: "♨", maxStack: 3, tags: ["decor"], sellPrice: 2 },
   { id: "woven_mat", name: "Woven mat", description: "A palm-leaf sleeping mat with a red border. Place it on your veranda.", category: "decor", icon: "▭", maxStack: 2, tags: ["decor"], sellPrice: 2 },
   { id: "kolam_powder", name: "Kolam rice flour", description: "Fine rice flour for drawing a kolam on the doorstep. Used up when drawn.", category: "decor", icon: "❈", maxStack: 10, tags: ["decor"] },
+  // lost-and-found (session 3)
+  { id: "brass_bangle", name: "Brass bangle", description: "A thin brass bangle with a red bead. Valli lost one by the temple tank.", category: "quest", icon: "◯", maxStack: 1, tags: ["lost"], questProtected: true },
+  { id: "velan_chisel", name: "Velan's chisel", description: "A well-worn chisel with a brass collar. VELAN is scratched into the handle.", category: "tool", icon: "⟋", maxStack: 1, tags: ["lost"], questProtected: true },
+  { id: "coin_pouch", name: "Cloth pouch", description: "A red cloth pouch heavy with coins. Someone must be missing it.", category: "trade", icon: "◎", maxStack: 1, tags: ["lost"], use: { label: "Open it and keep the coins", coins: 8, flag: "kept_pouch" } },
   { id: "tulsi_pot", name: "Tulsi pot", description: "Holy basil in a painted pot, a gift from Amudha.", category: "decor", icon: "♣", maxStack: 1, tags: ["decor"], questProtected: true },
 ];

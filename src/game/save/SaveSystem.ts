@@ -24,6 +24,10 @@ export const DEFAULT_SETTINGS: Settings = {
   textScale: 1,
   fov: 55,
   showIntro: true,
+  keyBindings: {},
+  dialogueBackdrop: 0.9,
+  typewriter: true,
+  showTargetRing: true,
 };
 
 /** IndexedDB persistence with a rolling backup and validation on every read. */
@@ -155,6 +159,16 @@ export function sanitizeSettings(raw: unknown): Settings {
   num("fov", 45, 75);
   if (typeof r.invertY === "boolean") s.invertY = r.invertY;
   if (typeof r.showIntro === "boolean") s.showIntro = r.showIntro;
+  if (typeof r.typewriter === "boolean") s.typewriter = r.typewriter;
+  if (typeof r.showTargetRing === "boolean") s.showTargetRing = r.showTargetRing;
+  num("dialogueBackdrop", 0.4, 1);
+  if (typeof r.keyBindings === "object" && r.keyBindings !== null) {
+    const kb: Record<string, string[]> = {};
+    for (const [k, v] of Object.entries(r.keyBindings as Record<string, unknown>)) {
+      if (Array.isArray(v) && v.every((c) => typeof c === "string" && c.length < 32) && v.length <= 3) kb[k] = v as string[];
+    }
+    s.keyBindings = kb;
+  }
   if (r.graphicsQuality === "low" || r.graphicsQuality === "medium" || r.graphicsQuality === "high") s.graphicsQuality = r.graphicsQuality;
   return s;
 }

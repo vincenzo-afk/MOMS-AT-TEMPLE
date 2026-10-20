@@ -37,5 +37,6 @@ export const AUDIO_MANIFEST: AudioEntry[] = [
   { id: "sfx_craft", path: "/assets/audio/interactions/sfx_craft.ogg", type: "sfx", durationSec: null, loop: false, intendedUse: "Completing a craft", volume: 0.7, source: lyria, status: "pending" },
   { id: "sfx_restore", path: "/assets/audio/interactions/sfx_restore.ogg", type: "sfx", durationSec: null, loop: false, intendedUse: "Restoration complete", volume: 0.8, source: lyria, status: "pending" },
   { id: "ui_open", path: "/assets/audio/ui/ui_open.ogg", type: "ui", durationSec: null, loop: false, intendedUse: "Panel open", volume: 0.5, source: lyria, status: "pending" },
+  { id: "ui_error", path: "/assets/audio/ui/ui_error.ogg", type: "ui", durationSec: null, loop: false, intendedUse: "Refused action / failure feedback", volume: 0.5, source: lyria, status: "pending" },
   { id: "ui_confirm", path: "/assets/audio/ui/ui_confirm.ogg", type: "ui", durationSec: null, loop: false, intendedUse: "Confirm / quest update", volume: 0.5, source: lyria, status: "pending" },
 ];

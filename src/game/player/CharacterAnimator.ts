@@ -33,6 +33,10 @@ export class CharacterAnimator {
   readonly mixer: THREE.AnimationMixer;
   private actions = new Map<string, THREE.AnimationAction>();
   private phase = 0;
+  /** Normalised locomotion cycle position (0..1), used to time footsteps. */
+  get cyclePhase(): number {
+    return this.phase;
+  }
   private locoWeight = 1;
   private current: { name: string; action: THREE.AnimationAction; once: boolean; onDone?: () => void } | null = null;
   private turn = 0; // -1 right, 0 none, 1 left

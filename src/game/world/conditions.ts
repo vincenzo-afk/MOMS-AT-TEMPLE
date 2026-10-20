@@ -26,6 +26,14 @@ export function evaluate(c: Condition, s: GameState, defs: Definitions): boolean
       return (s.relationships[c.npcId] ?? 0) >= c.min;
     case "plot":
       return (s.plots[c.id]?.stage ?? "empty") === c.stage;
+    case "hour": {
+      const h = (s.worldMinutes % 1440) / 60;
+      return c.from <= c.to ? h >= c.from && h < c.to : h >= c.from || h < c.to;
+    }
+    case "crime":
+      return (s.pendingCrime !== null) === c.value;
+    case "picked":
+      return s.pickedUp.includes(c.id) === c.value;
   }
 }
 

@@ -207,6 +207,36 @@ export const QUESTS: QuestDefinition[] = [
     ],
   },
   {
+    id: "q_bangle",
+    title: "The Lost Bangle",
+    description: "Valli lost one of her brass bangles somewhere by the temple tank on the south road.",
+    giverNpcId: "npc_valli",
+    prerequisites: ["q_arrival"],
+    objectives: [
+      { id: "find", type: "collect", text: "Search the temple tank steps for the bangle", targetId: "brass_bangle", requiredCount: 1, locationId: "loc_kulam" },
+      { id: "return", type: "deliver", text: "Return the bangle to Valli", targetId: "brass_bangle", requiredCount: 1, locationId: "loc_courtyard" },
+    ],
+    rewards: [
+      { type: "coins", amount: 3 },
+      { type: "relationship", npcId: "npc_valli", amount: 10 },
+    ],
+  },
+  {
+    id: "q_chisel",
+    title: "Velan's Chisel",
+    description: "Velan left his favourite chisel somewhere by the broken brick wall in the western ruins.",
+    giverNpcId: "npc_velan",
+    prerequisites: ["q_channel"],
+    objectives: [
+      { id: "find", type: "collect", text: "Find the chisel near the broken wall in the western ruins", targetId: "velan_chisel", requiredCount: 1, locationId: "loc_ruins" },
+      { id: "return", type: "deliver", text: "Bring the chisel back to Velan", targetId: "velan_chisel", requiredCount: 1, locationId: "loc_workshop" },
+    ],
+    rewards: [
+      { type: "coins", amount: 4 },
+      { type: "relationship", npcId: "npc_velan", amount: 15 },
+    ],
+  },
+  {
     id: "q_festival",
     title: "The Lamp Festival",
     description: "With water in the fields, flowers in the garden and a loom working again, Elder Ponnan says the settlement can hold its lamp festival for the first time in years.",

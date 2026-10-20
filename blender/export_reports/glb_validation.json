@@ -1,10 +1,17 @@
 {
-  "checkedAt": "2026-10-20T02:35:55.342Z",
+  "checkedAt": "2026-10-20T04:25:47.687Z",
   "results": [
     {
       "id": "CHR_NPC_Amudha",
       "bytes": 145212,
       "triangles": 3678,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_NPC_Kaaval",
+      "bytes": 127056,
+      "triangles": 3158,
       "animations": 0,
       "problems": []
     },
@@ -131,6 +138,20 @@
       "id": "ENV_Gopuram_Entrance_A",
       "bytes": 334484,
       "triangles": 9938,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Granary_A",
+      "bytes": 141960,
+      "triangles": 3936,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_House_Player_A",
+      "bytes": 263316,
+      "triangles": 7274,
       "animations": 0,
       "problems": []
     },
@@ -352,6 +373,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Bangle_A",
+      "bytes": 6988,
+      "triangles": 216,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Bench_Wood_A",
       "bytes": 6452,
       "triangles": 60,
@@ -387,6 +415,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Chisel_A",
+      "bytes": 6344,
+      "triangles": 96,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Clay_Bank_A",
       "bytes": 18360,
       "triangles": 428,
@@ -401,6 +436,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Coin_Pouch_A",
+      "bytes": 11796,
+      "triangles": 348,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Contribution_Chest_A",
       "bytes": 13400,
       "triangles": 134,
@@ -411,6 +453,13 @@
       "id": "PRP_Cot_A",
       "bytes": 25024,
       "triangles": 784,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Crate_A",
+      "bytes": 23124,
+      "triangles": 308,
       "animations": 0,
       "problems": []
     },
@@ -632,6 +681,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Neem_Tree_B_LOD1",
+      "bytes": 6712,
+      "triangles": 180,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Oil_Lamp_A",
       "bytes": 11928,
       "triangles": 324,
@@ -653,6 +709,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Palm_Coconut_B_LOD1",
+      "bytes": 16656,
+      "triangles": 344,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Pottery_Display_A",
       "bytes": 47324,
       "triangles": 1908,
@@ -663,6 +726,13 @@
       "id": "PRP_Pottery_Shards_A",
       "bytes": 14384,
       "triangles": 188,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Rain_Shelter_A",
+      "bytes": 81148,
+      "triangles": 1408,
       "animations": 0,
       "problems": []
     },

@@ -24,7 +24,7 @@ export async function waitForTitle(page: Page): Promise<void> {
 export async function startNewGame(page: Page): Promise<void> {
   await page.evaluate(async () => {
     const t = window.__tom!;
-    t.game.settings = { ...t.game.settings, showIntro: false };
+    t.game.settings = { ...t.game.settings, showIntro: false, typewriter: false };
     await t.saves.deleteSave();
   });
   await page.getByTestId("new-game").click();

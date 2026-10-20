@@ -57,7 +57,33 @@ function textures(set: string) {
   return t;
 }
 
+/** Shared, per-frame environment uniforms (wind sway for foliage, wetness while it rains). */
+export const ENV_UNIFORMS = {
+  tomTime: { value: 0 },
+  tomWind: { value: 0.3 },
+  tomWet: { value: 0 },
+};
+
+const WIND_BODY = /* glsl */ `
+#ifdef TOM_WIND
+  {
+    #ifdef USE_INSTANCING
+      vec2 tomBase = instanceMatrix[3].xz;
+    #else
+      vec2 tomBase = modelMatrix[3].xz;
+    #endif
+    float tomH = max(position.y, 0.0);
+    float tomPh = tomBase.x * 0.35 + tomBase.y * 0.27 + position.x * 0.6;
+    float tomAmp = tomWind * (0.02 * tomH + 0.035 * min(tomH, 1.0));
+    transformed.x += sin(tomTime * 1.7 + tomPh) * tomAmp;
+    transformed.z += cos(tomTime * 1.3 + tomPh * 1.3) * tomAmp * 0.8;
+  }
+#endif
+`;
+
 const VERT_DECL = /* glsl */ `
+uniform float tomTime;
+uniform float tomWind;
 varying vec3 vTomPos;
 varying vec3 vTomNormal;
 #ifdef TOM_OBJECT_SPACE
@@ -94,6 +120,7 @@ uniform float tomScale;
 uniform float tomAlbedoStrength;
 uniform float tomNormalStrength;
 uniform float tomRoughness;
+uniform float tomWet;
 `;
 
 const FRAG_COLOR = /* glsl */ `
@@ -104,10 +131,17 @@ const FRAG_COLOR = /* glsl */ `
   vec2 tomUvZ = vTomPos.xy * tomScale;
   float tomD = texture2D(tomAlbedo, tomUvX).r * tomW.x + texture2D(tomAlbedo, tomUvY).r * tomW.y + texture2D(tomAlbedo, tomUvZ).r * tomW.z;
   diffuseColor.rgb *= clamp(1.0 + (tomD - 0.5) * 2.0 * tomAlbedoStrength, 0.25, 1.75);
+  #ifndef TOM_OBJECT_SPACE
+    float tomWetK = tomWet * (0.55 + 0.45 * clamp(vTomNormal.y, 0.0, 1.0));
+    diffuseColor.rgb *= 1.0 - 0.28 * tomWetK;
+  #endif
 `;
 
 const FRAG_ROUGH = /* glsl */ `
   roughnessFactor = clamp(roughnessFactor + (0.5 - tomD) * tomRoughness, 0.04, 1.0);
+  #ifndef TOM_OBJECT_SPACE
+    roughnessFactor = mix(roughnessFactor, roughnessFactor * 0.45, tomWetK);
+  #endif
 `;
 
 const FRAG_NORMAL = /* glsl */ `
@@ -130,8 +164,9 @@ export function applyDetail(material: THREE.Material, specKey: string, objectSpa
   if (!enabled || !spec || !m.isMeshStandardMaterial || m.userData.tomDetail) return;
   const tex = textures(spec.set);
   m.userData.tomDetail = specKey;
-  m.defines = { ...(m.defines ?? {}), ...(objectSpace ? { TOM_OBJECT_SPACE: "" } : {}) };
-  m.customProgramCacheKey = () => `tom-${specKey}-${objectSpace ? "o" : "w"}`;
+  const wind = !objectSpace && (specKey === "MAT_Foliage_A" || specKey === "MAT_Cloth_A");
+  m.defines = { ...(m.defines ?? {}), ...(objectSpace ? { TOM_OBJECT_SPACE: "" } : {}), ...(wind ? { TOM_WIND: "" } : {}) };
+  m.customProgramCacheKey = () => `tom-${specKey}-${objectSpace ? "o" : "w"}${wind ? "-wind" : ""}`;
   m.onBeforeCompile = (shader) => {
     shader.uniforms.tomAlbedo = { value: tex.albedo };
     shader.uniforms.tomNormalMap = { value: tex.normal };
@@ -139,7 +174,12 @@ export function applyDetail(material: THREE.Material, specKey: string, objectSpa
     shader.uniforms.tomAlbedoStrength = { value: spec.albedo };
     shader.uniforms.tomNormalStrength = { value: spec.normal };
     shader.uniforms.tomRoughness = { value: spec.roughness ?? 0 };
-    shader.vertexShader = VERT_DECL + shader.vertexShader.replace("#include <project_vertex>", `#include <project_vertex>\n${VERT_BODY}`);
+    shader.uniforms.tomTime = ENV_UNIFORMS.tomTime;
+    shader.uniforms.tomWind = ENV_UNIFORMS.tomWind;
+    shader.uniforms.tomWet = ENV_UNIFORMS.tomWet;
+    shader.vertexShader =
+      VERT_DECL +
+      shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>\n${WIND_BODY}`).replace("#include <project_vertex>", `#include <project_vertex>\n${VERT_BODY}`);
     shader.fragmentShader =
       FRAG_DECL +
       shader.fragmentShader

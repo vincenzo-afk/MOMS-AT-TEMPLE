@@ -13,6 +13,8 @@ export interface ItemDefinition {
   tags: string[];
   questProtected?: boolean; // cannot be sold
   sellPrice?: number;
+  /** "Use" from the inventory: consumes one and applies the effect. */
+  use?: { label: string; coins?: number; flag?: string };
 }
 
 export interface ItemStack {
@@ -38,7 +40,10 @@ export type Condition =
   | { type: "hasItem"; itemId: string; count: number }
   | { type: "discovered"; id: string; value: boolean }
   | { type: "relationship"; npcId: string; min: number }
-  | { type: "plot"; id: string; stage: PlotStage };
+  | { type: "plot"; id: string; stage: PlotStage }
+  | { type: "hour"; from: number; to: number }
+  | { type: "crime"; value: boolean }
+  | { type: "picked"; id: string; value: boolean };
 
 export type Effect =
   | { type: "startQuest"; questId: string }
@@ -47,7 +52,10 @@ export type Effect =
   | { type: "setFlag"; id: string }
   | { type: "relationship"; npcId: string; amount: number }
   | { type: "openShop"; shopId: string }
-  | { type: "giveItem"; itemId: string; quantity: number; once: string };
+  | { type: "giveItem"; itemId: string; quantity: number; once: string }
+  | { type: "takeItem"; itemId: string; quantity: number }
+  | { type: "coins"; amount: number }
+  | { type: "resolveCrime"; mode: "return" | "fine" };
 
 export type ObjectiveType = "talk" | "collect" | "deliver" | "craft" | "restore" | "inspect" | "store" | "decorate";
 
@@ -113,7 +121,7 @@ export interface ScheduleEntry {
   fromHour: number; // inclusive, 0-24 (values past 24 wrap to the next morning)
   toHour: number; // exclusive
   anchorId: string;
-  activity: "work" | "rest" | "talk" | "home" | "sit" | "garden" | "craft" | "trade" | "festival";
+  activity: "work" | "rest" | "talk" | "home" | "sit" | "garden" | "craft" | "trade" | "festival" | "patrol";
   /** Optional: entry only applies while these hold (checked before unconditional entries). */
   when?: Condition[];
 }
@@ -244,6 +252,11 @@ export interface GameState {
   decor: Record<string, string | null>;
   lastTalkDay: Record<string, number>;
   skills: Record<SkillId, number>;
+  doors: Record<string, boolean>; // v3: true = open
+  containers: Record<string, Array<ItemStack | null>>; // v3
+  pickedUp: string[]; // v3
+  pendingCrime: PendingCrime | null; // v3
+  talkLog: TalkLogEntry[]; // v3: recent conversation lines (newest last, capped)
 }
 
 export interface Settings {
@@ -256,6 +269,84 @@ export interface Settings {
   textScale: number;
   fov: number;
   showIntro: boolean;
+  /** Per-action key codes (see Input.BINDINGS for defaults). */
+  keyBindings: Record<string, string[]>;
+  dialogueBackdrop: number; // 0.4-1 opacity of the dialogue box
+  typewriter: boolean; // reveal dialogue text gradually
+  showTargetRing: boolean;
+}
+
+export interface DoorDefinition {
+  id: string;
+  placementId: string;
+  node: string; // DOOR_<node> in the placement's GLB
+  label: string;
+  /** Door cannot be opened while these hold (e.g. the granary at night). */
+  lockedWhen?: Condition[];
+  lockedReason?: string;
+}
+
+export interface ContainerDefinition {
+  id: string;
+  placementId: string;
+  label: string;
+  /** null = anyone may take from it; otherwise taking in view of others is theft. */
+  ownerNpcId: string | null;
+  initial: ItemStack[];
+  slots: number;
+  locationId: string;
+}
+
+export interface PickupDefinition {
+  id: string;
+  placementId: string;
+  itemId: string;
+  quantity: number;
+  label: string;
+  locationId: string;
+  conditions: Condition[];
+}
+
+export interface TopicAnswer {
+  /** npc id, "group:<group>" or "default" */
+  who: string;
+  when?: Condition[];
+  lines: string[];
+  effects?: Effect[];
+}
+
+export interface TopicDefinition {
+  id: string;
+  label: string;
+  conditions: Condition[];
+  answers: TopicAnswer[];
+}
+
+export type BarkTrigger = "greet" | "bump" | "rain" | "witness" | "festival" | "admire" | "missing";
+
+export interface BarkDefinition {
+  id: string;
+  /** npc id, "group:<group>" or "any" */
+  who: string;
+  trigger: BarkTrigger;
+  conditions: Condition[];
+  lines: string[];
+  priority: number;
+}
+
+export interface PendingCrime {
+  containerId: string;
+  itemId: string;
+  quantity: number;
+  witnessId: string;
+  day: number;
+}
+
+export interface TalkLogEntry {
+  npcId: string;
+  text: string;
+  day: number;
+  minute: number;
 }
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; reason: string };

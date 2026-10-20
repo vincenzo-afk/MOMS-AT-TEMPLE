@@ -110,4 +110,6 @@ export const NOTICE_HINTS: Record<string, string> = {
   q_manuscript: "Elder Ponnan has a lead on old writings in the western ruins.",
   q_weaver: "Valli hopes someone will fix the weaver's house.",
   q_festival: "Elder Ponnan is thinking about the lamp festival.",
+  q_bangle: "Valli has lost a bangle near the temple tank.",
+  q_chisel: "Velan is missing a chisel somewhere in the western ruins.",
 };

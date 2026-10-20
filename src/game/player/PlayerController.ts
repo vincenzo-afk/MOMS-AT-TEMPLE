@@ -53,22 +53,16 @@ export class PlayerController {
 
   update(dt: number, input: Input, cameraYaw: number): void {
     // desired direction relative to the camera (camera looks along -Z when cameraYaw = 0)
-    let ix = 0;
-    let iz = 0;
-    if (!this.locked) {
-      if (input.isDown("forward")) iz -= 1;
-      if (input.isDown("back")) iz += 1;
-      if (input.isDown("left")) ix -= 1;
-      if (input.isDown("right")) ix += 1;
-    }
-    const len = Math.hypot(ix, iz);
+    // keyboard gives unit length; a gamepad stick gives analog magnitude (gentle push = slow walk)
+    const axis = this.locked ? { x: 0, z: 0 } : input.moveAxis();
+    const len = Math.hypot(axis.x, axis.z);
     const target = new THREE.Vector3();
     if (len > 0) {
-      ix /= len;
-      iz /= len;
+      const ix = axis.x / len;
+      const iz = axis.z / len;
       const s = Math.sin(cameraYaw);
       const c = Math.cos(cameraYaw);
-      target.set(ix * c + iz * s, 0, -ix * s + iz * c).multiplyScalar(input.isDown("run") ? RUN_SPEED : WALK_SPEED);
+      target.set(ix * c + iz * s, 0, -ix * s + iz * c).multiplyScalar((input.isDown("run") ? RUN_SPEED : WALK_SPEED) * Math.max(0.35, len));
     }
     const horiz = new THREE.Vector3(this.velocity.x, 0, this.velocity.z);
     const rate = target.lengthSq() > horiz.lengthSq() ? ACCEL : DECEL;

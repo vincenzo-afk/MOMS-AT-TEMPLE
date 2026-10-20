@@ -1,4 +1,4 @@
-export type InteractableKind = "npc" | "gather" | "station" | "restoration" | "discovery" | "rest" | "plot" | "water" | "storage" | "decor" | "notice" | "sit";
+export type InteractableKind = "npc" | "gather" | "station" | "restoration" | "discovery" | "rest" | "plot" | "water" | "storage" | "decor" | "notice" | "sit" | "door" | "container" | "pickup";
 
 export interface InteractableDef {
   id: string;
@@ -9,7 +9,7 @@ export interface InteractableDef {
   radius: number;
 }
 
-export type Verb = "talk" | "gather" | "craft" | "inspect" | "repair" | "read" | "rest" | "plant" | "water" | "harvest" | "fill" | "store" | "decorate" | "notices" | "sit";
+export type Verb = "talk" | "gather" | "craft" | "inspect" | "repair" | "read" | "rest" | "plant" | "water" | "harvest" | "fill" | "store" | "decorate" | "notices" | "sit" | "open" | "close" | "search" | "pickup";
 
 export interface InteractionAction {
   verb: Verb;

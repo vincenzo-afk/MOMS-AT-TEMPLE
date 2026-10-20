@@ -1,7 +1,8 @@
 import type { Definitions } from "../game/core/defs";
 import type { Condition, Effect } from "../game/core/types";
 import { RECORD_TEXT, LOCATIONS, NOTICE_HINTS } from "./text";
-import { ANCHORS } from "./level";
+import { ANCHORS, PLACEMENTS, INTERACTABLES } from "./level";
+import { SHELTER_ANCHORS } from "./world";
 
 /** Cross-reference check for all authored data. Returns a list of human-readable problems. */
 export function validateDefinitions(d: Definitions): string[] {
@@ -22,6 +23,7 @@ export function validateDefinitions(d: Definitions): string[] {
     if (c.type === "discovered") need(d.discoveries.has(c.id), `${ctx}: unknown discovery ${c.id}`);
     if (c.type === "relationship") need(d.npcs.has(c.npcId), `${ctx}: unknown npc ${c.npcId}`);
     if (c.type === "plot") need(d.plots.has(c.id), `${ctx}: unknown plot ${c.id}`);
+    if (c.type === "picked") need(d.pickups.has(c.id), `${ctx}: unknown pickup ${c.id}`);
   };
   const effect = (e: Effect, ctx: string) => {
     if (e.type === "startQuest") need(d.quests.has(e.questId), `${ctx}: unknown quest ${e.questId}`);
@@ -29,7 +31,7 @@ export function validateDefinitions(d: Definitions): string[] {
       need(!!d.quests.get(e.questId)?.objectives.some((o) => o.id === e.objectiveId), `${ctx}: unknown objective ${e.questId}/${e.objectiveId}`);
     if (e.type === "relationship") need(d.npcs.has(e.npcId), `${ctx}: unknown npc ${e.npcId}`);
     if (e.type === "openShop") need(d.shops.has(e.shopId), `${ctx}: unknown shop ${e.shopId}`);
-    if (e.type === "giveItem") item(e.itemId, ctx);
+    if (e.type === "giveItem" || e.type === "takeItem") item(e.itemId, ctx);
   };
   const groups = new Set([...d.npcs.values()].map((n) => n.group).filter(Boolean).map((g) => `group:${g}`));
 
@@ -100,6 +102,42 @@ export function validateDefinitions(d: Definitions): string[] {
     need(d.npcs.has(s.npcId), `shop ${s.id}: unknown npc`);
     [...s.sells, ...s.buys].forEach((o) => item(o.itemId, `shop ${s.id}`));
   }
+  const placementIds = new Set(PLACEMENTS.map((p) => p.id).filter(Boolean));
+  const who = (w: string, ctx: string) => need(w === "any" || w === "default" || d.npcs.has(w) || groups.has(w), `${ctx}: unknown speaker ${w}`);
+  for (const door of d.doors.values()) {
+    need(placementIds.has(door.placementId), `door ${door.id}: unknown placement ${door.placementId}`);
+    (door.lockedWhen ?? []).forEach((c) => cond(c, `door ${door.id}`));
+  }
+  for (const c of d.containers.values()) {
+    need(placementIds.has(c.placementId), `container ${c.id}: unknown placement ${c.placementId}`);
+    if (c.ownerNpcId) need(d.npcs.has(c.ownerNpcId), `container ${c.id}: unknown owner`);
+    c.initial.forEach((st) => item(st.itemId, `container ${c.id}`));
+    need(c.initial.length <= c.slots, `container ${c.id}: more stacks than slots`);
+    need(INTERACTABLES.some((i) => i.kind === "container" && i.refId === c.id), `container ${c.id}: no interactable`);
+    loc(c.locationId, `container ${c.id}`);
+  }
+  for (const pk of d.pickups.values()) {
+    need(placementIds.has(pk.placementId), `pickup ${pk.id}: unknown placement ${pk.placementId}`);
+    item(pk.itemId, `pickup ${pk.id}`);
+    pk.conditions.forEach((c) => cond(c, `pickup ${pk.id}`));
+    need(INTERACTABLES.some((i) => i.kind === "pickup" && i.refId === pk.id), `pickup ${pk.id}: no interactable`);
+  }
+  for (const t of d.topics.values()) {
+    t.conditions.forEach((c) => cond(c, `topic ${t.id}`));
+    need(t.answers.some((a) => a.who === "default"), `topic ${t.id}: needs a default answer (knowledge boundary)`);
+    for (const a of t.answers) {
+      who(a.who, `topic ${t.id}`);
+      (a.when ?? []).forEach((c) => cond(c, `topic ${t.id}`));
+      (a.effects ?? []).forEach((e) => effect(e, `topic ${t.id}`));
+    }
+  }
+  for (const b of d.barks) {
+    who(b.who, `bark ${b.id}`);
+    b.conditions.forEach((c) => cond(c, `bark ${b.id}`));
+    need(b.lines.length > 0, `bark ${b.id}: no lines`);
+  }
+  for (const a of SHELTER_ANCHORS) need(a in ANCHORS, `shelter anchor ${a} missing`);
+  for (const i of d.items.values()) if (i.use) need(!!i.use.coins || !!i.use.flag, `item ${i.id}: use has no effect`);
   for (const disc of d.discoveries.values()) {
     text(disc.descriptionKey, `discovery ${disc.id}`);
     loc(disc.locationId, `discovery ${disc.id}`);

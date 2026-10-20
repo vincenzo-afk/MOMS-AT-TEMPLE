@@ -8,6 +8,7 @@ import { DIALOGUE } from "../../data/dialogue";
 import { SHOPS } from "../../data/shops";
 import { DISCOVERIES, type DiscoveryDefinition } from "../../data/discoveries";
 import { CROPS, DECOR_SLOTS, PLOTS, WATER_SOURCES } from "../../data/farming";
+import { BARKS, CONTAINERS, DOORS, PICKUPS, TOPICS } from "../../data/world";
 import type {
   DialogueNode,
   GatherNodeDefinition,
@@ -21,6 +22,11 @@ import type {
   CropDefinition,
   WaterSourceDefinition,
   DecorSlotDefinition,
+  DoorDefinition,
+  ContainerDefinition,
+  PickupDefinition,
+  TopicDefinition,
+  BarkDefinition,
 } from "./types";
 
 export interface Definitions {
@@ -37,6 +43,11 @@ export interface Definitions {
   crops: Map<string, CropDefinition>;
   waterSources: Map<string, WaterSourceDefinition>;
   decorSlots: Map<string, DecorSlotDefinition>;
+  doors: Map<string, DoorDefinition>;
+  containers: Map<string, ContainerDefinition>;
+  pickups: Map<string, PickupDefinition>;
+  topics: Map<string, TopicDefinition>;
+  barks: BarkDefinition[];
 }
 
 const byId = <T extends { id: string }>(list: T[]): Map<string, T> => new Map(list.map((x) => [x.id, x]));
@@ -56,10 +67,15 @@ export function loadDefinitions(): Definitions {
     crops: new Map(CROPS.map((c) => [c.seedItemId, c])),
     waterSources: byId(WATER_SOURCES),
     decorSlots: byId(DECOR_SLOTS),
+    doors: byId(DOORS),
+    containers: byId(CONTAINERS),
+    pickups: byId(PICKUPS),
+    topics: byId(TOPICS),
+    barks: BARKS,
   };
 }
 
 export const INVENTORY_SLOTS = 20;
 export const STORAGE_SLOTS = 24;
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 export const START_MINUTES = 7 * 60; // day 1, 07:00

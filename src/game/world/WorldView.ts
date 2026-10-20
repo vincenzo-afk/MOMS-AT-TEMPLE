@@ -37,11 +37,18 @@ export class WorldView {
         this.showState(obj, s.plots[b.plotId]?.stage ?? "empty");
       } else if ("decorSlot" in b) {
         obj.visible = !!s.decor[b.decorSlot];
+      } else if ("pickupId" in b) {
+        obj.visible = this.session.isPickupAvailable(b.pickupId);
       } else {
         const state = s.restorations[b.restorationId] ?? "";
         if (b.visibleInState) obj.visible = state === b.visibleInState;
         else this.showState(obj, state);
       }
+    }
+    // doors: the leaf animates in Game.frame; the doorway blocker follows the saved state immediately
+    for (const d of this.session.defs.doors.values()) {
+      const rt = this.level.doors.get(`${d.placementId}.${d.node}`);
+      if (rt?.collider) rt.collider.enabled = !this.session.isDoorOpen(d.id);
     }
     for (const sc of this.level.stateColliders) {
       const rid = this.restorationOf.get(sc.placementId);

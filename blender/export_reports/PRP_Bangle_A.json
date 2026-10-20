@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Bangle_A",
+  "glb": "public/assets/models/props/PRP_Bangle_A.glb",
+  "blend": "blender/source/PRP_Bangle_A.blend",
+  "bytes": 6988,
+  "triangles": 216,
+  "objects": [
+    "PRP_Bangle_A",
+    "PRP_Bangle_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.04,
+    -0.04,
+    0.0
+  ],
+  "boundsMax": [
+    0.043,
+    0.04,
+    0.02
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

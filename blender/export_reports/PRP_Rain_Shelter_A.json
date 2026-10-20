@@ -1,0 +1,40 @@
+{
+  "assetId": "PRP_Rain_Shelter_A",
+  "glb": "public/assets/models/props/PRP_Rain_Shelter_A.glb",
+  "blend": "blender/source/PRP_Rain_Shelter_A.blend",
+  "bytes": 81148,
+  "triangles": 1348,
+  "objects": [
+    "COL_Bench",
+    "COL_Post_-1_-1",
+    "COL_Post_-1_1",
+    "COL_Post_1_-1",
+    "COL_Post_1_1",
+    "PRP_Rain_Shelter_A",
+    "PRP_Rain_Shelter_A_Mesh",
+    "PRP_Rain_Shelter_A_Roof",
+    "SOCKET_Shelter"
+  ],
+  "colliders": [
+    "COL_Bench",
+    "COL_Post_-1_-1",
+    "COL_Post_-1_1",
+    "COL_Post_1_-1",
+    "COL_Post_1_1"
+  ],
+  "materials": [
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.05,
+    -1.635,
+    -0.005
+  ],
+  "boundsMax": [
+    2.05,
+    1.635,
+    3.58
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

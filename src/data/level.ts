@@ -17,7 +17,7 @@ export interface Placement {
 
 export interface InteractablePlacement {
   id: string;
-  kind: "gather" | "station" | "restoration" | "discovery" | "rest" | "plot" | "water" | "storage" | "decor" | "notice" | "sit";
+  kind: "gather" | "station" | "restoration" | "discovery" | "rest" | "plot" | "water" | "storage" | "decor" | "notice" | "sit" | "container" | "pickup";
   refId: string;
   label: string;
   locationId: string;
@@ -27,6 +27,8 @@ export interface InteractablePlacement {
   visualId?: string;
   /** For "sit": which way to face while seated (degrees). */
   faceY?: number;
+  /** Resolve the position from a placement socket ("placementId.SOCKET_Name") instead of `pos`. */
+  socket?: string;
 }
 
 export interface Region {
@@ -166,7 +168,7 @@ export const PLACEMENTS: Placement[] = [
   P("ENV_House_Village_B", -26, -2, 90),
   P("ENV_House_Village_A", -26, 8, 90, { id: "house_ponnan" }),
   P("ENV_House_Village_B", -26, 18, 90, { id: "house_valli" }),
-  P("ENV_House_Village_A", -26, 28, 90, { id: "house_player" }),
+  P("ENV_House_Player_A", -26, 28, 90, { id: "house_player" }), // enterable: hinged door, furnished room
   { asset: "PRP_Storage_Chest_A", pos: [-22.9, 0.85, 30.3], rotY: 90, id: "home_chest" }, // on the left thinnai
   // player home decorations (shown by decor slot state)
   { asset: "PRP_Thoranam_A", pos: [-23.9, 2.85, 28], rotY: 90, id: "decor_doorway" },
@@ -234,6 +236,18 @@ export const PLACEMENTS: Placement[] = [
   P("ENV_House_Thatch_A", 102, -8, 0, { state: "restored" }),
   P("ENV_House_Village_B", 82, -11, 0),
   P("PRP_Storage_Set_A", 74, -4, 0),
+  // ---- granary (owned by Selvam, watched by Kannan at night), rain shelters, containers, lost items
+  P("ENV_Granary_A", 118, -8, 0, { id: "granary" }),
+  { asset: "PRP_Crate_A", pos: [118.9, 0.4, -7.4], rotY: 10, id: "granary_crate" },
+  P("PRP_Crate_A", 55.2, 2.8, 15, { id: "raman_crate" }),
+  P("PRP_Crate_A", -108, -30, 40, { id: "ruins_crate" }),
+  P("PRP_Crate_A", 43.6, -58.2, 0, { id: "field_crate" }),
+  P("PRP_Rain_Shelter_A", 88, -3, 0, { id: "shelter_bazaar" }),
+  P("PRP_Rain_Shelter_A", 60, -55, 0, { id: "shelter_fields" }),
+  P("PRP_Rain_Shelter_A", 12, 84, 90, { id: "shelter_road" }),
+  { asset: "PRP_Bangle_A", pos: [-29.6, 0.09, 78], rotY: 0, id: "pickup_bangle" },
+  P("PRP_Chisel_A", -66.5, -41.6, 30, { id: "pickup_chisel" }),
+  P("PRP_Coin_Pouch_A", 64.5, 10.8, 0, { id: "pickup_pouch" }),
   // ---- east lane
   P("ENV_House_Village_A", 71, 34, 90),
   P("ENV_House_Thatch_A", 72, 48, 90, { state: "restored" }),
@@ -313,7 +327,14 @@ export const INTERACTABLES: InteractablePlacement[] = [
   { id: "int_fragment", kind: "discovery", refId: "disc_carved_fragment", label: "the carved block", locationId: "loc_ruins", pos: [-78.6, 0, -34.4], radius: 2.0 },
   { id: "int_manuscript", kind: "discovery", refId: "disc_palm_manuscript", label: "the sealed case", locationId: "loc_ruins", pos: [-104, 0, -14.4], radius: 2.0 },
   { id: "int_marker", kind: "discovery", refId: "disc_marker_stone", label: "the boundary stone", locationId: "loc_fields", pos: [113.6, 0, -58.8], radius: 2.0 },
-  { id: "int_rest", kind: "rest", refId: "home", label: "your doorway", locationId: "loc_home", pos: [-23.2, 0.45, 28], radius: 1.6 },
+  { id: "int_rest", kind: "rest", refId: "home", label: "your cot", locationId: "loc_home", pos: [-27.2, 0.45, 26.5], radius: 1.4, socket: "house_player.SOCKET_Bed" },
+  { id: "int_ct_granary", kind: "container", refId: "ct_granary_crate", label: "crate", locationId: "loc_bazaar", pos: [118.9, 0.4, -6.8], radius: 1.4 },
+  { id: "int_ct_raman", kind: "container", refId: "ct_raman_crate", label: "crate", locationId: "loc_bazaar", pos: [55.2, 0, 3.4], radius: 1.4 },
+  { id: "int_ct_ruins", kind: "container", refId: "ct_ruins_crate", label: "crate", locationId: "loc_ruins", pos: [-108, 0, -29.3], radius: 1.4 },
+  { id: "int_ct_field", kind: "container", refId: "ct_field_crate", label: "crate", locationId: "loc_fields", pos: [43.6, 0, -57.5], radius: 1.4 },
+  { id: "int_pk_bangle", kind: "pickup", refId: "pk_bangle", label: "bangle", locationId: "loc_kulam", pos: [-29.6, 0.09, 78], radius: 1.4, visualId: "pickup_bangle" },
+  { id: "int_pk_chisel", kind: "pickup", refId: "pk_chisel", label: "chisel", locationId: "loc_ruins", pos: [-66.5, 0, -41.6], radius: 1.4, visualId: "pickup_chisel" },
+  { id: "int_pk_pouch", kind: "pickup", refId: "pk_pouch", label: "pouch", locationId: "loc_bazaar", pos: [64.5, 0, 10.8], radius: 1.4, visualId: "pickup_pouch" },
   { id: "int_home_chest", kind: "storage", refId: "home_chest", label: "your chest", locationId: "loc_home", pos: [-21.6, 0.6, 30.3], radius: 1.4 },
   { id: "int_home_decor", kind: "decor", refId: "home", label: "your house", locationId: "loc_home", pos: [-20.4, 0, 28.0], radius: 1.4 },
   { id: "int_notice", kind: "notice", refId: "board", label: "the notice board", locationId: "loc_approach", pos: [5.2, 0, 52], radius: 2.2 },
@@ -359,6 +380,17 @@ export const ANCHORS: Record<string, { pos: [number, number, number]; faceY: num
   anc_kulam: { pos: [-28, 0, 74], faceY: 250 },
   anc_road: { pos: [4.5, 0, 75], faceY: 270 },
   anc_woods: { pos: [-80, 0, -72], faceY: 30 },
+  anc_granary: { pos: [119.6, 0, -3.6], faceY: 0 },
+  anc_shelter_bazaar: { pos: [88, 0, -2.4], faceY: 0 },
+  anc_shelter_fields: { pos: [60, 0, -54.4], faceY: 0 },
+  anc_shelter_road: { pos: [12.6, 0, 84], faceY: 90 },
+  anc_workshop_cover: { pos: [26.2, 0.15, 10.6], faceY: -90 },
+  anc_courtyard_cover: { pos: [2.2, 1.5, -9.4], faceY: 0 },
+  anc_well_queue: { pos: [80.2, 0, 7.6], faceY: 120 },
+  anc_road_south: { pos: [-1.5, 0, 128], faceY: 0 },
+  anc_road_north: { pos: [1.5, 0, 60], faceY: 180 },
+  anc_logs: { pos: [-96, 0, -67], faceY: 200 },
+  anc_paddy_2: { pos: [100, 0, -95], faceY: 90 },
   ...fest,
 };
 
@@ -400,6 +432,9 @@ export const NAV_NODES: Record<string, [number, number]> = {
   ruins_c: [-66, -28],
   ruins_e: [-80, -22],
   woods: [-76, -66],
+  bazaar_far: [122, 10],
+  granary: [118, -2],
+  road_far: [0, 128],
 };
 
 export const NAV_EDGES: Array<[string, string]> = [
@@ -412,6 +447,7 @@ export const NAV_EDGES: Array<[string, string]> = [
   ["well", "lane_n"], ["lane_n", "lane_m"], ["lane_m", "lane_s"],
   ["gate", "south_out"], ["south_out", "road_mid"], ["road_mid", "kulam"],
   ["forgotten", "west_in"], ["west_in", "west_out"], ["west_out", "ruins_c"], ["ruins_c", "ruins_e"], ["ruins_c", "woods"],
+  ["bazaar_e", "bazaar_far"], ["bazaar_far", "granary"], ["road_mid", "road_far"],
 ];
 
 /** State -> visual rules. See WorldView. */
@@ -419,7 +455,8 @@ export type VisualBinding =
   | { placementId: string; restorationId: string; visibleInState?: string }
   | { placementId: string; flag: string }
   | { placementId: string; plotId: string }
-  | { placementId: string; decorSlot: string };
+  | { placementId: string; decorSlot: string }
+  | { placementId: string; pickupId: string };
 
 export const VISUAL_BINDINGS: VisualBinding[] = [
   { placementId: "channel_blocked", restorationId: "rest_channel_east", visibleInState: "blocked" },
@@ -436,6 +473,7 @@ export const VISUAL_BINDINGS: VisualBinding[] = [
   { placementId: "old_path", restorationId: "rest_old_path" },
   { placementId: "weaver_house", restorationId: "rest_weaver_house" },
   ...[1, 2, 3, 4].map((i) => ({ placementId: `plot_${i}`, plotId: `plot_${i}` })),
+  ...["pickup_bangle", "pickup_chisel", "pickup_pouch"].map((p) => ({ placementId: p, pickupId: `pk_${p.slice(7)}` })),
   ...["decor_doorway", "decor_doorstep", "decor_lamp", "decor_mat", "decor_plant"].map((s) => ({ placementId: s, decorSlot: s })),
   ...["fest_kolam_1", "fest_kolam_2", "fest_kolam_3", "fest_bunting_1", "fest_bunting_2", "fest_bunting_3", "fest_lamps_1", "fest_lamps_2", "fest_lamps_3", "fest_lamps_4", "fest_stand_1", "fest_stand_2", "fest_arch_1", "fest_arch_2", "fest_arch_3"].map(
     (p) => ({ placementId: p, flag: "festival_held" }),

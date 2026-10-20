@@ -1,5 +1,6 @@
 import { AUDIO_MANIFEST, type AudioEntry } from "../../data/audioManifest";
 import type { Settings } from "../core/types";
+import { Soundscape, type SoundscapeParams, type Surface } from "./Soundscape";
 
 type Bus = "music" | "effects";
 
@@ -18,6 +19,10 @@ export class AudioManager {
   readonly missing = new Set<string>();
   readonly loaded = new Set<string>();
   private settings: Settings | null = null;
+  /** Procedural ambience; present once audio is unlocked. */
+  soundscape: Soundscape | null = null;
+  /** Counts of triggered cues (diagnostics and tests). */
+  readonly cueCounts: Record<string, number> = {};
 
   get started(): boolean {
     return this.ctx !== null && this.ctx.state === "running";
@@ -35,6 +40,7 @@ export class AudioManager {
       this.buses.music.connect(this.master);
       this.buses.effects.connect(this.master);
       this.applySettings(settings);
+      this.soundscape = new Soundscape(this.ctx, this.buses.effects, (id) => this.loaded.has(id));
       void this.preload();
     }
     if (this.ctx.state === "suspended") await this.ctx.resume().catch(() => undefined);
@@ -85,7 +91,32 @@ export class AudioManager {
     return e.type === "music" ? "music" : "effects";
   }
 
+  /** True when the real audio file for this manifest id is loaded. */
+  hasFile(id: string): boolean {
+    return this.loaded.has(id);
+  }
+
+  updateAmbience(dt: number, p: SoundscapeParams): void {
+    this.soundscape?.update(dt, p);
+  }
+  footstep(surface: Surface, running: boolean): void {
+    this.count("footstep");
+    this.soundscape?.footstep(surface, running);
+  }
+  door(open: boolean): void {
+    this.count("door");
+    this.soundscape?.door(open);
+  }
+  alarm(): void {
+    this.count("alarm");
+    this.soundscape?.alarm();
+  }
+  private count(id: string): void {
+    this.cueCounts[id] = (this.cueCounts[id] ?? 0) + 1;
+  }
+
   play(id: string): void {
+    this.count(id);
     const e = AUDIO_MANIFEST.find((a) => a.id === id);
     if (!this.ctx || !e) return;
     const buf = this.buffers.get(id);
@@ -141,6 +172,7 @@ export class AudioManager {
       sfx_restore: [392, 784, 0.45],
       ui_open: [520, 520, 0.05],
       ui_confirm: [600, 900, 0.1],
+      ui_error: [300, 200, 0.12],
     };
     const t = tones[id];
     if (!t) return;

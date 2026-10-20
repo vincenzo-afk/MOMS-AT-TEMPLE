@@ -1,16 +1,15 @@
 {
   "blender": "5.2.2 LTS",
   "exported": [
-    "CHR_Player_Base",
-    "CHR_NPC_Amudha",
-    "CHR_NPC_Velan",
-    "CHR_NPC_Selvam",
-    "CHR_NPC_Ponnan",
-    "CHR_NPC_Valli",
-    "CHR_NPC_Meena",
-    "CHR_Villager_A",
-    "CHR_Villager_B",
-    "CHR_Villager_C"
+    "ENV_House_Player_A",
+    "ENV_Granary_A",
+    "PRP_Crate_A",
+    "PRP_Bangle_A",
+    "PRP_Chisel_A",
+    "PRP_Coin_Pouch_A",
+    "PRP_Palm_Coconut_B_LOD1",
+    "PRP_Neem_Tree_B_LOD1",
+    "PRP_Rain_Shelter_A"
   ],
   "failures": []
 }

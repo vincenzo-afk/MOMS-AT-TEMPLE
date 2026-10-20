@@ -17,7 +17,7 @@
 
 > This section tracks what is actually built. Everything from §1 onward is the unchanged design specification.
 
-**Milestone reached:** expanded vertical slice (session 2). A full beginning-to-festival story arc is playable. Prototype, not a finished game.
+**Milestone reached:** systemic vertical slice (session 3). A full beginning-to-festival story arc is playable in a world with enterable interiors, doors, owned containers, a watchman, weather and a reactive population. It is still a prototype with first-pass procedural art and placeholder audio, not a finished game.
 
 ## Quick start
 
@@ -30,22 +30,26 @@ npm run build        # typecheck + production build in dist/
 npm run assets       # rebuild all 3D assets in Blender (headless), manifest + GLB validation
 ```
 
-Controls: WASD move · Shift run · mouse look (click the scene) · E interact · R secondary · I inventory · J journal · L Living Record · M map · C community and skills · Esc pause/close.
+Controls: WASD move · Shift run · mouse look (click the scene, or hold right mouse) · E interact · R secondary · I inventory · J journal · L Living Record · M map · C community and skills · Esc pause/close. Keys can be remapped in Settings; a standard gamepad works (see `docs/GAMEPLAY_SYSTEMS.md`).
 
 ## What works (verified in the browser)
 
 | Area | State |
 |---|---|
 | World | 300 × 300 m map: the walled temple core (temple, gopuram, prakara, west street, workshop, garden, old grounds) plus a south approach with a large stepped temple tank, an east bazaar with eight stalls and a well square, an east lane of houses, north paddy fields with a channel network and a reservoir sluice, western ruins in a walled enclosure, and a woodland. Four gates through the core wall. |
-| Assets | **113** Blender-generated GLB models validated and placed, rebuilt to the reference sheets in `asserts_img/` (see `docs/REFERENCE_COVERAGE.md`). Tileable detail textures (stone, plaster, wood, terracotta, thatch, soil, foliage, cloth, brass, skin, brick, ground) are applied by a triplanar shader. |
-| Characters | Player, 6 story NPCs (Valli, Amudha the gardener, Velan the stone carver, Selvam the trader, Elder Ponnan, Meena the weaver) and 6 everyday villagers on one shared skeleton; **28 animation clips** shared to every NPC by retargeting. Still procedural first-pass characters, not final art. |
-| Story | **12 quests** from arrival to the lamp festival: welcome, garden channel, gate garland, inscription, your house, bazaar well, field sluice, first harvest, old wall and pillar, palm-leaf manuscript, weaver's house, lamp festival. |
+| Assets | **123** Blender-generated GLB models (session 3 added the enterable player house, the granary, a crate, three pickup props, a rain shelter, LOD1 palm and neem, and the watchman) validated and placed, rebuilt to the reference sheets in `asserts_img/` (see `docs/REFERENCE_COVERAGE.md`). Tileable detail textures (stone, plaster, wood, terracotta, thatch, soil, foliage, cloth, brass, skin, brick, ground) are applied by a triplanar shader. |
+| Characters | Player, 6 story NPCs (Valli, Amudha the gardener, Velan the stone carver, Selvam the trader, Elder Ponnan, Meena the weaver), Kannan the watchman and 10 everyday villagers on one shared skeleton; **28 animation clips** shared to every NPC by retargeting. Still procedural first-pass characters, not final art. |
+| Story | **14 quests**: the 12-quest arc from arrival to the lamp festival (welcome, garden channel, gate garland, inscription, your house, bazaar well, field sluice, first harvest, old wall and pillar, palm-leaf manuscript, weaver's house, lamp festival) plus *The Lost Bangle* and *Velan's Chisel* (unlocked by asking Velan about the ruins). A found coin pouch can be kept or returned, with consequences. |
 | Systems | Gathering (flowers, stone, clay, timber, thatching grass), crafting at two stations (6 recipes), trading with two shops, **farming** (plant, water from tank/water point/well, grow over world time, harvest; plots auto-watered once the fields are irrigated), **storage chest**, **home decoration** (5 slots), **skills** (gardening, masonry, crafting), relationships with daily-greeting growth and relationship-gated dialogue, NPC schedules with conditional entries, an absent-until-restored NPC, villagers reacting to world changes, notice board, map with live NPC positions and restoration markers, Living Record with "show on map". |
 | Restorations | 9 restorations, 2 automatic consequences (garden from the channel, fields from the sluice), with state-dependent visuals and collision (the overgrown path physically blocks until cleared). The festival turns on kolams, bunting, banana arches and lit lamps across the settlement. |
-| Saves | IndexedDB schema **v2** with a tested migration from v1 saves, rolling backup, corrupt-save recovery. |
-| Audio | Web Audio buses and 16 Lyria slots (day/evening ambience switching, festival music slot). **No audio files supplied yet** (placeholder synthesized UI blips). |
+| World systems (session 3) | Hinged doors with saved state and night locks; enterable interiors with an "indoors" check; world crates with saved contents and owners; **theft seen by witnesses** (distance plus line of sight) → opinion loss → the watchman runs to you and confronts you → put it back or pay a fine (never a dead end); one-time world pickups; usable items; "Ask about" dialogue topics with knowledge boundaries, Goodbye, and a conversation history in the journal. |
+| NPCs (session 3) | Collision-aware steering, separation from people, stuck recovery; head look-at, greetings, bump reactions and contextual speech bubbles with cooldowns; errands pause while talking; indoors at night; **shelter from rain**; distance-tiered updates. |
+| Atmosphere (session 3) | Deterministic weather (clear, cloudy, rain) with rain streaks, wet ground, overcast lighting, nearer fog, wind sway on foliage and cloth, dust motes and fireflies. |
+| Controls (session 3) | Analog gamepad support, key remapping, right-drag look, interaction line of sight, cooldown and a target ring, gradual dialogue text and dialogue box opacity. |
+| Saves | IndexedDB schema **v3** with tested migrations v1 → v2 → v3, rolling backup, corrupt-save recovery. |
+| Audio | Web Audio buses and 17 Lyria slots. **No audio files supplied yet.** A **procedural placeholder soundscape** (wind, rain, water, market murmur, birds, crickets, surface footsteps, doors, alarm) is synthesized in code; each layer mutes once its recording exists. |
 
-Tests: 17 unit tests, 15 browser tests and 113 GLB validations pass; typecheck is clean; the production build succeeds. Details are in `docs/TEST_PLAN.md`.
+Tests: 29 unit tests, 23 browser tests and 123 GLB validations pass; typecheck is clean; the production build succeeds. Details are in `docs/TEST_PLAN.md`; the session 3 audit and checklist are in `docs/PROGRESS_CHECKLIST.md`.
 
 ## Documentation
 
@@ -53,7 +57,7 @@ Tests: 17 unit tests, 15 browser tests and 113 GLB validations pass; typecheck i
 
 ## Not done yet
 
-Cultural and historical reference brief. Hand-modelled production characters (fingers, faces, textures). Lyria audio. Painted item icons. Performance budgets on lower-end hardware (the larger map now draws ~650 calls / ~1M triangles per frame). Firefox and Safari testing.
+Cultural and historical reference brief. Hand-modelled production characters (fingers, faces, textures). Lyria audio (the procedural soundscape is a placeholder). Painted item icons. Performance budgets on lower-end hardware (about 710 draw calls and 0.8M triangles per frame in the courtyard). Testing with a physical gamepad (only a scripted one was used), in Firefox and in Safari. New animation clips for doors and containers (they reuse the reach animation).
 
 ---
 

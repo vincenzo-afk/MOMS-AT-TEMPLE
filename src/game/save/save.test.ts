@@ -49,7 +49,7 @@ describe("save system", () => {
     expect(r.ok).toBe(false);
   });
 
-  it("migrates a version 1 save (renamed NPCs, shortened garland quest, new state blocks)", () => {
+  it("migrates a version 1 save through v2 to v3 (renamed NPCs, shortened garland quest, new state blocks)", () => {
     const s = new GameSession(defs);
     const v1 = JSON.parse(JSON.stringify(s.state));
     v1.schemaVersion = 1;
@@ -64,7 +64,7 @@ describe("save system", () => {
     const r = validateSave(v1, defs);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.state.schemaVersion).toBe(2);
+    expect(r.state.schemaVersion).toBe(3);
     expect(r.state.relationships).toEqual({ npc_amudha: 25, npc_velan: 10 });
     expect(r.state.quests.q_garland?.objectiveIndex).toBe(2);
     expect(r.state.flags.learned_garland).toBe(true);

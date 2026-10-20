@@ -73,6 +73,43 @@ export function StoragePanel() {
   );
 }
 
+// ------------------------------------------------------------------ world containers
+export function ContainerPanel() {
+  const game = useGame();
+  const ui = useUi();
+  const s = useGameState();
+  const def = ui.containerId ? game.session.defs.containers.get(ui.containerId) : undefined;
+  if (!def) return null;
+  const owner = def.ownerNpcId ? game.session.defs.npcs.get(def.ownerNpcId) : undefined;
+  const permitted = !owner || (def.id === "ct_granary_crate" && s.flags.granary_key);
+  const slots = s.containers[def.id] ?? [];
+  return (
+    <Frame title={def.label[0]!.toUpperCase() + def.label.slice(1)} wide testId="container">
+      {owner && !permitted && <p className="warn">This belongs to {owner.name}. Taking from it while anyone can see you is theft.</p>}
+      {owner && permitted && <p className="muted small">{owner.name} said you may take from this.</p>}
+      <div className="two-col">
+        <div>
+          <h4 className="section">Inside</h4>
+          <div className="inv-grid">
+            {slots.map((st, i) => (
+              <Slot key={i} stack={st} onClick={() => game.takeFromContainer(def.id, i)} testId={st ? `take-${st.itemId}` : undefined} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <h4 className="section">Your bag</h4>
+          <div className="inv-grid">
+            {s.inventory.map((st, i) => (
+              <Slot key={i} stack={st} onClick={() => game.session.putIntoContainer(def.id, i)} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <p className="muted small">Click an item to move it.</p>
+    </Frame>
+  );
+}
+
 // ------------------------------------------------------------------ home decoration
 export function DecorPanel() {
   const game = useGame();

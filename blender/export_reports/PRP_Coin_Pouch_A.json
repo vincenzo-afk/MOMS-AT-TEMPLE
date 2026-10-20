@@ -1,0 +1,28 @@
+{
+  "assetId": "PRP_Coin_Pouch_A",
+  "glb": "public/assets/models/props/PRP_Coin_Pouch_A.glb",
+  "blend": "blender/source/PRP_Coin_Pouch_A.blend",
+  "bytes": 11796,
+  "triangles": 348,
+  "objects": [
+    "PRP_Coin_Pouch_A",
+    "PRP_Coin_Pouch_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -0.06,
+    -0.055,
+    -0.001
+  ],
+  "boundsMax": [
+    0.108,
+    0.053,
+    0.135
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

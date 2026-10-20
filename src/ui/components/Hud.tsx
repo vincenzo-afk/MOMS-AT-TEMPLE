@@ -1,5 +1,6 @@
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS } from "../../data/text";
+import { keyLabel, type Binding } from "../../game/core/Input";
 
 function clock(minutes: number): string {
   const m = Math.floor(minutes % 1440);
@@ -22,8 +23,9 @@ export function Hud() {
       <div className="hud-top">
         <div className="hud-place">
           <span className="hud-location" data-testid="location">{ui.locationName}</span>
-          <span className="hud-time">
-            Day {Math.floor(s.worldMinutes / 1440) + 1} · {clock(s.worldMinutes)}
+          <span className="hud-time" data-testid="hud-time">
+            Day {Math.floor(s.worldMinutes / 1440) + 1} · {clock(s.worldMinutes)} · {ui.weather === "rain" ? "☂ Rain" : ui.weather === "cloudy" ? "☁ Cloudy" : "☀ Clear"}
+            {ui.indoors ? " · indoors" : ""}
           </span>
         </div>
         <div className="hud-coins" title="Coins" data-testid="coins">
@@ -55,14 +57,26 @@ export function Hud() {
 
       {ui.busyLabel && <div className="busy">{ui.busyLabel}</div>}
 
-      {ui.mode === "play" && !ui.pointerLocked && ui.panel === null && <div className="lock-hint">Click the scene to look around · Esc to pause</div>}
+      {ui.mode === "play" && !ui.pointerLocked && ui.panel === null && <div className="lock-hint">Click the scene (or hold right mouse) to look around · Esc to pause</div>}
+      {s.pendingCrime && <div className="crime-banner" data-testid="crime-banner">Kannan the watchman is looking for you</div>}
 
       <div className="hud-keys">
-        <span><kbd>I</kbd> Inventory</span>
-        <span><kbd>J</kbd> Journal</span>
-        <span><kbd>L</kbd> Living Record</span>
-        <span><kbd>M</kbd> Map</span>
-        <span><kbd>C</kbd> Community</span>
+        {(
+          [
+            ["inventory", "Inventory"],
+            ["journal", "Journal"],
+            ["record", "Living Record"],
+            ["map", "Map"],
+            ["community", "Community"],
+          ] as Array<[Binding, string]>
+        ).map(([b, label]) => {
+          const k = game.input.keysFor(b)[0]; // follows remapped keys
+          return k ? (
+            <span key={b}>
+              <kbd>{keyLabel(k)}</kbd> {label}
+            </span>
+          ) : null;
+        })}
       </div>
 
       <div className="toasts" aria-live="polite">

@@ -38,6 +38,16 @@
 | D27 | Git: the existing remote main (MIT LICENSE by Bharani Kumar S, README stub) is kept as the first commit and this project is committed on top; the README stub was replaced by the project README | no force-push; the LICENSE is preserved |
 | D28 | Blender and asset-build temp files go to .tmp/ on the project drive | the C: drive ran out of space during this session |
 
+## Decisions (session 3)
+
+- **Rules in the session, perception in the engine.** Who saw a theft is computed by the engine (distance plus line of sight against the collision world) and passed to `GameSession.takeFromContainer()`, which owns every consequence. The rules stay unit-testable and the save stays the only source of truth.
+- **No soft-locks from crime.** Confrontation always resolves: return the item, pay 6 coins, or lose what coins you have. Taking more is blocked while a crime is pending so it cannot snowball.
+- **Weather is not saved.** It is a pure function of world time, so a reload shows the same sky and tests can find rain deterministically.
+- **No language model.** Dialogue topics are authored data with per-NPC knowledge boundaries. An LLM could later rephrase answers, but it must never apply effects; only authored effects change state.
+- **Procedural audio as a labelled placeholder** rather than silence, so footsteps, rain and doors give feedback now. Each layer is muted automatically once a real recording is supplied.
+- **The door interaction point is the doorway centre**, so the same door works from inside and outside. Doors swing inward so an open door never blocks the veranda.
+- **Line of sight is tested at waist and shoulder height,** so a counter does not hide a trader but a wall hides everything.
+
 ## Conflicts between README and reality
 
 - **README §14 file structure** lists `src/tests/` and per-system data folders; data lives in single files under `src/data/` (small enough), and unit tests sit beside the code they test. Browser tests are in `tests/e2e/`.
@@ -49,18 +59,21 @@
 | Area | Issue | Severity | Next step |
 |---|---|---|---|
 | Characters | cloth stretches on wide strides (no cloth simulation); faces have no rig or blinking; procedural, not hand-modelled | medium | hand-modelled pass keeping SK_Humanoid_A |
-| Performance | the 300 m map draws about 650 calls and 1M triangles per frame (6 ms CPU here); not measured on low-end hardware | medium | LOD for palms and neems, merge static props per chunk |
+| Performance | about 710 draw calls and 0.82M triangles per frame in the courtyard (67-101 fps headless on an AMD iGPU, depending on what else shares the GPU); draw-call bound; not measured on low-end hardware. Palm and neem LOD (session 3) cut triangles by about 26% in that view | medium | merge static props per chunk, LOD for walls and houses |
 | Environment | the C: drive was full during session 2; npm installs need --cache on another drive | environment | free space on C: |
 | Characters | no UVs or textures | low | after modelling pass |
 | Animation | 28 of the README's ~35 clips exist (see ANIMATION_SPEC) | low | walk start/stop, carry, close_container |
-| NPCs | no collision avoidance with the player or each other; they follow a nav graph but can brush past props | low | add simple separation steering |
-| NPCs | villagers can brush through props on some navigation segments (no avoidance) | low | separation steering |
-| Camera | mouse look requires pointer lock (click the canvas); no drag-to-look fallback | low | add right-drag fallback |
+| NPCs | stuck recovery (re-plan, skip a waypoint, step past) is implemented but no automated test forces an NPC into a stuck state; the sampled runs recorded 0 repaths | low | a test that blocks a route with a collider |
+| NPCs | NPCs do not react to the player running, entering homes or carrying stolen goods later; only witnessed container theft is a crime | low | trespass rules per interior |
+| Interaction | opening doors and containers reuses the reach animation (no dedicated door or lid animation; crates have no opening lid) | low | door_push and open_container clips, an animated lid |
+| Input | gamepad tested only with a scripted `navigator.getGamepads()` stub, not a physical controller | low | manual check with an Xbox/PS pad |
+| Audio | the procedural soundscape is a placeholder and has not been mixed or listened to by a person | medium | Lyria recordings, mix pass |
+| Characters | Kannan the watchman is a first-pass procedural character like the others | low | production pass |
 | Rendering | ≈ 550k triangles/frame including the shadow pass; grass and palm instances cast shadows | low-medium | LOD for palms, no grass shadows, cascade or tighter shadow box |
 | Rendering | changing graphics quality at runtime toggles shadows; pixel ratio applies immediately, but some materials may need a reload to update shadow receiving | low | force `material.needsUpdate` on change |
 | Vegetation | palm fronds are flat strips (no leaflets) | low | leaflet cards in production pass |
 | Audio | no music or ambience files yet (all pending) | expected | generate with Lyria from AUDIO_BIBLE prompts |
 | Content | Phase 8 targets met (12 quests, 6 recipes, 26 items, festival, housing); no post-festival content yet | low | seasonal events, more professions |
 | Culture | historical and cultural reference brief not yet written; architecture vocabulary and clothing are generic | **high before content expansion** | write `docs/CULTURAL_RESEARCH.md` and review assets against it |
-| Build | single 960 kB JS chunk (262 kB gzip) | low | code-split UI panels and three/addons if startup matters |
+| Build | single 1.1 MB JS chunk (304 kB gzip) | low | code-split UI panels and three/addons if startup matters |
 | Tests | headless runs never exercise real pointer-lock; Firefox/Safari untested | low | manual checklist in TEST_PLAN |

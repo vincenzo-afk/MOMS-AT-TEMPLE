@@ -6,3 +6,5 @@ playwright-report/
 *.blend1
 blender/export_reports/previews/
 .tmp/
+__pycache__/
+*.pyc

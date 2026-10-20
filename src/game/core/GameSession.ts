@@ -28,7 +28,11 @@ export type GameEvent =
   | { type: "reading"; discoveryId: string }
   | { type: "inspect"; text: string[] }
   | { type: "farm"; plotId: string; action: "plant" | "water" | "harvest" }
-  | { type: "skill"; skill: SkillId; level: number };
+  | { type: "skill"; skill: SkillId; level: number }
+  | { type: "door"; doorId: string; open: boolean }
+  | { type: "crime"; witnessId: string; containerId: string }
+  | { type: "pickup"; pickupId: string }
+  | { type: "fail" };
 
 export interface Conversation {
   npcId: string;
@@ -58,8 +62,15 @@ export function newGameState(now = new Date()): GameState {
     decor: {},
     lastTalkDay: {},
     skills: { gardening: 0, masonry: 0, crafting: 0 },
+    doors: {},
+    containers: {},
+    pickedUp: [],
+    pendingCrime: null,
+    talkLog: [],
   };
 }
+
+const TALK_LOG_MAX = 60;
 
 const levelOf = (xp: number) => Math.floor(Math.sqrt(Math.max(0, xp) / 10));
 
@@ -87,6 +98,13 @@ export class GameSession {
     for (const r of this.defs.restorations.values()) if (!s.restorations[r.id]) s.restorations[r.id] = r.initialState;
     for (const p of this.defs.plots.values()) if (!s.plots[p.id]) s.plots[p.id] = { stage: "empty", seedItemId: null, plantedAt: 0, wateredAt: null };
     for (const d of this.defs.decorSlots.values()) if (!(d.id in s.decor)) s.decor[d.id] = null;
+    for (const c of this.defs.containers.values()) {
+      if (!s.containers[c.id]) {
+        const slots: Array<ItemStack | null> = Array.from({ length: c.slots }, () => null);
+        c.initial.forEach((st, i) => (slots[i] = { ...st }));
+        s.containers[c.id] = slots;
+      }
+    }
   }
 
   // ---------------------------------------------------------------- subscription
@@ -105,6 +123,7 @@ export class GameSession {
   }
   private notify(text: string, tone: "info" | "good" | "bad" = "info"): void {
     this.emit({ type: "notify", text, tone });
+    if (tone === "bad") this.emit({ type: "fail" });
   }
   /** Commit: settle consequences, then publish a new snapshot reference. */
   private commit(): void {
@@ -629,8 +648,15 @@ export class GameSession {
     return this.conversation;
   }
 
+  private logTalk(npcId: string, lines: string[]): void {
+    const day = this.worldDay;
+    const minute = Math.floor(this.state.worldMinutes % 1440);
+    this.state.talkLog = [...this.state.talkLog, ...lines.map((text) => ({ npcId, text, day, minute }))].slice(-TALK_LOG_MAX);
+  }
+
   private showNode(npcId: string, node: DialogueNode): void {
     this.conversation = { npcId, node };
+    this.logTalk(npcId, node.lines);
     this.applyEffects(node.effects);
     this.advanceWhere("talk", npcId);
     this.commit();
@@ -686,6 +712,18 @@ export class GameSession {
           break;
         case "openShop":
           this.emit({ type: "shop", shopId: e.shopId });
+          break;
+        case "takeItem": {
+          const removed = removeItems(this.state.inventory, [{ itemId: e.itemId, quantity: e.quantity }]);
+          if (!removed.ok) return false;
+          this.state.inventory = removed.inventory;
+          break;
+        }
+        case "coins":
+          this.state.coins = Math.max(0, this.state.coins + e.amount);
+          break;
+        case "resolveCrime":
+          this.resolveCrime(e.mode);
           break;
         case "giveItem": {
           const claim = `give:${e.once}`;
@@ -763,6 +801,21 @@ export class GameSession {
         return [{ verb: "notices", label: "Read the notice board", enabled: true }];
       case "sit":
         return [{ verb: "sit", label: "Sit and rest a while", enabled: true }];
+      case "door": {
+        const open = this.isDoorOpen(it.refId);
+        const locked = !open && this.isDoorLocked(it.refId);
+        const d = this.defs.doors.get(it.refId);
+        return [{ verb: open ? "close" : "open", label: `${open ? "Close" : "Open"} ${d?.label ?? it.label}`, enabled: !locked, reason: locked ? d?.lockedReason : undefined }];
+      }
+      case "container": {
+        const c = this.defs.containers.get(it.refId);
+        const own = !c?.ownerNpcId;
+        return [{ verb: "search", label: own ? `Search ${c?.label ?? it.label}` : `Look in ${c?.label ?? it.label}`, enabled: true }];
+      }
+      case "pickup": {
+        const p = this.defs.pickups.get(it.refId);
+        return this.isPickupAvailable(it.refId) ? [{ verb: "pickup", label: `Pick up ${p?.label ?? it.label}`, enabled: true }] : [];
+      }
     }
   }
 
@@ -786,6 +839,12 @@ export class GameSession {
         return this.harvest(it.refId);
       case "fill":
         return this.fill(it.refId);
+      case "open":
+      case "close":
+        return this.toggleDoor(it.refId);
+      case "pickup":
+        return this.pickUp(it.refId);
+      case "search":
       case "craft":
       case "store":
       case "decorate":
@@ -804,6 +863,155 @@ export class GameSession {
     this.notify(`You rest. Day ${this.worldDay} begins.`, "info");
     this.commit();
     return { ok: true };
+  }
+
+  // ---------------------------------------------------------------- doors
+  isDoorOpen(doorId: string): boolean {
+    return this.state.doors[doorId] === true;
+  }
+  isDoorLocked(doorId: string): boolean {
+    const d = this.defs.doors.get(doorId);
+    return !!d?.lockedWhen && d.lockedWhen.length > 0 && evaluateAll(d.lockedWhen, this.state, this.defs);
+  }
+  toggleDoor(doorId: string): ActionResult {
+    const d = this.defs.doors.get(doorId);
+    if (!d) return { ok: false, reason: "Not a door." };
+    const open = !this.isDoorOpen(doorId);
+    if (open && this.isDoorLocked(doorId)) return { ok: false, reason: d.lockedReason ?? "It's locked." };
+    this.state.doors = { ...this.state.doors, [doorId]: open };
+    this.emit({ type: "door", doorId, open });
+    this.commit();
+    return { ok: true };
+  }
+
+  // ---------------------------------------------------------------- containers & ownership
+  containerSlots(containerId: string): Array<ItemStack | null> {
+    return this.state.containers[containerId] ?? [];
+  }
+  /**
+   * Take a stack from a world container. `witnesses` are NPC ids that can see the player (computed by the
+   * engine from distance and line of sight). Taking from someone else's container in view of a witness is
+   * theft: relationships drop and the watchman will confront the player until it is resolved.
+   */
+  takeFromContainer(containerId: string, slot: number, witnesses: string[] = []): ActionResult {
+    const c = this.defs.containers.get(containerId);
+    const slots = this.state.containers[containerId];
+    const stack = slots?.[slot];
+    if (!c || !slots || !stack) return { ok: false, reason: "Nothing there." };
+    if (this.state.pendingCrime) return { ok: false, reason: "Kannan the watchman is coming for you - better wait." };
+    const res = this.give([stack]);
+    if (!res.ok) {
+      this.notify(res.reason, "bad");
+      return res;
+    }
+    this.state.containers = { ...this.state.containers, [containerId]: slots.map((s, i) => (i === slot ? null : s)) };
+    const permitted = !c.ownerNpcId || (c.ownerNpcId === "npc_selvam" && this.state.flags.granary_key && containerId === "ct_granary_crate");
+    if (!permitted) {
+      const seen = witnesses.filter((w) => this.isNpcPresent(w));
+      if (seen.length) {
+        const witness = seen.includes(c.ownerNpcId!) ? c.ownerNpcId! : seen[0]!;
+        this.state.pendingCrime = { containerId, itemId: stack.itemId, quantity: stack.quantity, witnessId: witness, day: this.worldDay };
+        this.changeRelationship(c.ownerNpcId!, -15);
+        for (const w of seen) if (w !== c.ownerNpcId) this.changeRelationship(w, -5);
+        this.state.flags = { ...this.state.flags, seen_stealing: true };
+        this.emit({ type: "crime", witnessId: witness, containerId });
+        this.notify(`${this.defs.npcs.get(witness)?.name ?? "Someone"} saw you take that!`, "bad");
+      } else {
+        // Nobody saw. The owner notices later; there is no confrontation, but it is remembered.
+        this.state.flags = { ...this.state.flags, [`missing_from_${c.ownerNpcId}`]: true };
+      }
+    }
+    this.commit();
+    return { ok: true };
+  }
+  putIntoContainer(containerId: string, invSlot: number): ActionResult {
+    const stack = this.state.inventory[invSlot];
+    const slots = this.state.containers[containerId];
+    if (!stack || !slots) return { ok: false, reason: "Nothing to put away." };
+    const added = addItems(slots, [stack], (id) => this.defs.items.get(id));
+    if (!added.ok) return { ok: false, reason: "It's full." };
+    this.state.containers = { ...this.state.containers, [containerId]: added.inventory };
+    this.state.inventory = this.state.inventory.map((s, i) => (i === invSlot ? null : s));
+    this.commit();
+    return { ok: true };
+  }
+  private resolveCrime(mode: "return" | "fine"): void {
+    const crime = this.state.pendingCrime;
+    if (!crime) return;
+    const owner = this.defs.containers.get(crime.containerId)?.ownerNpcId;
+    const have = countItem(this.state.inventory, crime.itemId);
+    if (mode === "return" && have >= 1) {
+      const qty = Math.min(have, crime.quantity);
+      this.state.inventory = (removeItems(this.state.inventory, [{ itemId: crime.itemId, quantity: qty }]) as { ok: true; inventory: GameState["inventory"] }).inventory;
+      const back = addItems(this.state.containers[crime.containerId] ?? [], [{ itemId: crime.itemId, quantity: qty }], (id) => this.defs.items.get(id));
+      if (back.ok) this.state.containers = { ...this.state.containers, [crime.containerId]: back.inventory };
+      if (owner) this.changeRelationship(owner, 5);
+      this.notify("You returned it.", "info");
+    } else if (this.state.coins >= 6) {
+      this.state.coins -= 6;
+      this.notify("Paid a 6 coin fine.", "info");
+    } else {
+      // Cannot return or pay: the watchman takes what coins there are. Never a dead end.
+      this.state.coins = 0;
+      if (owner) this.changeRelationship(owner, -5);
+      this.notify("Kannan took what coins you had.", "bad");
+    }
+    this.state.pendingCrime = null;
+  }
+
+  // ---------------------------------------------------------------- pickups & item use
+  isPickupAvailable(pickupId: string): boolean {
+    const p = this.defs.pickups.get(pickupId);
+    return !!p && !this.state.pickedUp.includes(pickupId) && evaluateAll(p.conditions, this.state, this.defs);
+  }
+  pickUp(pickupId: string): ActionResult {
+    const p = this.defs.pickups.get(pickupId);
+    if (!p || !this.isPickupAvailable(pickupId)) return { ok: false, reason: "Nothing to pick up." };
+    const res = this.give([{ itemId: p.itemId, quantity: p.quantity }]);
+    if (!res.ok) {
+      this.notify(res.reason, "bad");
+      return res;
+    }
+    this.state.pickedUp = [...this.state.pickedUp, pickupId];
+    this.emit({ type: "pickup", pickupId });
+    this.notify(`Picked up ${this.itemName(p.itemId)}`, "good");
+    this.commit();
+    return { ok: true };
+  }
+  useItem(slot: number): ActionResult {
+    const stack = this.state.inventory[slot];
+    const def = stack ? this.defs.items.get(stack.itemId) : undefined;
+    if (!stack || !def?.use) return { ok: false, reason: "You can't use that." };
+    this.state.inventory = (removeItems(this.state.inventory, [{ itemId: stack.itemId, quantity: 1 }]) as { ok: true; inventory: GameState["inventory"] }).inventory;
+    if (def.use.coins) this.state.coins += def.use.coins;
+    if (def.use.flag) this.state.flags = { ...this.state.flags, [def.use.flag]: true };
+    this.notify(def.use.coins ? `+${def.use.coins} coins` : `Used ${def.name}`, "info");
+    this.commit();
+    return { ok: true };
+  }
+
+  // ---------------------------------------------------------------- dialogue topics
+  private whoMatches(who: string, npcId: string): boolean {
+    const group = this.defs.npcs.get(npcId)?.group;
+    return who === npcId || (!!group && who === `group:${group}`);
+  }
+  /** Topics this NPC can be asked about right now. */
+  topicsFor(npcId: string): Array<{ id: string; label: string }> {
+    return [...this.defs.topics.values()].filter((t) => evaluateAll(t.conditions, this.state, this.defs)).map((t) => ({ id: t.id, label: t.label }));
+  }
+  /** The answer this NPC gives: its own, then its group's, then the default (knowledge boundary). */
+  topicAnswer(npcId: string, topicId: string) {
+    const t = this.defs.topics.get(topicId);
+    if (!t) return undefined;
+    const ok = (a: (typeof t.answers)[number]) => !a.when || evaluateAll(a.when, this.state, this.defs);
+    return t.answers.find((a) => a.who === npcId && ok(a)) ?? t.answers.find((a) => a.who.startsWith("group:") && this.whoMatches(a.who, npcId) && ok(a)) ?? t.answers.find((a) => a.who === "default" && ok(a));
+  }
+  askTopic(npcId: string, topicId: string): Conversation | null {
+    const a = this.topicAnswer(npcId, topicId);
+    if (!a || !this.conversation) return this.conversation;
+    const node: DialogueNode = { id: `topic:${topicId}`, npcId, priority: 0, root: false, conditions: [], lines: a.lines, effects: a.effects ?? [], options: [] };
+    this.showNode(npcId, node);
+    return this.conversation;
   }
 
   /** Replace the whole state (load). */

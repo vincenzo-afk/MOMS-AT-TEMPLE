@@ -330,8 +330,8 @@ export const DIALOGUE: DialogueNode[] = [
     npcId: "npc_selvam",
     priority: 96,
     conditions: [at("q_well", "report")],
-    lines: ["They're queuing at the well already! Business will be up by noon. Here, you've earned this."],
-    effects: [{ type: "advance", questId: "q_well", objectiveId: "report" }],
+    lines: ["They're queuing at the well already! Business will be up by noon. Here, you've earned this.", "And take this key to the granary bar - you can fetch from the granary any time, even at night. My crate only, mind."],
+    effects: [{ type: "advance", questId: "q_well", objectiveId: "report" }, { type: "setFlag", id: "granary_key" }],
   }),
   node({
     id: "s_needs",
@@ -469,6 +469,80 @@ export const DIALOGUE: DialogueNode[] = [
       { label: "It's a good sound.", effects: [] },
     ],
   }),
+
+  // ================================================================ lost and found (session 3)
+  node({
+    id: "v_bangle_offer",
+    npcId: "npc_valli",
+    priority: 59,
+    conditions: [done("q_arrival"), notStarted("q_bangle")],
+    lines: ["Oh, before you go - I lost a bangle when I went down to the temple tank for water. Brass, with a red bead. If you're on the south road, would you look?"],
+    options: [
+      { label: "I'll look for it.", effects: [{ type: "startQuest", questId: "q_bangle" }] },
+      { label: "Not now.", effects: [] },
+    ],
+  }),
+  node({
+    id: "v_bangle_deliver",
+    npcId: "npc_valli",
+    priority: 97,
+    conditions: [at("q_bangle", "return"), has("brass_bangle")],
+    lines: ["My bangle! My mother gave me that pair."],
+    options: [{ label: "It was on the tank steps.", effects: [{ type: "deliver", questId: "q_bangle", objectiveId: "return" }] }],
+  }),
+  node({
+    id: "ve_chisel_offer",
+    npcId: "npc_velan",
+    priority: 81,
+    conditions: [done("q_channel"), notStarted("q_chisel"), flag("heard_chisel")],
+    lines: ["You'll be out in the ruins anyway. If you see a chisel with a brass collar by the broken wall, it's mine."],
+    options: [
+      { label: "I'll find it.", effects: [{ type: "startQuest", questId: "q_chisel" }] },
+      { label: "Maybe.", effects: [] },
+    ],
+  }),
+  node({
+    id: "ve_chisel_deliver",
+    npcId: "npc_velan",
+    priority: 97,
+    conditions: [at("q_chisel", "return"), has("velan_chisel")],
+    lines: ["My father's chisel! I thought the monsoon had taken it."],
+    options: [{ label: "Here you are.", effects: [{ type: "deliver", questId: "q_chisel", objectiveId: "return" }] }],
+  }),
+  node({
+    id: "r_pouch",
+    npcId: "npc_villager_raman",
+    priority: 95,
+    conditions: [has("coin_pouch")],
+    lines: ["Is that - that's my pouch! I've been looking everywhere."],
+    options: [
+      {
+        label: "Here, it's yours.",
+        effects: [{ type: "takeItem", itemId: "coin_pouch", quantity: 1 }, { type: "coins", amount: 2 }, { type: "relationship", npcId: "npc_villager_raman", amount: 20 }, { type: "setFlag", id: "returned_pouch" }],
+        next: "r_pouch_thanks",
+      },
+      { label: "I found it - finders keepers.", effects: [{ type: "relationship", npcId: "npc_villager_raman", amount: -20 }, { type: "setFlag", id: "refused_pouch" }] },
+    ],
+  }),
+  node({ id: "r_pouch_thanks", npcId: "npc_villager_raman", root: false, lines: ["Take these two for your honesty. I'll tell everyone at the stalls."] }),
+  node({ id: "r_pouch_kept", npcId: "npc_villager_raman", priority: 80, conditions: [flag("kept_pouch")], lines: ["I lost my pouch at the bazaar. If you hear anything... no? No. Of course not."] }),
+  node({ id: "r_pouch_returned", npcId: "npc_villager_raman", priority: 70, conditions: [flag("returned_pouch")], lines: ["Vanakkam, my honest friend! Have a mango."] }),
+
+  // ================================================================ Kannan, watchman
+  node({
+    id: "k_confront",
+    npcId: "npc_kaaval",
+    priority: 200,
+    conditions: [{ type: "crime", value: true }],
+    lines: ["Stop right there. Somebody saw you take what isn't yours.", "Put it back where it came from, or pay the fine. Your choice - but you're not walking off with it."],
+    options: [
+      { label: "I'll put it back.", effects: [{ type: "resolveCrime", mode: "return" }], next: "k_resolved" },
+      { label: "I'll pay the fine (6 coins).", effects: [{ type: "resolveCrime", mode: "fine" }], next: "k_resolved" },
+    ],
+  }),
+  node({ id: "k_resolved", npcId: "npc_kaaval", root: false, lines: ["Good. We'll say no more about it. But people talk, and they'll remember."] }),
+  node({ id: "k_key", npcId: "npc_kaaval", priority: 30, conditions: [flag("granary_key")], lines: ["Selvam says you can come and go from the granary. Just bar the door behind you."] }),
+  node({ id: "k_default", npcId: "npc_kaaval", lines: ["Kannan. I keep the granary and walk the bazaar at night.", "Honest business by day. After seven, the door is barred."] }),
 
   // ================================================================ everyday villagers (group)
   node({ id: "g_festival", npcId: "group:villager", priority: 90, conditions: [flag("festival_held")], lines: ["Did you see the courtyard last night? Lamps on every step. My children won't stop talking about it."] }),

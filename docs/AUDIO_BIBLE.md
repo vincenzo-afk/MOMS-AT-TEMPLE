@@ -2,7 +2,9 @@
 
 Runtime: Web Audio via `src/game/audio/AudioManager.ts`. Three buses: master → music, master → effects (ambience + SFX + UI). The audio context starts on the first user gesture (New Game / Continue). Volume settings apply immediately and persist.
 
-**Status: no audio file has been supplied yet.** Every manifest entry is `pending`. The game makes no network requests for pending files. Interaction and UI cues fall back to short **synthesized sine blips** (code, not files, and clearly placeholders) so feedback and volume controls can be tested. Music and ambience slots stay silent until files arrive.
+**Status: no audio file has been supplied yet.** Every manifest entry is `pending`. The game makes no network requests for pending files. Interaction and UI cues fall back to short **synthesized sine blips** (code, not files, and clearly placeholders) so feedback and volume controls can be tested. Music slots stay silent until files arrive.
+
+**Procedural soundscape (session 3, placeholder):** `src/game/audio/Soundscape.ts` synthesizes the ambience layers with Web Audio: wind (low-passed noise that follows the weather wind), rain (band-passed noise), water (band-passed noise, louder near the tank and channels), market murmur (band-passed noise near the bazaar by day), birds (chirp bursts by day) and crickets (an amplitude-modulated tone in pulses at night). It also makes surface footsteps (stone, soil, wood) timed to the walk cycle, door creaks and the theft alarm. These are code, not recordings. They are clearly placeholders, and each layer mutes automatically once the matching Lyria file is supplied (`AudioManager.hasFile`). They have not been mixed or listened to on speakers by a person; the automated tests run with audio muted and only check that the cues fire.
 
 ## Integration steps for a Lyria track
 

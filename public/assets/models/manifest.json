@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T02:41:23.585Z",
+  "generatedAt": "2026-10-20T03:25:35.528Z",
   "assets": [
     {
       "id": "CHR_NPC_Amudha",
@@ -7,6 +7,18 @@
       "type": "character",
       "triangles": 3678,
       "bytes": 145212,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "CHR_NPC_Kaaval",
+      "url": "/assets/models/characters/CHR_NPC_Kaaval.glb",
+      "type": "character",
+      "triangles": 3158,
+      "bytes": 127056,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -428,6 +440,38 @@
         ],
         "maxBytes": 1500000,
         "maxTriangles": 40000
+      }
+    },
+    {
+      "id": "ENV_Granary_A",
+      "url": "/assets/models/buildings/ENV_Granary_A.glb",
+      "type": "building",
+      "triangles": 3792,
+      "bytes": 141960,
+      "expect": {
+        "nodes": [
+          "COL_Bin_-1",
+          "COL_Bin_1",
+          "COL_Ceiling"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_House_Player_A",
+      "url": "/assets/models/buildings/ENV_House_Player_A.glb",
+      "type": "building",
+      "triangles": 7058,
+      "bytes": 263316,
+      "expect": {
+        "nodes": [
+          "COL_Ceiling",
+          "COL_Cot",
+          "COL_DOOR_Main"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
       }
     },
     {
@@ -888,6 +932,18 @@
       }
     },
     {
+      "id": "PRP_Bangle_A",
+      "url": "/assets/models/props/PRP_Bangle_A.glb",
+      "type": "prop",
+      "triangles": 216,
+      "bytes": 6988,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Bench_Wood_A",
       "url": "/assets/models/props/PRP_Bench_Wood_A.glb",
       "type": "prop",
@@ -962,6 +1018,18 @@
       }
     },
     {
+      "id": "PRP_Chisel_A",
+      "url": "/assets/models/props/PRP_Chisel_A.glb",
+      "type": "prop",
+      "triangles": 96,
+      "bytes": 6344,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Clay_Bank_A",
       "url": "/assets/models/props/PRP_Clay_Bank_A.glb",
       "type": "prop",
@@ -990,6 +1058,18 @@
       }
     },
     {
+      "id": "PRP_Coin_Pouch_A",
+      "url": "/assets/models/props/PRP_Coin_Pouch_A.glb",
+      "type": "prop",
+      "triangles": 348,
+      "bytes": 11796,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Contribution_Chest_A",
       "url": "/assets/models/props/PRP_Contribution_Chest_A.glb",
       "type": "prop",
@@ -1012,6 +1092,20 @@
       "expect": {
         "nodes": [
           "COL_Cot"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Crate_A",
+      "url": "/assets/models/props/PRP_Crate_A.glb",
+      "type": "prop",
+      "triangles": 296,
+      "bytes": 23124,
+      "expect": {
+        "nodes": [
+          "COL_Crate"
         ],
         "maxBytes": 800000,
         "maxTriangles": 12000
@@ -1430,6 +1524,18 @@
       }
     },
     {
+      "id": "PRP_Neem_Tree_B_LOD1",
+      "url": "/assets/models/environment/PRP_Neem_Tree_B_LOD1.glb",
+      "type": "environment",
+      "triangles": 180,
+      "bytes": 6712,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Oil_Lamp_A",
       "url": "/assets/models/props/PRP_Oil_Lamp_A.glb",
       "type": "prop",
@@ -1470,6 +1576,18 @@
       }
     },
     {
+      "id": "PRP_Palm_Coconut_B_LOD1",
+      "url": "/assets/models/environment/PRP_Palm_Coconut_B_LOD1.glb",
+      "type": "environment",
+      "triangles": 344,
+      "bytes": 16656,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Pottery_Display_A",
       "url": "/assets/models/props/PRP_Pottery_Display_A.glb",
       "type": "prop",
@@ -1489,6 +1607,22 @@
       "bytes": 14384,
       "expect": {
         "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Rain_Shelter_A",
+      "url": "/assets/models/props/PRP_Rain_Shelter_A.glb",
+      "type": "prop",
+      "triangles": 1348,
+      "bytes": 81148,
+      "expect": {
+        "nodes": [
+          "COL_Bench",
+          "COL_Post_-1_-1",
+          "COL_Post_-1_1"
+        ],
         "maxBytes": 800000,
         "maxTriangles": 12000
       }

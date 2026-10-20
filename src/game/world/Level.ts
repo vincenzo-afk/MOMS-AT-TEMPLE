@@ -11,6 +11,22 @@ export interface StateCollider {
   state: string;
 }
 
+/** A hinged door leaf: the leaf rotates about its origin (the hinge); the doorway collider blocks while closed. */
+export interface DoorRuntime {
+  leaf: THREE.Object3D;
+  baseRotY: number;
+  opens: number; // +1 / -1
+  angle: number; // current opening, 0..1
+  collider: Box | null;
+}
+
+/** Instanced trees for one 60 m cell, with a full and a distant version. */
+export interface LodChunk {
+  center: THREE.Vector3;
+  near: THREE.Object3D[];
+  far: THREE.Object3D[];
+}
+
 export interface LevelHandles {
   root: THREE.Group;
   collision: CollisionWorld;
@@ -19,7 +35,22 @@ export interface LevelHandles {
   stateColliders: StateCollider[];
   flames: THREE.Object3D[];
   water: THREE.ShaderMaterial;
+  doors: Map<string, DoorRuntime>;
+  lodChunks: LodChunk[];
+  /** World positions of water surfaces (for spatial water ambience). */
+  waterPoints: THREE.Vector3[];
   stats: { placements: number; instancedDraws: number; colliders: number };
+}
+
+const LOD_DISTANCE = 60;
+
+/** Show full-detail trees near the camera and the LOD1 versions farther away. */
+export function updateLod(level: LevelHandles, cameraPos: THREE.Vector3): void {
+  for (const c of level.lodChunks) {
+    const near = c.center.distanceTo(cameraPos) < LOD_DISTANCE;
+    for (const o of c.near) o.visible = near;
+    for (const o of c.far) o.visible = !near;
+  }
 }
 
 const DEG = Math.PI / 180;
@@ -49,6 +80,9 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
   const stateColliders: StateCollider[] = [];
   const flames: THREE.Object3D[] = [];
   const water = createWaterMaterial();
+  const doors = new Map<string, DoorRuntime>();
+  const lodChunks: LodChunk[] = [];
+  const waterPoints: THREE.Vector3[] = [];
   let instancedDraws = 0;
 
   root.add(buildGround());
@@ -64,16 +98,15 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
       groups.set(key, list);
     }
   }
-  for (const [key, list] of groups) {
-    const assetId = key.split("|")[0]!;
+  const instanceAll = (assetId: string, matrices: THREE.Matrix4[], withColliders: boolean): THREE.Object3D[] => {
+    const out: THREE.Object3D[] = [];
     const template = assets.get(assetId)!.gltf.scene;
     template.updateMatrixWorld(true);
-    const matrices = list.map(placementMatrix);
     template.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
       if (mesh.name.startsWith("COL_") || mesh.name.startsWith("WALK_")) {
-        for (const m of matrices) collision.addProxy(mesh.geometry, m.clone().multiply(mesh.matrixWorld), mesh.name.startsWith("WALK_"), mesh.name);
+        if (withColliders) for (const m of matrices) collision.addProxy(mesh.geometry, m.clone().multiply(mesh.matrixWorld), mesh.name.startsWith("WALK_"), mesh.name);
         return;
       }
       const inst = new THREE.InstancedMesh(mesh.geometry, mesh.material, matrices.length);
@@ -83,8 +116,22 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
       inst.name = `${assetId}__instanced`;
       inst.computeBoundingSphere();
       root.add(inst);
+      out.push(inst);
       instancedDraws++;
     });
+    return out;
+  };
+  for (const [key, list] of groups) {
+    const assetId = key.split("|")[0]!;
+    const matrices = list.map(placementMatrix);
+    const near = instanceAll(assetId, matrices, true);
+    const lodId = `${assetId}_LOD1`;
+    if (assets.has(lodId)) {
+      const far = instanceAll(lodId, matrices, false);
+      const center = list.reduce((acc, p) => acc.add(new THREE.Vector3(...p.pos)), new THREE.Vector3()).multiplyScalar(1 / list.length);
+      for (const o of far) o.visible = false;
+      lodChunks.push({ center, near, far });
+    }
   }
 
   // ---- unique placements
@@ -102,6 +149,11 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
     obj.traverse((o) => {
       if (o.name.startsWith("SOCKET_") && p.id) sockets.set(`${p.id}.${o.name}`, o.getWorldPosition(new THREE.Vector3()));
       if (o.name.startsWith("FLAME_")) flames.push(o);
+      if (o.name.startsWith("DOOR_") && p.id) {
+        const key = `${p.id}.${o.name.slice(5)}`;
+        const prev = doors.get(key);
+        doors.set(key, { leaf: o, baseRotY: o.rotation.y, opens: Number((o.userData as { opens?: number }).opens ?? 1) || 1, angle: 0, collider: prev?.collider ?? null });
+      }
       const st = stateOfNode(o.name);
       if (p.state && st && !o.name.startsWith("COL_")) o.visible = st === p.state; // decorative copies show one fixed state
       const mesh = o as THREE.Mesh;
@@ -109,11 +161,19 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
       if (mesh.name.startsWith("COL_") || mesh.name.startsWith("WALK_")) {
         if (skipColliders) return;
         const box = collision.addProxy(mesh.geometry, mesh.matrixWorld, mesh.name.startsWith("WALK_"), mesh.name);
+        if (mesh.name.startsWith("COL_DOOR_") && p.id) {
+          const key = `${p.id}.${mesh.name.slice(9)}`;
+          const d = doors.get(key);
+          if (d) d.collider = box;
+          else doors.set(key, { leaf: new THREE.Object3D(), baseRotY: 0, opens: 1, angle: 0, collider: box });
+          return;
+        }
         const state = (mesh.userData as { state?: string }).state;
         if (state && p.id) stateColliders.push({ box, placementId: p.id, state });
         else if (state && p.state) box.enabled = state === p.state;
       } else if (mesh.name.startsWith("WATER_")) {
         mesh.material = water;
+        waterPoints.push(mesh.getWorldPosition(new THREE.Vector3()));
         mesh.castShadow = false;
         mesh.renderOrder = 2;
       } else if (quality === "low" || NO_SHADOW.test(p.asset) || (p.id?.startsWith("paddy_") && mesh.name.startsWith("STATE_"))) {
@@ -127,7 +187,7 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
   for (const [cx, cz, hx, hz] of [[0, -W, W, 1], [0, W, W, 1], [-W, 0, 1, W], [W, 0, 1, W]] as Array<[number, number, number, number]>)
     collision.add({ cx, cz, hx, hz, cos: 1, sin: 0, yMin: -1, yMax: 10, walk: false, name: "BOUNDARY" });
 
-  return { root, collision, byId, sockets, stateColliders, flames, water, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
+  return { root, collision, byId, sockets, stateColliders, flames, water, doors, lodChunks, waterPoints, stats: { placements: PLACEMENTS.length, instancedDraws, colliders: collision.boxes.length } };
 }
 
 /** Earth ground with vertex-colour variation, worn paths along the navigation graph and greener field margins. */

@@ -1,0 +1,28 @@
+{
+  "assetId": "PRP_Chisel_A",
+  "glb": "public/assets/models/props/PRP_Chisel_A.glb",
+  "blend": "blender/source/PRP_Chisel_A.blend",
+  "bytes": 6344,
+  "triangles": 96,
+  "objects": [
+    "PRP_Chisel_A",
+    "PRP_Chisel_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Iron_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.1,
+    -0.02,
+    0.0
+  ],
+  "boundsMax": [
+    0.205,
+    0.02,
+    0.032
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

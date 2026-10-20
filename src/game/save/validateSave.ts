@@ -1,4 +1,4 @@
-import type { GameState, ItemStack, LivingRecordEvent, PlotState, QuestProgress, SkillId } from "../core/types";
+import type { GameState, ItemStack, LivingRecordEvent, PendingCrime, PlotState, QuestProgress, SkillId, TalkLogEntry } from "../core/types";
 import { INVENTORY_SLOTS, SCHEMA_VERSION, STORAGE_SLOTS, type Definitions } from "../core/defs";
 
 export type SaveCheck = { ok: true; state: GameState; warnings: string[] } | { ok: false; error: string };
@@ -33,6 +33,9 @@ const MIGRATIONS: Record<number, (raw: Record<string, unknown>) => Record<string
     out.skills = { gardening: 0, masonry: 0, crafting: 0 };
     return out;
   },
+  // v2 -> v3: doors, world containers, pickups, the watchman's pending-crime record and the conversation log.
+  // Containers start from their authored contents (filled in by GameSession.fillDefaults).
+  2: (raw) => ({ ...raw, schemaVersion: 3, doors: {}, containers: {}, pickedUp: [], pendingCrime: null, talkLog: [] }),
 };
 
 /**
@@ -175,6 +178,23 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
       if (def) decor[slot] = isStr(item) && def.accepts.includes(item) ? item : null;
     }
   }
+  const containers: Record<string, Array<ItemStack | null>> = {};
+  if (isObj(data.containers)) {
+    for (const [id, v] of Object.entries(data.containers)) {
+      const def = defs.containers.get(id);
+      if (def) containers[id] = readStacks(v, def.slots, `container ${id}`);
+    }
+  }
+  let pendingCrime: PendingCrime | null = null;
+  const pc = data.pendingCrime;
+  if (isObj(pc) && isStr(pc.containerId) && defs.containers.has(pc.containerId) && isStr(pc.itemId) && defs.items.has(pc.itemId) && isNum(pc.quantity) && isStr(pc.witnessId) && isNum(pc.day))
+    pendingCrime = { containerId: pc.containerId, itemId: pc.itemId, quantity: pc.quantity, witnessId: pc.witnessId, day: pc.day };
+  const talkLog: TalkLogEntry[] = Array.isArray(data.talkLog)
+    ? data.talkLog
+        .filter((t): t is Record<string, unknown> => isObj(t) && isStr(t.npcId) && isStr(t.text) && isNum(t.day))
+        .slice(-60)
+        .map((t) => ({ npcId: t.npcId as string, text: t.text as string, day: t.day as number, minute: isNum(t.minute) ? t.minute : 0 }))
+    : [];
   const skillsRaw = isObj(data.skills) ? data.skills : {};
   const skills = Object.fromEntries((["gardening", "masonry", "crafting"] as SkillId[]).map((k) => [k, isNum(skillsRaw[k]) ? Math.max(0, skillsRaw[k] as number) : 0])) as Record<SkillId, number>;
   return {
@@ -202,6 +222,11 @@ export function validateSave(raw: unknown, defs: Definitions): SaveCheck {
       decor,
       lastTalkDay: numRecord(data.lastTalkDay),
       skills,
+      doors: Object.fromEntries(Object.entries(boolRecord(data.doors)).filter(([id]) => defs.doors.has(id))),
+      containers,
+      pickedUp: strList(data.pickedUp).filter((id) => defs.pickups.has(id)),
+      pendingCrime,
+      talkLog,
     },
   };
 }

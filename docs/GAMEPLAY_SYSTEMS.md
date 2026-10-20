@@ -6,7 +6,7 @@
 |---|---|
 | W A S D / arrows | move (camera-relative) |
 | Shift | run |
-| Mouse | rotate camera (click the scene to capture the mouse) |
+| Mouse | rotate camera (click the scene to capture the mouse, or hold the right button and drag) |
 | Wheel | camera distance 2.2–9 m |
 | E | primary interaction / advance dialogue |
 | R | secondary interaction (e.g. inspect when repair is available) |
@@ -15,6 +15,9 @@
 | Esc | close panel, or pause |
 | 1–4, Space, Enter | dialogue options / continue |
 | Movement key while seated | stand up |
+| Gamepad (standard mapping) | left stick move (analog speed) · right stick look · A interact/accept · B back · X secondary · LT or L3 run · LB inventory · RB map · Y journal · View record · Start pause · d-pad up/down in menus |
+
+Every keyboard action except pause can be rebound in Settings → Controls. A key can drive only one action; giving it to another action leaves the old one "(unbound)" until it is rebound or the defaults are restored. The HUD key hints follow the bindings.
 
 ## The map
 
@@ -64,6 +67,22 @@ The notice board by the south gate lists every quest whose prerequisites are met
 - **Map (M):** regions, roads, buildings, live story-NPC positions, restoration markers (amber = needs work, green = restored), your position and heading, the current objective.
 - **World time:** 1 real second = 1 world minute. Day/dusk/night lighting; warm point lights follow the nearest lit lamps at night; evening ambience after 18:00.
 
+## Session 3 systems
+
+- **Interaction framework:** every interactable has a range, a facing score and a **line-of-sight** check (a ray from the chest to the target at waist and shoulder height, so a trader behind a counter is reachable but nothing works through a wall). A 0.35 s cooldown stops double-fires. The current target gets a ground ring (toggle in Settings). Failures play an error cue and a toast.
+- **Doors:** the player house and the granary have hinged doors. Open/closed state is saved; a closed door is solid. Doors can be locked by conditions: the granary is barred 19:00–06:00 until Selvam gives you his key (after the well is restored). The HUD shows "indoors" when there is a ceiling overhead.
+- **Interiors:** the player house is now enterable (cot where you rest, hearth, shelves, water urn, mat, lamp niche). The granary is a walk-in store room with sacks and bins.
+- **World containers:** four crates with saved contents (Selvam's in the granary, Raman's in the bazaar, and two unowned ones at the ruins and fields). Click a stack to move it either way; nothing is duplicated or lost.
+- **Ownership and the watchman:** taking from an owned container is theft if anyone sees it (14 m with a clear line of sight, 22 m for the watchman). The owner's opinion drops by 15 and other witnesses' by 5, a banner appears, and **Kannan the kaavalkaaran** runs to you and confronts you. You can put it back (the item returns to the crate) or pay a 6-coin fine; if you can do neither he takes what coins you have. It always resolves, so there is no dead end. Unseen theft is remembered as a flag (the owner mentions things going missing). Selvam's key also permits taking from his crate.
+- **Pickups:** three items lie in the world. The brass bangle appears only once Valli has asked you to find it; Velan's chisel is at the ruins; a coin pouch lies in the bazaar. Each can be taken once (saved).
+- **Item use:** some items have a Use button in the inventory. Opening the found pouch keeps its coins, and Raman remembers that. Returning it to him unopened earns his gratitude and a small reward.
+- **New quests:** *The Lost Bangle* (Valli) and *Velan's Chisel*, which is unlocked by **asking Velan about the ruins**.
+- **Dialogue topics:** after a conversation's last line, "Ask about" topics appear. Each answer is chosen by who you ask and the state of the world. Every topic has a default "I don't know much about that" answer, so villagers only say what they would plausibly know. Asking can set flags (that is how you learn of the chisel). Goodbye ends the talk. The last 60 lines are kept in the journal under *Recent conversations*.
+- **Dialogue text settings:** gradual text reveal (Space finishes the line), dialogue box opacity and text size.
+- **NPC behaviour:** NPCs steer with collision (they slide along props and walls), keep apart from each other and from you, and recover when stuck (re-plan, skip a waypoint, then step past). Near you they turn their heads to look, greet you, react if you walk into them, and comment on the weather, the festival, a restored place or missing goods (speech bubbles, with per-NPC cooldowns). Talking pauses their errand, which resumes afterwards. They go indoors at night (21:00–05:00) and **head for cover when it rains** (bazaar, field and roadside shelters, the workshop and the courtyard cloister). Distant NPCs animate at a reduced rate.
+- **Weather:** clear, cloudy or rain, decided deterministically from the world time in 3-hour blocks (so it survives a reload without being saved). It eases in and out over 20 minutes. The first morning and the festival evening are always clear. Rain brings falling streaks, wet darker ground, a grey sky, diffused light and nearer fog. Wind sways foliage and cloth, and dust motes and fireflies (at night) drift.
+- **Soundscape (procedural placeholder):** wind, rain, water near the tank and channels, a market murmur near the bazaar, birds by day, crickets by night, footsteps that match the walk cycle and surface (stone, soil, wood), door creaks and an alarm when you are seen stealing. All of it is synthesized with Web Audio until the Lyria recordings exist; each layer goes quiet automatically once its recording is supplied.
+
 ## Not implemented yet
 
-Item use from the inventory, cabinets/shelves as extra storage, carrying animations, NPC collision avoidance, a second festival or post-festival events, market stock changing over time.
+Cabinets and shelves as extra storage, carrying animations, a second festival or post-festival events, market stock changing over time, NPCs reacting to the player sprinting or trespassing indoors, locked containers or lock-picking (deliberately not planned).

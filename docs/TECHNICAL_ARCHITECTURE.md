@@ -46,7 +46,26 @@ Blender exports box proxies named `COL_*` (obstacles) and `WALK_*` (surfaces you
 
 - `resolve()` pushes the player circle (r = 0.3 m) out of blocking boxes. Walk boxes only block when their top is more than the step height (0.36 m) above the feet.
 - `groundHeight()` returns the highest reachable walk surface (steps, plinths, verandas).
-- `raycast()` serves the camera boom (shortens on hit, eases back out).
+- `raycast()` serves the camera boom (shortens on hit, eases back out), interaction line of sight, NPC witness checks and the "indoors" test (a ceiling straight overhead). Boxes under 0.3 m tall are ignored by rays.
+- Boxes have an `enabled` flag: door colliders (`COL_DOOR_<name>`) switch off while their door is open.
+
+### Doors, LOD and new node conventions (session 3)
+
+- `DOOR_<name>`: a door leaf whose origin is the hinge; the custom property `opens` (±1) gives the swing direction. `WorldView` eases it to ±1.45 rad from `GameState.doors`.
+- `COL_DOOR_<name>`: the matching collider; `CEIL_<name>`: an interior ceiling (also a collider for the indoors test).
+- `<asset>_LOD1` GLBs (palm, neem) are instanced per chunk next to the full model; `updateLod()` swaps chunks beyond 60 m to LOD1 four times a second.
+
+### NPC update tiers
+
+`NpcSystem.update()` runs every NPC's schedule and steering every frame. Awareness (look-at, greetings, barks, bumps) runs only within 15 m, and the animation mixer is advanced at a reduced rate further away. Steering is a seek toward the next nav waypoint plus separation from other NPCs and the player, then `CollisionWorld.resolve()`. Stuck detection (less than 0.5 m of progress in 2 s) re-plans, then skips a waypoint, then steps past; `stats` counts repaths and unsticks.
+
+### Weather and atmosphere
+
+`weather.ts` is a pure function of world minutes, so it never needs saving. `Atmosphere` draws rain streaks around the camera (hidden indoors), dust motes and night fireflies, and drives shared shader uniforms (`tomTime`, `tomWind`, `tomWet`). `DetailMaterials` injects wind sway into foliage and cloth vertex shaders and darkens and smooths world-space materials when wet. Cloud cover moves light from the sun to the sky fill, greys the sky and horizon, and rain pulls the fog in.
+
+### Systemic rules
+
+Ownership, witnesses and crime live in `GameSession` (rules) and `NpcSystem.witnessesOf()` (perception: distance plus line of sight). The engine passes witness ids into `takeFromContainer()`, so the rules stay testable without a renderer. Dialogue topics are data (`src/data/world.ts`); `topicAnswer()` picks the most specific answer (NPC, then group, then default) whose conditions hold. Answers can set flags but never move items or money directly.
 
 Instanced placements register one proxy per instance using the template's proxy matrix times the instance matrix.
 

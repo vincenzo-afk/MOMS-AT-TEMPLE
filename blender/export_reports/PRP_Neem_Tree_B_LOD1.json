@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Neem_Tree_B_LOD1",
+  "glb": "public/assets/models/environment/PRP_Neem_Tree_B_LOD1.glb",
+  "blend": "blender/source/PRP_Neem_Tree_B_LOD1.blend",
+  "bytes": 6712,
+  "triangles": 180,
+  "objects": [
+    "PRP_Neem_Tree_B_LOD1",
+    "PRP_Neem_Tree_B_LOD1_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Foliage_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -3.511,
+    -3.334,
+    -0.031
+  ],
+  "boundsMax": [
+    3.399,
+    3.327,
+    6.956
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

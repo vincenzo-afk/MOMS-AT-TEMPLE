@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, RECORD_TEXT } from "../../data/text";
 import { countItem } from "../../game/inventory/inventory";
-import { CommunityPanel, DecorPanel, MapPanel, NoticesPanel, StoragePanel } from "./WorldPanels";
+import { CommunityPanel, ContainerPanel, DecorPanel, MapPanel, NoticesPanel, StoragePanel } from "./WorldPanels";
 import { SKILL_NAMES, skillLevel } from "../../data/farming";
 import type { SkillId } from "../../game/core/types";
 
@@ -35,6 +35,8 @@ export function Panels() {
       return <MapPanel />;
     case "community":
       return <CommunityPanel />;
+    case "container":
+      return <ContainerPanel />;
     default:
       return null;
   }
@@ -63,14 +65,29 @@ function DialoguePanel() {
   useGameState(); // re-render on state changes
   const conv = game.session.conversation;
   const [line, setLine] = useState(0);
+  const [shown, setShown] = useState(0);
   const firstOption = useRef<HTMLButtonElement>(null);
   const nodeId = conv?.node.id;
-  useEffect(() => setLine(0), [nodeId]);
   const lines = conv?.node.lines ?? [];
+  const text = lines[line] ?? "";
+  const typing = game.settings.typewriter !== false && shown < text.length;
+  useEffect(() => setLine(0), [nodeId]);
+  useEffect(() => setShown(game.settings.typewriter === false ? Infinity : 0), [nodeId, line, game.settings.typewriter]);
+  useEffect(() => {
+    if (!typing) return;
+    const t = window.setInterval(() => setShown((n) => n + 2), 22);
+    return () => window.clearInterval(t);
+  }, [typing, nodeId, line]);
   const onLast = line >= lines.length - 1;
+  const hasOptions = (conv?.node.options.length ?? 0) > 0;
+  const topics = conv && onLast && !hasOptions && !typing ? game.session.topicsFor(conv.npcId) : [];
 
   const advance = (opt?: number) => {
     if (!conv) return;
+    if (typing) {
+      setShown(Infinity); // first press finishes the line
+      return;
+    }
     if (!onLast) {
       setLine((l) => l + 1);
       return;
@@ -79,19 +96,23 @@ function DialoguePanel() {
     // An option may have opened another panel (e.g. a shop); only close if we're still in dialogue.
     if (!next && game.ui.get().panel === "dialogue") game.closePanel();
   };
+  const ask = (topicId: string) => {
+    if (!conv) return;
+    game.session.askTopic(conv.npcId, topicId);
+  };
 
   useEffect(() => {
-    if (onLast) firstOption.current?.focus();
-  }, [onLast, nodeId]);
+    if (onLast && !typing) firstOption.current?.focus();
+  }, [onLast, nodeId, typing]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!conv) return;
       const n = Number(e.key);
-      if (onLast && n >= 1 && n <= conv.node.options.length) {
+      if (onLast && !typing && hasOptions && n >= 1 && n <= conv.node.options.length) {
         e.preventDefault();
         advance(n - 1);
-      } else if ((e.code === "Space" || e.code === "Enter" || e.code === "KeyE") && (!onLast || conv.node.options.length === 0)) {
+      } else if ((e.code === "Space" || e.code === "Enter" || e.code === "KeyE") && (typing || !onLast || !hasOptions)) {
         e.preventDefault();
         advance();
       }
@@ -107,18 +128,37 @@ function DialoguePanel() {
       <div className="dialogue-speaker">
         {npc?.name} <span className="role">{npc?.role}</span>
       </div>
-      <p className="dialogue-text" data-testid="dialogue-text">{lines[line]}</p>
+      <p className="dialogue-text" data-testid="dialogue-text" aria-label={text}>
+        {text.slice(0, shown)}
+        {typing && <span className="caret">▍</span>}
+      </p>
       <div className="dialogue-options">
-        {!onLast || conv.node.options.length === 0 ? (
+        {typing || !onLast ? (
           <button ref={firstOption} className="option continue" onClick={() => advance()}>
-            {onLast ? "Goodbye" : "Continue"} <kbd>Space</kbd>
+            Continue <kbd>Space</kbd>
           </button>
-        ) : (
+        ) : hasOptions ? (
           conv.node.options.map((o, i) => (
             <button key={i} ref={i === 0 ? firstOption : undefined} className="option" onClick={() => advance(i)} data-testid={`option-${i}`}>
               <kbd>{i + 1}</kbd> {o.label}
             </button>
           ))
+        ) : (
+          <>
+            {topics.length > 0 && (
+              <div className="topics" data-testid="topics">
+                <span className="muted small">Ask about:</span>
+                {topics.map((t) => (
+                  <button key={t.id} className="topic" onClick={() => ask(t.id)} data-testid={`topic-${t.id}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button ref={firstOption} className="option continue" onClick={() => advance()} data-testid="goodbye">
+              Goodbye <kbd>Space</kbd>
+            </button>
+          </>
         )}
       </div>
     </div>
@@ -158,6 +198,11 @@ function InventoryPanel() {
               {def.questProtected ? " · keep for a task" : ""}
             </div>
             <p>{def.description}</p>
+            {def.use && (
+              <button className="primary" data-testid="use-item" onClick={() => game.session.useItem(sel!)}>
+                {def.use.label}
+              </button>
+            )}
           </>
         ) : (
           <p className="muted">Select an item to see its details. {s.inventory.filter(Boolean).length}/{s.inventory.length} slots used.</p>
@@ -195,6 +240,18 @@ function JournalPanel() {
           </article>
         );
       })}
+      {s.talkLog.length > 0 && (
+        <details className="talklog" data-testid="talklog">
+          <summary className="section">Recent conversations</summary>
+          <ol>
+            {[...s.talkLog].reverse().slice(0, 30).map((t, i) => (
+              <li key={i}>
+                <span className="muted small">Day {t.day} · {game.session.defs.npcs.get(t.npcId)?.name}:</span> {t.text}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
       <h4 className="section">Skills</h4>
       <p className="muted small">
         {(Object.keys(SKILL_NAMES) as SkillId[]).map((k) => `${SKILL_NAMES[k]} ${skillLevel(s.skills[k])}`).join(" · ")}

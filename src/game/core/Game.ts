@@ -9,6 +9,9 @@ import type { Settings } from "./types";
 import { buildLevel, type LevelHandles } from "../world/Level";
 import { WorldView } from "../world/WorldView";
 import { configureDetail } from "../world/DetailMaterials";
+import { Atmosphere, Bubbles, TargetRing } from "../world/Atmosphere";
+import { updateLod } from "../world/Level";
+import { weatherAt, type Weather } from "../world/weather";
 import { PlayerController, RUN_SPEED, WALK_SPEED } from "../player/PlayerController";
 import { CharacterAnimator } from "../player/CharacterAnimator";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
@@ -23,7 +26,7 @@ export const MINUTES_PER_SECOND = 1; // one real second = one world minute (24 m
 const PLAYER_MODEL = "CHR_Player_Base";
 
 export type Mode = "loading" | "title" | "intro" | "play" | "paused" | "error";
-export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community";
+export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community" | "container";
 
 export interface Toast {
   id: number;
@@ -50,6 +53,9 @@ export interface UiState {
   hasSave: boolean;
   /** Living Record entry to highlight on the map. */
   mapFocus: string | null;
+  containerId: string | null;
+  weather: Weather["kind"];
+  indoors: boolean;
 }
 
 export class Game {
@@ -76,6 +82,9 @@ export class Game {
     assetProblems: [],
     hasSave: false,
     mapFocus: null,
+    containerId: null,
+    weather: "clear",
+    indoors: false,
   });
   input: Input;
   level!: LevelHandles;
@@ -97,6 +106,17 @@ export class Game {
   private talkingTo: string | null = null;
   private seated = false;
   private musicCheck = 0;
+  private atmosphere = new Atmosphere();
+  private ring = new TargetRing();
+  private bubbles: Bubbles | null = null;
+  private clock = 0;
+  private interactCooldown = 0;
+  private confrontCooldown = 0;
+  private lastFootPhase = 0;
+  private lodTimer = 0;
+  private indoors = false;
+  weather: Weather = { kind: "clear", rain: 0, cloud: 0, wind: 0.3 };
+  private fogBase: { near: number; far: number } | null = null;
   private disposed = false;
   stats = { fps: 0, frameMs: 0, drawCalls: 0, triangles: 0 };
 
@@ -129,7 +149,9 @@ export class Game {
       configureDetail({ anisotropy: Math.min(8, this.renderer.capabilities.getMaxAnisotropy()), enabled: this.settings.graphicsQuality !== "low" });
       this.ui.set({ loading: { done: 0, total: 1, label: "Reading asset manifest" } });
       await this.assets.loadManifest();
-      const ids = [...new Set([...PLACEMENTS.map((p) => p.asset), PLAYER_MODEL, ...[...this.session.defs.npcs.values()].map((n) => n.appearance.model)])];
+      const base = [...new Set([...PLACEMENTS.map((p) => p.asset), PLAYER_MODEL, ...[...this.session.defs.npcs.values()].map((n) => n.appearance.model)])];
+      const lods = (this.assets.manifest?.assets ?? []).map((a) => a.id).filter((id) => id.endsWith("_LOD1") && base.includes(id.slice(0, -5)));
+      const ids = [...base, ...lods];
       await this.assets.loadAll(ids, (done, total) => this.ui.set({ loading: { done, total, label: "Loading models" } }));
       this.ui.set({ loading: { done: 1, total: 1, label: "Building the settlement" }, assetProblems: this.assets.problems.map((p) => `${p.id}: ${p.message}`) });
 
@@ -150,16 +172,33 @@ export class Game {
       this.player = new PlayerController(model, animator, this.level.collision);
       this.scene.add(this.player.object);
       this.cam = new ThirdPersonCamera(this.camera, this.level.collision);
-      this.npcs = new NpcSystem(this.session, this.assets, this.level.collision, PLAYER_MODEL);
+      this.npcs = new NpcSystem(this.session, this.assets, this.level.collision, PLAYER_MODEL, {
+        bark: (npcId, text) => this.bubbles?.show(text, npcId, () => this.npcs.positionOf(npcId)),
+        confront: (npcId) => this.confront(npcId),
+      });
       this.scene.add(this.npcs.group);
+      this.scene.add(this.atmosphere.group, this.ring.mesh);
+      this.bubbles = new Bubbles(this.canvas.parentElement ?? document.body);
 
-      this.interaction = new InteractionSystem(this.session);
+      this.interaction = new InteractionSystem(this.session, this.level.collision);
       for (const p of INTERACTABLES) {
-        const v = new THREE.Vector3(...p.pos);
+        const socket = p.socket ? this.level.sockets.get(p.socket) : undefined;
+        const v = socket ? socket.clone() : new THREE.Vector3(...p.pos);
         this.interaction.register({ def: { id: p.id, kind: p.kind, refId: p.refId, label: p.label, locationId: p.locationId, radius: p.radius }, position: () => v, faceY: p.faceY });
       }
       for (const npc of this.session.defs.npcs.values()) {
-        this.interaction.register({ def: { id: `int_${npc.id}`, kind: "npc", refId: npc.id, label: npc.name, locationId: "", radius: 2.6 }, position: () => this.npcs.positionOf(npc.id) });
+        this.interaction.register({
+          def: { id: `int_${npc.id}`, kind: "npc", refId: npc.id, label: npc.name, locationId: "", radius: 2.6 },
+          position: () => this.npcs.positionOf(npc.id),
+          available: () => this.npcs.isAvailable(npc.id),
+        });
+      }
+      // doors: the interaction point is the middle of the doorway (its collider), so it works from both sides
+      for (const d of this.session.defs.doors.values()) {
+        const rt = this.level.doors.get(`${d.placementId}.${d.node}`);
+        if (!rt?.collider) continue;
+        const v = new THREE.Vector3(rt.collider.cx, rt.collider.yMin, rt.collider.cz);
+        this.interaction.register({ def: { id: `int_${d.id}`, kind: "door", refId: d.id, label: d.label, locationId: "", radius: 1.9 }, position: () => v });
       }
 
       this.session.subscribe(() => this.worldView.apply());
@@ -230,6 +269,8 @@ export class Game {
     }
     this.renderer.shadowMap.enabled = s.graphicsQuality !== "low";
     this.sun.castShadow = s.graphicsQuality !== "low";
+    this.input.setBindings(s.keyBindings ?? {});
+    document.documentElement.style.setProperty("--dialogue-alpha", String(s.dialogueBackdrop ?? 0.9));
     document.documentElement.style.setProperty("--text-scale", String(s.textScale));
     this.audio.applySettings(s);
     this.resize();
@@ -324,14 +365,17 @@ export class Game {
   closePanel(): void {
     const { panel } = this.ui.get();
     if ((panel === "storage" || panel === "decor") && this.player.animator.currentAction === "open_container") this.player.animator.stopAction();
-    if (panel === "dialogue") this.session.endConversation();
+    if (panel === "dialogue") {
+      this.session.endConversation();
+      this.confrontCooldown = this.clock + 5;
+    }
     if (this.talkingTo) {
       this.npcs.endTalk(this.talkingTo);
       this.talkingTo = null;
       if (this.player.animator.currentAction === "talk_idle") this.player.animator.stopAction();
       this.player.locked = false;
     }
-    this.ui.set({ panel: null, shopId: null, stationId: null, readingId: null, mapFocus: null });
+    this.ui.set({ panel: null, shopId: null, stationId: null, readingId: null, mapFocus: null, containerId: null });
     if (this.ui.get().mode === "play") this.input.requestLock();
   }
 
@@ -390,15 +434,48 @@ export class Game {
       case "inspect":
         this.ui.set({ panel: "inspect", inspectText: e.text });
         break;
+      case "door":
+        this.audio.door(e.open);
+        break;
+      case "pickup":
+        this.audio.play("sfx_pickup");
+        break;
+      case "fail":
+        this.audio.play("ui_error");
+        break;
     }
   };
 
+  /** Take a stack from a world container; NPCs who can see the player act as witnesses. */
+  takeFromContainer(containerId: string, slot: number): void {
+    const witnesses = this.npcs.witnessesOf(this.player.position);
+    const before = this.session.state.pendingCrime;
+    const r = this.session.takeFromContainer(containerId, slot, witnesses);
+    if (!r.ok) return;
+    if (!before && this.session.state.pendingCrime) {
+      this.npcs.reactToCrime(witnesses);
+      this.audio.alarm();
+      this.closePanel();
+    }
+  }
+
+  /** The watchman caught up with the player: open his conversation (it offers return or fine). */
+  private confront(npcId: string): void {
+    const ui = this.ui.get();
+    if (ui.mode !== "play" || ui.panel !== null || this.player.locked || this.clock < this.confrontCooldown) return;
+    const pos = this.npcs.positionOf(npcId);
+    this.perform({ id: `int_${npcId}`, kind: "npc", refId: npcId, label: "", locationId: "", radius: 3 }, "talk", pos);
+  }
+
   private interact(c: Candidate, secondary: boolean): void {
+    if (this.clock < this.interactCooldown) return; // debounce: one action per press, no double triggers
+    this.interactCooldown = this.clock + 0.35;
     const acts = c.actions;
     const act = secondary ? acts[1] : acts[0];
     if (!act) return;
     if (!act.enabled) {
       this.toast(act.reason ?? "You can't do that yet.", "bad");
+      this.audio.play("ui_error");
       return;
     }
     this.perform(c.def, act.verb, c.position, c.faceY);
@@ -419,6 +496,13 @@ export class Game {
     }
     if (verb === "sit") {
       this.sitAt(at, faceY ?? 0);
+      return;
+    }
+    if (verb === "search") {
+      this.player.faceTowards(at);
+      this.player.animator.play("open_container", { once: true });
+      this.ui.set({ containerId: def.refId });
+      this.openPanel("container");
       return;
     }
     const result = this.session.perform(def, verb);
@@ -473,6 +557,13 @@ export class Game {
       case "decorate":
         this.openPanel("decor");
         break;
+      case "open":
+      case "close":
+        this.lockFor("interact_reach");
+        break;
+      case "pickup":
+        this.lockFor("pickup_ground");
+        break;
       case "rest":
         break;
     }
@@ -516,6 +607,9 @@ export class Game {
     const t0 = performance.now();
     const ui = this.ui.get();
     const mode = ui.mode;
+    this.clock += dt;
+    this.input.pollGamepad(dt);
+    if (this.input.padNav && (ui.panel !== null || mode !== "play")) this.gamepadMenu(this.input.padNav, mode);
 
     if (mode === "play") {
       // Esc reaches us only when the pointer is not locked (locked Esc is handled via pointerlockchange).
@@ -534,9 +628,12 @@ export class Game {
       this.session.advanceTime(dt * MINUTES_PER_SECOND);
       this.player.update(dt, this.input, this.cam.yaw);
       this.cam.update(dt, ui.panel === null ? this.input : ({ mouseDX: 0, mouseDY: 0, wheel: 0 } as Input), this.player.position);
-      this.npcs.update(dt);
+      const pSpeed = Math.hypot(this.player.velocity.x, this.player.velocity.z);
+      this.npcs.update(dt, { position: this.player.position, speed: pSpeed, busy: ui.panel !== null || this.player.locked });
       const focus = canAct ? this.interaction.update(this.player.position, this.player.yaw) : null;
       this.updatePrompt(focus);
+      this.ring.update(dt, focus?.position ?? null, focus ? focus.position.y : 0, !!focus?.actions[0]?.enabled, this.settings.showTargetRing !== false && ui.pointerLocked !== undefined);
+      this.footsteps(pSpeed);
       if (focus && canAct) {
         if (this.input.wasPressed("interact")) this.interact(focus, false);
         else if (this.input.wasPressed("secondary")) this.interact(focus, true);
@@ -566,7 +663,7 @@ export class Game {
       const e = t * t * (3 - 2 * t);
       this.camera.position.copy(this.introCurve.getPoint(e));
       this.camera.lookAt(new THREE.Vector3(0, 6 - e * 4, 30 + e * 25 - (1 - e) * 40));
-      this.npcs.update(dt);
+      this.npcs.update(dt, { position: this.player.position, speed: 0, busy: true });
       this.player.animator.update(dt, 0);
       const caption = t < 0.33 ? "A settlement on the river plain, grown up around its temple." : t < 0.7 ? "Its people still keep its gardens and workshops - though some of the old ways have been forgotten." : "You have come to make a life here.";
       if (caption !== ui.caption) this.ui.set({ caption });
@@ -577,16 +674,18 @@ export class Game {
       const a = this.titleT + 2.2;
       this.camera.position.set(Math.cos(a) * 58, 24, Math.sin(a) * 58 - 6);
       this.camera.lookAt(0, 5, -6);
-      this.npcs?.update(dt);
+      this.npcs?.update(dt, { position: this.player?.position ?? new THREE.Vector3(), speed: 0, busy: true });
     } else if (mode === "paused") {
       // world frozen; still render for the backdrop
     }
 
+    this.updateEnvironment(dt);
     this.updateLighting();
     for (const f of this.level?.flames ?? []) f.scale.setScalar(0.85 + Math.random() * 0.3);
     this.level?.water && (this.level.water.uniforms.uTime!.value += dt);
     this.sky.position.copy(this.camera.position);
     this.renderer.render(this.scene, this.camera);
+    this.bubbles?.update(dt, this.camera, this.canvas.clientWidth || window.innerWidth, this.canvas.clientHeight || window.innerHeight);
     this.input.endFrame();
 
     const ms = performance.now() - t0;
@@ -595,6 +694,84 @@ export class Game {
     this.stats.drawCalls = this.renderer.info.render.calls;
     this.stats.triangles = this.renderer.info.render.triangles;
   };
+
+  /** Weather, doors, tree LOD, particles and the procedural soundscape. */
+  private updateEnvironment(dt: number): void {
+    if (!this.level) return;
+    const minutes = this.session.state.worldMinutes;
+    this.weather = weatherAt(minutes, !!this.session.state.flags.festival_held);
+    if (this.weather.kind !== this.ui.get().weather) this.ui.set({ weather: this.weather.kind });
+    // doors swing toward their saved state
+    for (const d of this.session.defs.doors.values()) {
+      const rt = this.level.doors.get(`${d.placementId}.${d.node}`);
+      if (!rt) continue;
+      const target = this.session.isDoorOpen(d.id) ? 1 : 0;
+      rt.angle += (target - rt.angle) * Math.min(1, dt * 5);
+      rt.leaf.rotation.y = rt.baseRotY + rt.opens * rt.angle * 1.45;
+    }
+    // indoors = a ceiling or roof collider directly overhead
+    if (this.player) {
+      const head = this.player.position.clone().add(new THREE.Vector3(0, 1.7, 0));
+      const indoors = this.level.collision.raycast(head, new THREE.Vector3(0, 1, 0), 2.5) < 2.5;
+      if (indoors !== this.indoors) {
+        this.indoors = indoors;
+        this.ui.set({ indoors });
+      }
+    }
+    this.lodTimer -= dt;
+    if (this.lodTimer <= 0) {
+      this.lodTimer = 0.25;
+      updateLod(this.level, this.camera.position);
+    }
+    const h = this.session.hourOfDay;
+    const day = THREE.MathUtils.smoothstep(Math.sin(((h - 6) / 12) * Math.PI), -0.15, 0.35);
+    this.atmosphere.update(dt, this.camera, this.weather, day, this.indoors);
+    if (this.player) {
+      const p = this.player.position;
+      const water = this.level.waterPoints.reduce((m, w) => Math.min(m, w.distanceTo(p)), Infinity);
+      const crowd = Math.hypot(p.x - 82, p.z - 10);
+      const channelFlowing = this.session.state.restorations.rest_channel_east === "flowing";
+      this.audio.updateAmbience(dt, {
+        rain: this.weather.rain,
+        wind: this.weather.wind,
+        day,
+        water: THREE.MathUtils.clamp(1 - water / 14, 0, 1) * (channelFlowing || water > 3 ? 1 : 0.6),
+        crowd: THREE.MathUtils.clamp(1 - crowd / 40, 0, 1),
+        indoors: this.indoors,
+      });
+    }
+  }
+
+  /** Footstep on each foot contact of the locomotion cycle, sounding like the surface underfoot. */
+  private footsteps(speed: number): void {
+    const ph = this.player.animator.cyclePhase;
+    const crossed = (this.lastFootPhase < 0.5 && ph >= 0.5) || ph < this.lastFootPhase;
+    this.lastFootPhase = ph;
+    if (!crossed || speed < 0.4) return;
+    const p = this.player.position;
+    let surface: "stone" | "soil" | "wood" = "soil";
+    if (p.y > 0.03) surface = this.indoors ? "wood" : "stone";
+    else if (PLACEMENTS.some((pl) => pl.asset === "ENV_Paving_Courtyard_A" && Math.abs(pl.pos[0] - p.x) < 5 && Math.abs(pl.pos[2] - p.z) < 5)) surface = "stone";
+    this.audio.footstep(surface, speed > 3.5);
+  }
+
+  /** Gamepad navigation of menus and panels: d-pad moves focus, A activates, B goes back. */
+  private gamepadMenu(nav: NonNullable<Input["padNav"]>, mode: Mode): void {
+    if (nav === "back") {
+      if (mode === "play") this.closePanel();
+      else if (mode === "paused") this.resume();
+      return;
+    }
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>(".panel button:not(:disabled), .dialogue button:not(:disabled), .title-card button:not(:disabled)")];
+    if (!buttons.length) return;
+    const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (nav === "accept") {
+      (i >= 0 ? buttons[i]! : buttons[0]!).click();
+      return;
+    }
+    const next = nav === "down" ? (i + 1) % buttons.length : (i - 1 + buttons.length) % buttons.length;
+    buttons[i < 0 ? 0 : next]!.focus();
+  }
 
   /** Evening ambience after 18:00; festival music on festival evenings. Missing tracks simply stay silent. */
   private updateMusic(): void {
@@ -675,17 +852,26 @@ export class Game {
     const dir = new THREE.Vector3(Math.cos(az) * 0.8, elev, -0.45).normalize();
     this.sun.position.copy(center).addScaledVector(dir, 70);
     this.sun.target.position.copy(center);
-    this.sun.intensity = 0.55 + day * 1.8; // moonlight floor keeps nights readable
+    const cloud = this.weather.cloud;
+    // overcast: the direct sun is diffused into sky light (soft, near-shadowless), and rain pulls the fog in
+    this.sun.intensity = (0.55 + day * 1.8) * (1 - cloud * 0.8); // moonlight floor keeps nights readable
     this.sun.color.setRGB(1, 0.92 - dusk * 0.25, 0.82 - dusk * 0.4).lerp(new THREE.Color(0x9fb4dd), 1 - day);
-    this.hemi.intensity = 0.8 + day * 0.4;
+    this.hemi.intensity = 0.8 + day * (0.4 + cloud * 0.45);
     this.hemi.color.setHex(0xcfe3f5).lerp(new THREE.Color(0x6a7cae), 1 - day);
-    const top = new THREE.Color(0x7fb2dc).lerp(new THREE.Color(0x0e1630), 1 - day);
-    const horizon = new THREE.Color(0xf1dcb5).lerp(new THREE.Color(0xf09a5a), dusk * 0.6).lerp(new THREE.Color(0x26304a), 1 - day);
+    const top = new THREE.Color(0x7fb2dc).lerp(new THREE.Color(0x0e1630), 1 - day).lerp(new THREE.Color(0x6d7480).multiplyScalar(0.4 + day * 0.6), cloud * 0.7);
+    const horizon = new THREE.Color(0xf1dcb5)
+      .lerp(new THREE.Color(0xf09a5a), dusk * 0.6)
+      .lerp(new THREE.Color(0xa3a7ab), cloud * 0.65)
+      .lerp(new THREE.Color(0x26304a), 1 - day);
     const u = (this.sky.material as THREE.ShaderMaterial).uniforms;
     u.uTop!.value.copy(top);
     u.uHorizon!.value.copy(horizon);
     u.uSun!.value.copy(dir);
-    (this.scene.fog as THREE.Fog).color.copy(horizon);
+    const fog = this.scene.fog as THREE.Fog;
+    fog.color.copy(horizon);
+    this.fogBase ??= { near: fog.near, far: fog.far };
+    fog.near = this.fogBase.near * (1 - this.weather.rain * 0.5);
+    fog.far = this.fogBase.far * (1 - this.weather.rain * 0.45);
     this.renderer.toneMappingExposure = 1.0 + day * 0.1;
     this.updateLampLights(day);
   }
