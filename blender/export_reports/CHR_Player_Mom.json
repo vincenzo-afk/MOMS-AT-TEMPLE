@@ -1,0 +1,37 @@
+{
+  "assetId": "CHR_Player_Mom",
+  "glb": "public/assets/models/characters/CHR_Player_Mom.glb",
+  "blend": "blender/source/CHR_Player_Mom.blend",
+  "bytes": 342088,
+  "triangles": 9072,
+  "objects": [
+    "CHR_Player_Mom",
+    "CHR_Player_Mom_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Foliage_A",
+    "MAT_Hair_A",
+    "MAT_Saree_A",
+    "MAT_Skin_A",
+    "MAT_Thatch_A"
+  ],
+  "boundsMin": [
+    -0.272,
+    -0.207,
+    -0.01
+  ],
+  "boundsMax": [
+    0.272,
+    0.177,
+    1.613
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.6,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

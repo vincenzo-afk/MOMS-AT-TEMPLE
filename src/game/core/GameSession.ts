@@ -819,6 +819,8 @@ export class GameSession {
         const p = this.defs.pickups.get(it.refId);
         return this.isPickupAvailable(it.refId) ? [{ verb: "pickup", label: `Pick up ${p?.label ?? it.label}`, enabled: true }] : [];
       }
+      case "visit":
+        return []; // Temple Visit stations supply their own actions
     }
   }
 
@@ -853,7 +855,8 @@ export class GameSession {
       case "decorate":
       case "notices":
       case "sit":
-        return { ok: true }; // the UI / engine opens a panel or plays a pose
+      case "visit":
+        return { ok: true }; // the UI / engine opens a panel, plays a pose or runs the visit station
       case "rest":
         return this.rest();
     }

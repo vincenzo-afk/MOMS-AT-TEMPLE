@@ -15,7 +15,7 @@ from tom.core import reset_scene, render_preview, REPORT_OUT  # noqa: E402
 import assets_architecture  # noqa: E402
 
 GROUPS = {"architecture": assets_architecture.ASSETS}
-for mod_name in ("assets_buildings", "assets_nature", "assets_water", "assets_market", "assets_garden", "assets_crafting", "assets_restoration", "assets_discovery", "assets_home", "assets_settlement", "assets_interiors", "assets_characters"):
+for mod_name in ("assets_buildings", "assets_nature", "assets_water", "assets_market", "assets_garden", "assets_crafting", "assets_restoration", "assets_discovery", "assets_home", "assets_settlement", "assets_interiors", "assets_visit", "assets_characters"):
     try:
         mod = __import__(mod_name)
         GROUPS[mod_name.replace("assets_", "")] = mod.ASSETS

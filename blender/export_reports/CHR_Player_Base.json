@@ -2,7 +2,7 @@
   "assetId": "CHR_Player_Base",
   "glb": "public/assets/models/characters/CHR_Player_Base.glb",
   "blend": "blender/source/CHR_Player_Base.blend",
-  "bytes": 1679628,
+  "bytes": 1679632,
   "triangles": 8356,
   "objects": [
     "CHR_Player_Base",
@@ -21,7 +21,7 @@
   "boundsMin": [
     -0.314,
     -0.184,
-    -0.01
+    -0.009
   ],
   "boundsMax": [
     0.314,

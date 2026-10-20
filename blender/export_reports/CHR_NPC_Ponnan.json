@@ -2,7 +2,7 @@
   "assetId": "CHR_NPC_Ponnan",
   "glb": "public/assets/models/characters/CHR_NPC_Ponnan.glb",
   "blend": "blender/source/CHR_NPC_Ponnan.blend",
-  "bytes": 301044,
+  "bytes": 301052,
   "triangles": 8070,
   "objects": [
     "CHR_NPC_Ponnan",
@@ -20,7 +20,7 @@
   "boundsMin": [
     -0.349,
     -0.194,
-    -0.011
+    -0.01
   ],
   "boundsMax": [
     0.304,

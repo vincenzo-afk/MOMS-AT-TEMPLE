@@ -1,0 +1,38 @@
+{
+  "assetId": "PRP_Auto_Rickshaw_A",
+  "glb": "public/assets/models/props/PRP_Auto_Rickshaw_A.glb",
+  "blend": "blender/source/PRP_Auto_Rickshaw_A.blend",
+  "bytes": 45812,
+  "triangles": 1140,
+  "objects": [
+    "COL_Body",
+    "PRP_Auto_Rickshaw_A",
+    "PRP_Auto_Rickshaw_A_Mesh",
+    "SOCKET_Door",
+    "SOCKET_Driver",
+    "WHEEL_F",
+    "WHEEL_RL",
+    "WHEEL_RR"
+  ],
+  "colliders": [
+    "COL_Body"
+  ],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Emissive_A",
+    "MAT_Foliage_A",
+    "MAT_Iron_A",
+    "MAT_Water_A"
+  ],
+  "boundsMin": [
+    -0.725,
+    -1.17,
+    -0.0
+  ],
+  "boundsMax": [
+    0.725,
+    1.25,
+    1.95
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

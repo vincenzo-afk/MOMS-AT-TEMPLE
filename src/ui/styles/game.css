@@ -894,3 +894,376 @@ svg.map {
     transform: translateX(-50%) translateY(0);
   }
 }
+
+/* ---------------- temple visit ---------------- */
+.title-card:has(.visit-menu) {
+  max-width: 760px;
+}
+.visit-menu .visit-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+.visit-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.6rem 0.7rem;
+}
+.visit-card.selected,
+.saree.selected {
+  outline: 2px solid var(--gold-bright);
+}
+.visit-card .cost {
+  color: var(--gold-bright);
+}
+.visit-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+.visit-sarees {
+  display: flex;
+  gap: 0.4rem;
+}
+.saree {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 0.7rem;
+}
+.kumkum {
+  color: #ff8a80;
+  font-weight: 600;
+}
+.festival-tag {
+  background: rgba(217, 163, 91, 0.25);
+  border: 1px solid var(--gold-bright);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+}
+.visit-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.visit-score {
+  position: absolute;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  padding: 0.35rem 0.9rem;
+}
+.visit-score .punya {
+  font-size: 1.5rem;
+  font-family: var(--serif);
+  color: var(--gold-bright);
+}
+.meter {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  min-width: 7rem;
+}
+.meter .bar,
+.queue-panel .bar,
+.mini-timer {
+  height: 0.45rem;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.meter .bar > div,
+.queue-panel .bar > div,
+.mini-timer > div {
+  height: 100%;
+  transition: width 0.25s ease;
+}
+.meter.blessings .bar > div {
+  background: linear-gradient(90deg, #f6d27a, #ffb347);
+}
+.meter.stress .bar > div {
+  background: linear-gradient(90deg, #e5735b, #b3261e);
+}
+.queue-panel .bar > div,
+.mini-timer > div {
+  background: var(--gold-bright);
+}
+.streak {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.streak.hot {
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+.visit-objective {
+  position: absolute;
+  top: 4.4rem;
+  right: 1rem;
+  max-width: 22rem;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+}
+.visit-flash {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translateX(-50%);
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  animation: flash-up 2.2s ease-out forwards;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.visit-flash.good {
+  color: #ffe08a;
+}
+.visit-flash.bad {
+  color: #ff8a80;
+}
+.visit-flash.combo b {
+  color: #fff;
+}
+@keyframes flash-up {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -30px);
+  }
+}
+.queue-panel {
+  position: absolute;
+  bottom: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  min-width: 22rem;
+}
+.queue-panel .lanes {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.queue-panel .lane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  padding: 0.2rem;
+}
+.queue-panel .lane.mine {
+  border-color: var(--gold-bright);
+  background: rgba(217, 163, 91, 0.2);
+}
+.drive-hint {
+  position: absolute;
+  bottom: 2.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+}
+.minigame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 1rem 1.3rem;
+  min-width: 24rem;
+  max-width: 34rem;
+  z-index: 10;
+}
+.mini-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+.bag-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin: 0.6rem 0;
+}
+.bag-item.in {
+  background: rgba(120, 190, 120, 0.35);
+  border-color: #8fd18f;
+}
+.calendar-card {
+  font-size: 1.6rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: #f4efe2;
+  color: #2a1c12;
+  border-top: 0.6rem solid #b3261e;
+  border-radius: 6px;
+}
+.timing-bar {
+  position: relative;
+  height: 1.4rem;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  margin: 0.8rem 0;
+}
+.timing-bar .green {
+  position: absolute;
+  left: 42%;
+  width: 16%;
+  height: 100%;
+  background: rgba(120, 200, 120, 0.6);
+}
+.timing-bar .marker {
+  position: absolute;
+  top: -0.2rem;
+  width: 0.3rem;
+  height: 1.8rem;
+  background: #fff;
+  transform: translateX(-50%);
+}
+.lamp-row {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.6rem 0;
+  flex-wrap: wrap;
+}
+.lamp {
+  font-size: 1.4rem;
+  width: 2.6rem;
+}
+.lamp.on {
+  background: rgba(255, 190, 90, 0.35);
+}
+.darshan-view {
+  position: relative;
+  height: 5rem;
+  background: linear-gradient(#2b1a10, #4a2e1a);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+.darshan-view .deity {
+  position: absolute;
+  top: 1rem;
+  font-size: 2.4rem;
+  transform: translateX(-50%);
+}
+.darshan-view .window {
+  position: absolute;
+  left: 36%;
+  width: 28%;
+  top: 0;
+  bottom: 0;
+  border: 2px dashed rgba(255, 220, 140, 0.7);
+}
+.photo-faces {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 2.2rem;
+  justify-content: center;
+  margin: 0.6rem 0;
+}
+.gossip-line {
+  font-style: italic;
+}
+.score-table {
+  width: 100%;
+  margin: 0.6rem 0;
+}
+.score-table td:last-child {
+  text-align: right;
+}
+.score-table .total td {
+  font-size: 1.3rem;
+  color: var(--gold-bright);
+  border-top: 1px solid var(--edge);
+}
+/* the loading bar's global .bar sizing does not apply to visit meters */
+.meter .bar,
+.queue-panel .bar {
+  width: auto;
+  margin: 0.15rem 0 0;
+}
+.meter {
+  min-width: 8rem;
+}
+
+/* ---------------- touch controls ---------------- */
+.touch-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  touch-action: none;
+}
+.touch-look {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 55%;
+  height: 100%;
+  pointer-events: auto;
+}
+.touch-stick {
+  position: absolute;
+  left: 2rem;
+  bottom: 3rem;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.touch-stick .knob {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background: rgba(255, 230, 180, 0.45);
+}
+.touch-buttons {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 3rem;
+  display: grid;
+  grid-template-columns: repeat(2, 4.2rem);
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+.touch-btn {
+  height: 4.2rem;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  background: rgba(30, 20, 12, 0.6);
+}

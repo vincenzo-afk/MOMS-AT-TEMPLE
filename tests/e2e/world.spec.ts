@@ -278,11 +278,12 @@ test("gamepad drives movement and interaction; soundscape, footsteps and tree LO
   await page.waitForTimeout(1500);
   const tris = await page.evaluate(() => {
     const g = window.__tom!.game as unknown as {
-      renderer: { info: { render: { triangles: number } }; render: (s: unknown, c: unknown) => void };
+      renderer: { info: { render: { triangles: number }; reset: () => void }; render: (s: unknown, c: unknown) => void };
       scene: unknown;
       camera: unknown;
       level: { lodChunks: Array<{ near: Array<{ visible: boolean }>; far: Array<{ visible: boolean }> }> };
     };
+    g.renderer.info.reset();
     g.renderer.render(g.scene, g.camera);
     const lod = g.renderer.info.render.triangles;
     const saved = g.level.lodChunks.map((ch) => ch.near.map((o) => o.visible));
@@ -290,6 +291,7 @@ test("gamepad drives movement and interaction; soundscape, footsteps and tree LO
       ch.near.forEach((o) => (o.visible = true));
       ch.far.forEach((o) => (o.visible = false));
     }
+    g.renderer.info.reset();
     g.renderer.render(g.scene, g.camera);
     const fullDetail = g.renderer.info.render.triangles;
     g.level.lodChunks.forEach((ch, i) => {

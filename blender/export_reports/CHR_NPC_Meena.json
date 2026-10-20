@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Meena",
   "glb": "public/assets/models/characters/CHR_NPC_Meena.glb",
   "blend": "blender/source/CHR_NPC_Meena.blend",
-  "bytes": 331180,
-  "triangles": 8888,
+  "bytes": 336364,
+  "triangles": 8972,
   "objects": [
     "CHR_NPC_Meena",
     "CHR_NPC_Meena_Mesh",
@@ -21,11 +21,11 @@
   "boundsMin": [
     -0.275,
     -0.205,
-    -0.012
+    -0.01
   ],
   "boundsMax": [
     0.275,
-    0.149,
+    0.17,
     1.633
   ],
   "blenderVersion": "5.2.2 LTS",

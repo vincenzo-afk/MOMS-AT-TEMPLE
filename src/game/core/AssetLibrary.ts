@@ -88,7 +88,7 @@ export class AssetLibrary {
         if (sm.isMeshStandardMaterial) {
           sm.vertexColors = !!mesh.geometry.getAttribute("color");
           sm.envMapIntensity = 0.6;
-          if (sm.name === "MAT_Foliage_A" || sm.name === "MAT_Cloth_A") sm.side = THREE.DoubleSide;
+          if (sm.name === "MAT_Foliage_A" || sm.name === "MAT_Cloth_A" || sm.name === "MAT_Saree_A") sm.side = THREE.DoubleSide;
           applyDetail(sm, sm.name, skinned);
         }
       }

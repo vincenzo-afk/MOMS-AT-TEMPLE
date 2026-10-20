@@ -1,0 +1,29 @@
+{
+  "assetId": "PRP_Bush_Hide_A",
+  "glb": "public/assets/models/props/PRP_Bush_Hide_A.glb",
+  "blend": "blender/source/PRP_Bush_Hide_A.blend",
+  "bytes": 24480,
+  "triangles": 920,
+  "objects": [
+    "COL_Bush",
+    "PRP_Bush_Hide_A",
+    "PRP_Bush_Hide_A_Mesh"
+  ],
+  "colliders": [
+    "COL_Bush"
+  ],
+  "materials": [
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -0.679,
+    -0.686,
+    0.048
+  ],
+  "boundsMax": [
+    0.594,
+    0.662,
+    0.895
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

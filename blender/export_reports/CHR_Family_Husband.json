@@ -1,0 +1,33 @@
+{
+  "assetId": "CHR_Family_Husband",
+  "glb": "public/assets/models/characters/CHR_Family_Husband.glb",
+  "blend": "blender/source/CHR_Family_Husband.blend",
+  "bytes": 304792,
+  "triangles": 8108,
+  "objects": [
+    "CHR_Family_Husband",
+    "CHR_Family_Husband_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.319,
+    -0.195,
+    -0.009
+  ],
+  "boundsMax": [
+    0.319,
+    0.156,
+    1.738
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.73,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

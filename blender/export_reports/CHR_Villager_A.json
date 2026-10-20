@@ -2,7 +2,7 @@
   "assetId": "CHR_Villager_A",
   "glb": "public/assets/models/characters/CHR_Villager_A.glb",
   "blend": "blender/source/CHR_Villager_A.blend",
-  "bytes": 293740,
+  "bytes": 293736,
   "triangles": 7900,
   "objects": [
     "CHR_Villager_A",
@@ -19,7 +19,7 @@
   "boundsMin": [
     -0.312,
     -0.184,
-    -0.01
+    -0.009
   ],
   "boundsMax": [
     0.312,

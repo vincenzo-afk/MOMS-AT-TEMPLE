@@ -15,6 +15,10 @@ import { weatherAt, type Weather } from "../world/weather";
 import { PlayerController, RUN_SPEED, SPRINT_SPEED, WALK_SPEED, type LandKind } from "../player/PlayerController";
 import { measureSeat, SeatSession } from "../player/Seat";
 import { PostFX } from "../render/PostFX";
+import { VisitDirector, type VisitUi } from "../visit/VisitDirector";
+import type { VisitWorld } from "../visit/VisitWorld";
+import { isFestivalDay } from "../visit/rules";
+import { visitAssetIds } from "../../data/visit";
 import { CharacterAnimator } from "../player/CharacterAnimator";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
 import { InteractionSystem, type Candidate } from "../interaction/InteractionSystem";
@@ -40,7 +44,7 @@ const NO_INPUT = {
 const NO_LOOK = { mouseDX: 0, mouseDY: 0, wheel: 0 };
 
 export type Mode = "loading" | "title" | "intro" | "play" | "paused" | "error";
-export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community" | "container";
+export type Panel = null | "inventory" | "journal" | "record" | "dialogue" | "craft" | "shop" | "reading" | "inspect" | "settings" | "storage" | "decor" | "notices" | "map" | "community" | "container" | "minigame" | "visitScore";
 
 export interface Toast {
   id: number;
@@ -70,6 +74,8 @@ export interface UiState {
   containerId: string | null;
   weather: Weather["kind"];
   indoors: boolean;
+  /** Temple Visit HUD and mini-game state (null outside a visit). */
+  visit: VisitUi | null;
 }
 
 export class Game {
@@ -100,6 +106,7 @@ export class Game {
     containerId: null,
     weather: "clear",
     indoors: false,
+    visit: null,
   });
   input: Input;
   level!: LevelHandles;
@@ -120,6 +127,9 @@ export class Game {
   private actionTimer = 0;
   private talkingTo: string | null = null;
   private seat: SeatSession | null = null;
+  /** The running Temple Visit (GAME_DESIGN.md), if any. */
+  visit: VisitDirector | null = null;
+  private visitWorlds = new Map<string, VisitWorld>();
   private readonly lookPoint = new THREE.Vector3();
   private readonly lookPointB = new THREE.Vector3();
   /** Subscribers to hard landings (the temple visit turns a bad fall into Stress). */
@@ -156,6 +166,7 @@ export class Game {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
+    this.renderer.info.autoReset = false;
     this.renderer.shadowMap.enabled = settings.graphicsQuality !== "low";
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.postfx = new PostFX(this.renderer, this.scene, this.camera);
@@ -321,6 +332,7 @@ export class Game {
 
   // ------------------------------------------------------------------ modes
   enterTitle(): void {
+    if (this.visit) this.exitVisit();
     this.ui.set({ mode: "title", panel: null, caption: null });
     this.input.releaseLock();
   }
@@ -346,6 +358,84 @@ export class Game {
       return null;
     }
     return r.status === "empty" ? "No saved game found." : `Could not load the save: ${r.error}`;
+  }
+
+  /**
+   * Start a Temple Visit: a fresh in-memory world (the story save is never touched), the chosen mom with her
+   * saree, her family, and the temple's stations.
+   */
+  async startVisit(momId: string, templeId: string): Promise<void> {
+    await this.audio.unlock(this.settings);
+    if (this.visit) this.disposeVisit();
+    this.seat?.cancel();
+    const missing = visitAssetIds(templeId).filter((id) => !this.assets.has(id));
+    if (missing.length) {
+      this.ui.set({ mode: "loading", loading: { done: 0, total: missing.length, label: "Packing for the temple" } });
+      await this.assets.loadAll(missing, (done, total) => this.ui.set({ loading: { done, total, label: "Packing for the temple" } }));
+    }
+    this.session.replaceState(newGameState());
+    this.applyStateToWorld();
+    const profile = await this.saves.loadVisitProfile();
+    const day = new Date().toISOString().slice(0, 10);
+    const visit = new VisitDirector(this, profile, momId, templeId, isFestivalDay(day), this.visitWorlds);
+    this.setPlayerModel("CHR_Player_Mom", visit.saree);
+    this.visit = visit;
+    this.interaction.filter = (d) => d.kind === "visit" || d.kind === "door" || d.kind === "sit";
+    visit.start();
+    this.introCurve = null;
+    this.ui.set({ mode: "play", caption: null, panel: null });
+    this.audio.setMusic("mus_exploration_day");
+    this.audio.startLoop("amb_settlement_day");
+    this.input.requestLock();
+  }
+
+  private disposeVisit(): void {
+    if (!this.visit) return;
+    this.visit.dispose();
+    this.visit = null;
+    this.interaction.filter = null;
+    this.ui.set({ visit: null });
+  }
+
+  /** Leave the visit (score screen "Back to title", pause menu exit): restore the story-mode player. */
+  exitVisit(): void {
+    this.disposeVisit();
+    this.audio.engine(false);
+    this.setPlayerModel(PLAYER_MODEL);
+  }
+
+  /** Swap the controlled character (the mom for a visit, the newcomer for story mode); an optional saree tint. */
+  setPlayerModel(modelId: string, saree?: string): void {
+    if (!this.assets.has(modelId)) return;
+    const old = this.player;
+    const model = this.assets.instantiate(modelId);
+    model.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.castShadow = true;
+      mesh.frustumCulled = false;
+      if (saree) {
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const tinted = mats.map((m) => {
+          if (m.name !== "MAT_Saree_A") return m;
+          const c = (m as THREE.MeshStandardMaterial).clone();
+          c.color.set(saree);
+          return c;
+        });
+        mesh.material = Array.isArray(mesh.material) ? tinted : tinted[0]!;
+      }
+    });
+    const clips = modelId === PLAYER_MODEL ? this.assets.clips(PLAYER_MODEL) : this.assets.retargetClips(PLAYER_MODEL, modelId);
+    const animator = new CharacterAnimator(model, clips, WALK_SPEED, RUN_SPEED);
+    const p = new PlayerController(model, animator, this.level.collision);
+    p.onLand = old.onLand;
+    p.onJump = old.onJump;
+    p.teleport([old.position.x, old.position.y, old.position.z], old.yaw);
+    this.scene.remove(old.object);
+    this.scene.add(p.object);
+    this.player = p;
+    this.playerMaterials = null;
+    this.playerAlpha = 1;
   }
 
   private startIntro(): void {
@@ -398,6 +488,14 @@ export class Game {
 
   closePanel(): void {
     const { panel } = this.ui.get();
+    if (panel === "minigame" && this.visit?.ui.mini) {
+      // Esc out of a mini-game: it counts as a failed attempt
+      this.ui.set({ panel: null });
+      this.visit.finishMini({ ok: false });
+      if (this.ui.get().mode === "play") this.input.requestLock();
+      return;
+    }
+    if (panel === "visitScore") return; // the score screen leaves through its own buttons
     if ((panel === "storage" || panel === "decor") && this.player.animator.currentAction === "open_container") this.player.animator.stopAction();
     if (panel === "dialogue") {
       this.session.endConversation();
@@ -414,6 +512,7 @@ export class Game {
   }
 
   async saveGame(manual = false): Promise<boolean> {
+    if (this.visit) return true; // a visit is a separate run; it never writes the story save
     this.session.setPlayerTransform([this.player.position.x, this.player.position.y, this.player.position.z], this.player.yaw);
     try {
       await this.saves.save(this.session.state);
@@ -510,6 +609,11 @@ export class Game {
     if (!act.enabled) {
       this.toast(act.reason ?? "You can't do that yet.", "bad");
       this.audio.play("ui_error");
+      return;
+    }
+    if (act.verb === "visit") {
+      this.audio.play("ui_confirm");
+      this.visit?.perform(act.id ?? "");
       return;
     }
     this.perform(c.def, act.verb, c.position, c.faceY);
@@ -716,17 +820,26 @@ export class Game {
       }
       if (this.seated && ui.panel === null && (this.input.isDown("forward") || this.input.isDown("back") || this.input.isDown("left") || this.input.isDown("right") || this.input.wasPressed("jump"))) this.standUp();
       // no interacting mid-air, mid-vault or while a landing or the seat choreography owns the body
-      const canAct = ui.panel === null && !this.player.locked && !this.player.airborne && !this.player.busy && !this.seated;
+      const canAct = ui.panel === null && !this.player.locked && !this.player.airborne && !this.player.busy && !this.seated && !this.visit?.controlsPlayer;
       this.session.advanceTime(dt * MINUTES_PER_SECOND);
       const focus = canAct ? this.interaction.update(this.player.position, this.player.yaw) : null;
       // gamepad A is contextual: interact with a target, otherwise jump
       if (!focus && ui.panel === null && this.input.padPressedButton(0)) this.player.requestJump();
       this.player.lookTarget = focus ? this.lookPoint.copy(focus.position).setY(focus.position.y + (focus.def.kind === "npc" ? 1.55 : 0.6)) : null;
-      this.player.update(dt, ui.panel === null && !this.seated ? this.input : NO_INPUT, this.cam.yaw);
+      if (this.visit && ui.panel === null) this.visit.update(dt);
+      if (!this.visit?.controlsPlayer) this.player.update(dt, ui.panel === null && !this.seated ? this.input : NO_INPUT, this.cam.yaw);
       this.seat?.update(dt);
       const pSpeed = Math.hypot(this.player.velocity.x, this.player.velocity.z);
       const sprint = THREE.MathUtils.clamp((pSpeed - RUN_SPEED) / (SPRINT_SPEED - RUN_SPEED), 0, 1);
-      this.cam.update(dt, ui.panel === null ? this.input : NO_LOOK, this.player.position, this.player.velocity, sprint, !this.seated);
+      const drive = this.visit?.vehicleHeading;
+      if (drive) {
+        // vehicle camera: swing behind the auto while it moves, unless the player is looking around
+        if (Math.abs(drive.speed) > 1 && Math.abs(this.input.mouseDX) < 1) {
+          const want = drive.yaw + Math.PI;
+          this.cam.yaw += Math.atan2(Math.sin(want - this.cam.yaw), Math.cos(want - this.cam.yaw)) * (1 - Math.exp(-2 * dt));
+        }
+        this.cam.update(dt, ui.panel === null ? this.input : NO_LOOK, this.visit!.cameraFocus(this.lookPointB)!, undefined, Math.min(1, Math.abs(drive.speed) / 9) * 0.6, false);
+      } else this.cam.update(dt, ui.panel === null ? this.input : NO_LOOK, this.player.position, this.player.velocity, sprint, !this.seated);
       this.fadePlayer();
       this.npcs.update(dt, { position: this.player.position, speed: pSpeed, busy: ui.panel !== null || this.player.locked });
       this.updatePrompt(focus);
@@ -745,7 +858,7 @@ export class Game {
         }
       }
       this.autosaveTimer += dt;
-      if (this.autosaveTimer > 60) {
+      if (this.autosaveTimer > 60 && !this.visit) {
         this.autosaveTimer = 0;
         void this.saveGame();
       }
@@ -782,6 +895,7 @@ export class Game {
     for (const f of this.level?.flames ?? []) f.scale.setScalar(0.85 + Math.random() * 0.3);
     if (this.level?.water) this.level.water.uniforms.uTime!.value += dt;
     this.sky.position.copy(this.camera.position);
+    this.renderer.info.reset(); // post passes render several times a frame: count them all (autoReset is off)
     this.postfx.render(dt);
     this.bubbles?.update(dt, this.camera, this.canvas.clientWidth || window.innerWidth, this.canvas.clientHeight || window.innerHeight);
     this.input.endFrame();

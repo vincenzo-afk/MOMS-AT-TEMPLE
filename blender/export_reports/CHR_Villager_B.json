@@ -2,7 +2,7 @@
   "assetId": "CHR_Villager_B",
   "glb": "public/assets/models/characters/CHR_Villager_B.glb",
   "blend": "blender/source/CHR_Villager_B.blend",
-  "bytes": 298840,
+  "bytes": 298848,
   "triangles": 8056,
   "objects": [
     "CHR_Villager_B",

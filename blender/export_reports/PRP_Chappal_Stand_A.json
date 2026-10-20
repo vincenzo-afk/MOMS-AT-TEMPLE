@@ -1,0 +1,32 @@
+{
+  "assetId": "PRP_Chappal_Stand_A",
+  "glb": "public/assets/models/props/PRP_Chappal_Stand_A.glb",
+  "blend": "blender/source/PRP_Chappal_Stand_A.blend",
+  "bytes": 106160,
+  "triangles": 1452,
+  "objects": [
+    "COL_Counter",
+    "COL_Racks",
+    "PRP_Chappal_Stand_A",
+    "PRP_Chappal_Stand_A_Mesh",
+    "SOCKET_Counter"
+  ],
+  "colliders": [
+    "COL_Counter",
+    "COL_Racks"
+  ],
+  "materials": [
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.25,
+    -0.9,
+    0.0
+  ],
+  "boundsMax": [
+    1.25,
+    0.575,
+    1.6
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

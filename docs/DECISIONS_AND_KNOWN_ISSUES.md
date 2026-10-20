@@ -48,6 +48,18 @@
 - **The door interaction point is the doorway centre**, so the same door works from inside and outside. Doors swing inward so an open door never blocks the veranda.
 - **Line of sight is tested at waist and shoulder height,** so a counter does not hide a trader but a wall hides everything.
 
+## Decisions (session 4)
+
+- **GAME_DESIGN.md asked for Phaser 2D, the polish brief for GTA-style 3D.** The design's rules were built into the existing Three.js game as the Temple Visit mode instead of rewriting the engine (PLAN.md §0).
+- **Sitting is measured, not authored.** Clips supply joint angles; the pelvis is moved onto the seat measured from collision proxies, and IK plants the feet. Any bench, at any height, with or without a backrest, works without per-asset numbers.
+- **Clip weights are renormalised to 1 every frame.** Smoothed crossfades can never mix in the bind pose. The browser tests assert the weight sum stays at or above 0.98 through every transition.
+- **The controller was rewritten rather than patched,** because jump, vault and climb need scripted moves to own the position, and air time to own vertical motion.
+- **Animation library optimisation is lossless for motion:** constant translation and scale channels (identical in every clip) are dropped, and rotations are stored as normalised int16.
+- **Lint is oxlint,** because typescript-eslint does not support TypeScript 7.
+- **The Temple Visit never writes the story save.** It runs on a fresh in-memory world; its own progression is a separate validated IndexedDB record (`visit_profile`).
+- **"Stress caps it"** is implemented as a cap of (1 - stress/200) on the final score; the design names the effect, not the formula.
+- **Interaction line of sight aims at the target itself for raised targets** (a wall calendar), and at waist and shoulder height for ground ones.
+
 ## Conflicts between README and reality
 
 - **README §14 file structure** lists `src/tests/` and per-system data folders; data lives in single files under `src/data/` (small enough), and unit tests sit beside the code they test. Browser tests are in `tests/e2e/`.
@@ -64,6 +76,12 @@
 | Characters | no UVs or textures | low | after modelling pass |
 | Animation | 28 of the README's ~35 clips exist (see ANIMATION_SPEC) | low | walk start/stop, carry, close_container |
 | NPCs | stuck recovery (re-plan, skip a waypoint, step past) is implemented but no automated test forces an NPC into a stuck state; the sampled runs recorded 0 repaths | low | a test that blocks a route with a collider |
+| Temple Visit | gossip, annadanam, vibhuti and the chappal-bush memory test are implemented and reachable but not driven by a browser test (the full-visit test covers the stand route) | low | extend visit.spec |
+| Temple Visit | the drive from home to the temple is free driving through the settlement with no road guidance; the auto can scrape walls in narrow lanes | low | a road path with the map marker |
+| Temple Visit | sound cues ("aiyyo", bells, nadaswaram, horn, engine) are synthesized placeholders | medium | recorded audio |
+| Characters | the saree pallu is a stylised band; there is no cloth simulation | low | production cloth pass |
+| Movement | cover snap not implemented (no combat or stealth in either design) | n/a | only if a stealth system is ever designed |
+| Touch | the touch controls are tested with mouse-driven pointer events, not on a physical phone | low | manual check on a phone |
 | NPCs | NPCs do not react to the player running, entering homes or carrying stolen goods later; only witnessed container theft is a crime | low | trespass rules per interior |
 | Interaction | opening doors and containers reuses the reach animation (no dedicated door or lid animation; crates have no opening lid) | low | door_push and open_container clips, an animated lid |
 | Input | gamepad tested only with a scripted `navigator.getGamepads()` stub, not a physical controller | low | manual check with an Xbox/PS pad |

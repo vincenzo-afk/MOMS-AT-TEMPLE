@@ -151,6 +151,156 @@ export class Soundscape {
   }
 
   /** Wooden door creak / thud. */
+  // ---------------------------------------------------------------- temple visit cues (placeholders)
+  /** Temple bell: inharmonic partials with a long decay. */
+  bell(): void {
+    const c = this.ctx;
+    const now = c.currentTime;
+    for (const [ratio, amp, decay] of [[1, 0.06, 2.4], [2.76, 0.03, 1.6], [5.4, 0.018, 0.9], [8.9, 0.01, 0.5]] as const) {
+      const o = c.createOscillator();
+      o.type = "sine";
+      o.frequency.value = 620 * ratio;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(amp, now + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + decay);
+      o.connect(g).connect(this.out);
+      o.start(now);
+      o.stop(now + decay + 0.05);
+    }
+  }
+
+  /** A light ting for social and hustle points. */
+  chime(): void {
+    const c = this.ctx;
+    const now = c.currentTime;
+    [1320, 1760].forEach((f, i) => {
+      const o = c.createOscillator();
+      o.type = "triangle";
+      o.frequency.value = f;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, now + i * 0.07);
+      g.gain.exponentialRampToValueAtTime(0.035, now + i * 0.07 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.07 + 0.35);
+      o.connect(g).connect(this.out);
+      o.start(now + i * 0.07);
+      o.stop(now + i * 0.07 + 0.4);
+    });
+  }
+
+  /** Nadaswaram sting: a short reedy rising phrase (Mohanam notes) for big scores. */
+  nadaswaram(): void {
+    const c = this.ctx;
+    const now = c.currentTime;
+    const notes = [523, 587, 659, 784, 880, 784, 1047];
+    const f = c.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = 1400;
+    f.Q.value = 1.2;
+    const g = c.createGain();
+    g.gain.value = 0.0001;
+    f.connect(g).connect(this.out);
+    const o = c.createOscillator();
+    o.type = "sawtooth";
+    const vib = c.createOscillator();
+    vib.frequency.value = 6;
+    const vg = c.createGain();
+    vg.gain.value = 9;
+    vib.connect(vg).connect(o.frequency);
+    notes.forEach((n, i) => o.frequency.setValueAtTime(n, now + i * 0.11));
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.05, now + 0.05);
+    g.gain.setValueAtTime(0.05, now + notes.length * 0.11);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + notes.length * 0.11 + 0.4);
+    o.connect(f);
+    o.start(now);
+    vib.start(now);
+    o.stop(now + notes.length * 0.11 + 0.45);
+    vib.stop(now + notes.length * 0.11 + 0.45);
+  }
+
+  /** "Aiyyo": a two-syllable falling vowel glide through formant filters (placeholder for a recorded voice). */
+  aiyyo(): void {
+    const c = this.ctx;
+    const now = c.currentTime;
+    const o = c.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(260, now);
+    o.frequency.linearRampToValueAtTime(300, now + 0.12);
+    o.frequency.linearRampToValueAtTime(200, now + 0.45);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.05, now + 0.03);
+    g.gain.setValueAtTime(0.05, now + 0.16);
+    g.gain.exponentialRampToValueAtTime(0.02, now + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.05, now + 0.26);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+    // formants glide from "ai" (F1 700, F2 1700) to "yo" (F1 450, F2 850)
+    for (const [a0, a1, q] of [[700, 450, 6], [1700, 850, 8]] as const) {
+      const f = c.createBiquadFilter();
+      f.type = "bandpass";
+      f.Q.value = q;
+      f.frequency.setValueAtTime(a0, now);
+      f.frequency.linearRampToValueAtTime(a0, now + 0.18);
+      f.frequency.linearRampToValueAtTime(a1, now + 0.32);
+      o.connect(f).connect(g);
+    }
+    g.connect(this.out);
+    o.start(now);
+    o.stop(now + 0.6);
+  }
+
+  /** Auto-rickshaw horn: two detuned squares. */
+  horn(): void {
+    const c = this.ctx;
+    const now = c.currentTime;
+    for (const f of [420, 435]) {
+      const o = c.createOscillator();
+      o.type = "square";
+      o.frequency.value = f;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.025, now + 0.02);
+      g.gain.setValueAtTime(0.025, now + 0.28);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+      o.connect(g).connect(this.out);
+      o.start(now);
+      o.stop(now + 0.36);
+    }
+  }
+
+  private engineOsc: OscillatorNode | null = null;
+  private engineGain: GainNode | null = null;
+  /** Two-stroke engine hum: a filtered sawtooth whose pitch follows speed. */
+  engine(on: boolean): void {
+    const c = this.ctx;
+    if (on && !this.engineOsc) {
+      const o = c.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.value = 38;
+      const f = c.createBiquadFilter();
+      f.type = "lowpass";
+      f.frequency.value = 420;
+      const g = c.createGain();
+      g.gain.value = 0.0001;
+      g.gain.exponentialRampToValueAtTime(0.04, c.currentTime + 0.3);
+      o.connect(f).connect(g).connect(this.out);
+      o.start();
+      this.engineOsc = o;
+      this.engineGain = g;
+    } else if (!on && this.engineOsc) {
+      const o = this.engineOsc;
+      this.engineGain!.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.3);
+      o.stop(c.currentTime + 0.35);
+      this.engineOsc = null;
+      this.engineGain = null;
+    }
+  }
+
+  engineSpeed(v: number): void {
+    if (this.engineOsc) this.engineOsc.frequency.setTargetAtTime(38 + v * 9, this.ctx.currentTime, 0.1);
+  }
+
   door(open: boolean): void {
     const c = this.ctx;
     const now = c.currentTime;

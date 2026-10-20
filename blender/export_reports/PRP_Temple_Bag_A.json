@@ -1,0 +1,28 @@
+{
+  "assetId": "PRP_Temple_Bag_A",
+  "glb": "public/assets/models/props/PRP_Temple_Bag_A.glb",
+  "blend": "blender/source/PRP_Temple_Bag_A.blend",
+  "bytes": 7444,
+  "triangles": 158,
+  "objects": [
+    "PRP_Temple_Bag_A",
+    "PRP_Temple_Bag_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Foliage_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -0.18,
+    -0.08,
+    0.0
+  ],
+  "boundsMax": [
+    0.18,
+    0.07,
+    0.506
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

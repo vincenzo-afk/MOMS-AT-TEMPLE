@@ -140,8 +140,15 @@ export class Input {
     return document.pointerLockElement === this.canvas;
   }
 
+  /** Touch devices drive the camera with the look area, never with pointer lock (which would swallow taps). */
+  private touchMode = false;
+  setTouchMode(on: boolean): void {
+    this.touchMode = on;
+    if (on) this.releaseLock();
+  }
+
   requestLock(): void {
-    if (this.locked) return;
+    if (this.locked || this.touchMode) return;
     try {
       const r = this.canvas.requestPointerLock() as unknown;
       if (r instanceof Promise) r.catch(() => undefined); // denied (e.g. too soon after exit) - harmless
@@ -154,14 +161,36 @@ export class Input {
     if (this.locked) document.exitPointerLock();
   }
 
+  // ---- touch (on-screen stick and buttons, GAME_DESIGN.md §1)
+  private touchMove = { x: 0, z: 0 };
+  private touchDown = new Set<Binding>();
+  private touchPressed = new Set<Binding>();
+  /** Stick deflection from the on-screen joystick: x right, z back, length 0..1. */
+  setTouchAxis(x: number, z: number): void {
+    this.touchMove.x = x;
+    this.touchMove.z = z;
+  }
+  touchButton(b: Binding, down: boolean): void {
+    if (down && !this.touchDown.has(b)) this.touchPressed.add(b);
+    if (down) this.touchDown.add(b);
+    else this.touchDown.delete(b);
+  }
+  /** Camera drag from the touch look area (pixels). */
+  touchLook(dx: number, dy: number): void {
+    this.mouseDX += dx * 1.4;
+    this.mouseDY += dy * 1.4;
+  }
+
   isDown(b: Binding): boolean {
     if (!this.enabled) return false;
+    if (this.touchDown.has(b)) return true;
     if (b === "run" && this.padRun) return true;
     return this.bindings[b].some((k) => this.down.has(k)) || (PAD_BUTTONS[b]?.some((i) => this.padDown.has(i)) ?? false);
   }
 
   /** True once per press (keyboard or gamepad). */
   wasPressed(b: Binding): boolean {
+    if (this.touchPressed.has(b)) return true;
     return this.bindings[b].some((k) => this.pressed.has(k)) || (PAD_BUTTONS[b]?.some((i) => this.padPressed.has(i)) ?? false);
   }
 
@@ -180,9 +209,22 @@ export class Input {
       a.z = z / len;
       return a;
     }
+    if (Math.hypot(this.touchMove.x, this.touchMove.z) > 0.05) {
+      a.x = this.touchMove.x;
+      a.z = this.touchMove.z;
+      return a;
+    }
     a.x = this.padMove.x;
     a.z = this.padMove.z;
     return a;
+  }
+
+  /** A physical key (KeyboardEvent.code) pressed this frame - for context keys shown on screen by mini-games. */
+  keyPressed(code: string): boolean {
+    return this.enabled && this.pressed.has(code);
+  }
+  keyHeld(code: string): boolean {
+    return this.enabled && this.down.has(code);
   }
 
   /** Right mouse held (focus / strafe mode). */
@@ -234,6 +276,7 @@ export class Input {
   /** Call at the end of each frame. */
   endFrame(): void {
     this.pressed.clear();
+    this.touchPressed.clear();
     this.mouseDX = 0;
     this.mouseDY = 0;
     this.wheel = 0;
@@ -275,7 +318,12 @@ export class Input {
     this.wheel += Math.sign(e.deltaY);
   };
   private lockchange = () => {
-    if (!this.locked) this.down.clear();
+    // a lock request that resolved after touch mode began: give it back (it would swallow every tap)
+    // (and losing it must not open the pause menu: on touch there is no Esc-to-unlock)
+    if (this.touchMode) {
+      if (this.locked) document.exitPointerLock();
+      return;
+    }
     this.onLockChange?.(this.locked);
   };
 }

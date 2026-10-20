@@ -58,6 +58,8 @@ def torso(p, body, spec, skin):
         (1.49 * s, 0.056 + m * 0.012, 0.056 + m * 0.008, 0.012),
         (1.585 * s, 0.047 + m * 0.006, 0.05 + m * 0.004, 0.004),
     ]
+    gi = body.girth
+    rings = [(z, rx * gi, ry * gi, cy * gi) for z, rx, ry, cy in rings]
     p.loft(rings, "MAT_Skin_A", lambda z: skin, segments=16, cap_bottom=True)
     if m > 0.3:  # trapezius slope for the stone carver, blended under the neck
         p.weight_fn = fixed("chest")
@@ -75,13 +77,14 @@ def head(p, body, spec, skin, rng):
     """Sculpted head (one surface) with set-in eyes, lids, brows, ears, then hair and facial hair."""
     s0 = body.s
     fem = body.female
-    rx, ry, rz = (0.078 if fem else 0.082) * s0, 0.103 * s0, 0.116 * s0
+    hs = spec.get("head_scale", 1.0)  # children: a larger head for their height
+    rx, ry, rz = (0.078 if fem else 0.082) * s0 * hs, 0.103 * s0 * hs, 0.116 * s0 * hs
     hc = V((0, -0.006, body.head_top.z - rz - 0.004))
     shape = HeadShape(hc, rx, ry, rz, fem=fem, nose=spec.get("nose", 1.0), jaw=spec.get("jaw", 1.0))
     p.weight_fn = fixed("head")
     lip = shade(skin, (0.82, 0.55, 0.55) if fem else (0.8, 0.6, 0.58))
     build_head(p, shape, {"skin": skin, "lip": lip, "mouth": shade(skin, (0.35, 0.22, 0.22))})
-    build_eyes(p, shape, {"sclera": (0.93, 0.91, 0.86, 1), "pupil": (0.02, 0.015, 0.015, 1), "glint": (1, 1, 1, 1),
+    build_eyes(p, shape, scale=s0 * hs * 1.04, colors={"sclera": (0.93, 0.91, 0.86, 1), "pupil": (0.02, 0.015, 0.015, 1), "glint": (1, 1, 1, 1),
                           "lid": shade(skin, (0.9, 0.86, 0.86)), "lid_low": shade(skin, (0.95, 0.93, 0.93)), "lash": (0.05, 0.04, 0.04, 1)})
     brow = col(spec.get("brows", spec.get("hair_color", "black")))
     build_brows(p, shape, brow, thickness=0.8 if fem else 1.15, arch=1.25 if fem else 0.8)
@@ -141,7 +144,7 @@ def arms(p, body, spec, skin):
         chain = [(f"shoulder_{side}", g("clav"), g("shoulder")), (f"upper_arm_{side}", g("shoulder"), g("elbow")),
                  (f"forearm_{side}", g("elbow"), g("wrist")), (f"hand_{side}", g("wrist"), g("hand_tip"))]
         p.weight_fn = chain_weights(chain, blend=0.05)
-        r0 = (0.052 if not fem else 0.044) * (1 + m * 0.3 - thin * 0.12)
+        r0 = (0.052 if not fem else 0.044) * (1 + m * 0.3 - thin * 0.12) * body.girth
         p.ico(1.0, tuple(g("shoulder") + V((-sx * 0.012, 0, -0.004))), "MAT_Skin_A", skin, subdiv=2, scale=(r0 * 0.98, r0 * 0.98, r0 * 1.05))  # deltoid
         sh, el, wr = g("shoulder"), g("elbow"), g("wrist")
         path = [sh, sh.lerp(el, 0.45), el, el.lerp(wr, 0.3), el.lerp(wr, 0.7), wr + (wr - el).normalized() * 0.008]
@@ -176,14 +179,15 @@ def legs(p, body, spec, skin, rng):
         kn, an = g("knee"), g("ankle")
         path = [g("hipj") + V((0, 0, 0.05)), g("hipj").lerp(kn, 0.5), kn, kn.lerp(an, 0.3), kn.lerp(an, 0.75), an + V((0, 0, 0.02))]
         rk = 1 + m * 0.15
-        p.tube([tuple(v) for v in path], [0.075 * rk, 0.064 * rk, 0.05, 0.056 * rk, 0.042, 0.038], "MAT_Skin_A", skin, segments=10)
+        gi = body.girth
+        p.tube([tuple(v) for v in path], [r * gi for r in (0.075 * rk, 0.064 * rk, 0.05, 0.056 * rk, 0.042, 0.038)], "MAT_Skin_A", skin, segments=10)
         # bare foot: sole, instep, five toes
         foot_c = (an + g("ball")) / 2
-        p.ico(1.0, tuple(foot_c + V((0, 0.012, -0.03))), "MAT_Skin_A", skin, subdiv=1, scale=(0.042, 0.088, 0.034))
-        p.ico(1.0, tuple(an + V((0, 0.035, -0.045))), "MAT_Skin_A", skin, subdiv=1, scale=(0.035, 0.035, 0.03))  # heel
+        p.ico(1.0, tuple(foot_c + V((0, 0.012 * s, -0.03 * s))), "MAT_Skin_A", skin, subdiv=1, scale=(0.042 * gi, 0.088 * s, 0.034 * gi))
+        p.ico(1.0, tuple(an + V((0, 0.035 * s, -0.045 * s))), "MAT_Skin_A", skin, subdiv=1, scale=(0.035 * gi, 0.035 * gi, 0.03 * gi))  # heel
         for t in range(5):
-            tx = g("ball").x + sx * (-0.022 + t * 0.011)
-            p.ico(1.0, (tx, g("ball").y - 0.045 + abs(t - 1) * 0.006, 0.014), "MAT_Skin_A", skin, subdiv=1, scale=(0.0085 if t else 0.012, 0.016, 0.011))
+            tx = g("ball").x + sx * (-0.022 + t * 0.011) * gi
+            p.ico(1.0, (tx, g("ball").y - 0.045 * s + abs(t - 1) * 0.006, 0.014), "MAT_Skin_A", skin, subdiv=1, scale=((0.0085 if t else 0.012) * gi, 0.016 * gi, 0.011 * gi))
         if spec.get("sandals"):
             p.box((0.1, 0.27, 0.016), tuple(foot_c + V((0, -0.02, -0.055))), "MAT_Wood_Teak_A", col(spec["sandals"]))
 
@@ -198,22 +202,23 @@ def kachcha_dhoti(p, body, spec):
     bag = d.get("bag", 1.0)
     p.weight_fn = chain_weights([("hips", body.hips + V((0, 0, -0.12)), body.spine), ("spine", body.spine, body.chest)], blend=0.05)
     top = 1.07 * s
-    p.loft([(top - 0.12, 0.172 + body.belly, 0.125 + body.belly, -0.004), (top - 0.03, 0.168 + body.belly, 0.12 + body.belly, -0.006),
-            (top, 0.16 + body.belly, 0.112 + body.belly, -0.006)], "MAT_Cloth_A", lambda z: base, segments=16)
+    gi = body.girth
+    p.loft([(top - 0.12, (0.172 + body.belly) * gi, (0.125 + body.belly) * gi, -0.004), (top - 0.03, (0.168 + body.belly) * gi, (0.12 + body.belly) * gi, -0.006),
+            (top, (0.16 + body.belly) * gi, (0.112 + body.belly) * gi, -0.006)], "MAT_Cloth_A", lambda z: base, segments=16)
     # rolled waist band
-    p.lathe([(0.164 + body.belly, -0.015), (0.178 + body.belly, 0.0), (0.164 + body.belly, 0.015)], (0, -0.006, top - 0.015), "MAT_Cloth_A", border, segments=16)
+    p.lathe([((0.164 + body.belly) * gi, -0.015), ((0.178 + body.belly) * gi, 0.0), ((0.164 + body.belly) * gi, 0.015)], (0, -0.006, top - 0.015), "MAT_Cloth_A", border, segments=16)
     for side, sx in (("L", 1), ("R", -1)):
         g = lambda k: getattr(body, f"{k}_{side}")
         chain = [("hips", body.hips, g("hipj")), (f"thigh_{side}", g("hipj"), g("knee")), (f"shin_{side}", g("knee"), g("ankle"))]
         p.weight_fn = chain_weights(chain, blend=0.09)
         kn, an = g("knee"), g("ankle")
         hem_pt = an.lerp(kn, max(0.0, min(1.0, (hem - an.z) / (kn.z - an.z)))) if hem < kn.z else kn.lerp(g("hipj"), (hem - kn.z) / (g("hipj").z - kn.z))
-        top_pt = V((sx * 0.08 * s, -0.005, top - 0.1))
+        top_pt = V((sx * 0.08 * s * gi, -0.005, top - 0.1))
         pts = [top_pt, g("hipj").lerp(kn, 0.35), kn + V((0, -0.01, 0))]
-        radii = [0.13 * bag, 0.115 * bag, 0.098 * bag]
+        radii = [0.13 * bag * gi, 0.115 * bag * gi, 0.098 * bag * gi]
         if hem < kn.z:
             pts.append(hem_pt + V((0, 0, 0.02)))
-            radii.append(0.085 * bag)
+            radii.append(0.085 * bag * gi)
         else:
             pts[-1] = hem_pt
         p.tube([tuple(v) for v in pts], radii, "MAT_Cloth_A", base, segments=12)
@@ -254,13 +259,14 @@ def long_veshti(p, body, spec):
         z = top + (length - top) * t
         rx = (0.158 + (0.02 if body.female else 0)) + (flare - 0.158) * (t ** 0.8) + body.belly * (1 - t)
         ry = 0.112 + (flare * 0.78 - 0.112) * (t ** 0.8) + body.belly * (1 - t)
-        rings.append((z, rx, ry, -0.005))
+        rings.append((z, rx * body.girth, ry * body.girth, -0.005))
     rings.insert(0, (top + 0.02, rings[0][1] - 0.01, rings[0][2] - 0.01, -0.005))
-    p.loft(rings, "MAT_Cloth_A", lambda z: band if (z < length + 0.07 or abs(z - top) < 0.025) else base, segments=18, double=True)
+    mat = sk.get("mat", "MAT_Cloth_A")
+    p.loft(rings, mat, lambda z: band if (z < length + 0.07 or abs(z - top) < 0.025) else base, segments=18, double=True)
     if sk.get("pleats"):
-        p.box((0.13, 0.02, top - length - 0.05), (0.02, -0.165 - flare * 0.15, (top + length) / 2), "MAT_Cloth_A", band, taper=(1.4, 1))
+        p.box((0.13 * body.girth, 0.02, top - length - 0.05), (0.02, (-0.165 - flare * 0.15) * body.girth, (top + length) / 2), mat, band, taper=(1.4, 1))
     else:  # front tuck fold of a veshti
-        p.box((0.06, 0.02, top - length - 0.1), (-0.05, -0.16 - flare * 0.12, (top + length) / 2 + 0.03), "MAT_Cloth_A", base, taper=(1.6, 1))
+        p.box((0.06 * body.girth, 0.02, top - length - 0.1), (-0.05 * body.girth, (-0.16 - flare * 0.12) * body.girth, (top + length) / 2 + 0.03), "MAT_Cloth_A", base, taper=(1.6, 1))
 
 
 def blouse(p, body, spec):
@@ -268,12 +274,13 @@ def blouse(p, body, spec):
     b = spec["blouse"]
     c = col(b["color"])
     p.weight_fn = chain_weights([("spine", body.spine, body.chest), ("chest", body.chest, body.neck)], blend=0.07)
-    p.loft([(1.17 * s, 0.158, 0.118, -0.012), (1.25 * s, 0.17, 0.132, -0.03), (1.33 * s, 0.17, 0.124, -0.026), (1.40 * s, 0.168, 0.106, -0.002),
-            (1.455 * s, 0.124, 0.085, 0.008), (1.49 * s, 0.066, 0.064, 0.012)], "MAT_Cloth_A", lambda z: c, segments=16)
+    gi = body.girth
+    p.loft([(z, rx * gi, ry * gi, cy * gi) for z, rx, ry, cy in [(1.17 * s, 0.158, 0.118, -0.012), (1.25 * s, 0.17, 0.132, -0.03), (1.33 * s, 0.17, 0.124, -0.026),
+            (1.40 * s, 0.168, 0.106, -0.002), (1.455 * s, 0.124, 0.085, 0.008), (1.49 * s, 0.066, 0.064, 0.012)]], "MAT_Cloth_A", lambda z: c, segments=16)
     for side in ("L", "R"):
         g = lambda k: getattr(body, f"{k}_{side}")
         p.weight_fn = chain_weights([(f"shoulder_{side}", g("clav"), g("shoulder")), (f"upper_arm_{side}", g("shoulder"), g("elbow"))], blend=0.05)
-        p.tube([tuple(g("shoulder") + V((0, 0, 0.008))), tuple(g("shoulder").lerp(g("elbow"), 0.4))], [0.052, 0.047], "MAT_Cloth_A", c, segments=10)
+        p.tube([tuple(g("shoulder") + V((0, 0, 0.008))), tuple(g("shoulder").lerp(g("elbow"), 0.4))], [0.052 * gi, 0.047 * gi], "MAT_Cloth_A", c, segments=10)
 
 
 def shoulder_cloth(p, body, spec, key="angavastram"):
@@ -286,7 +293,7 @@ def shoulder_cloth(p, body, spec, key="angavastram"):
     back_len = a.get("back", 0.45) * s
     sh = body.shoulder_L
     p.weight_fn = chain_weights([("spine", body.spine, body.chest), ("chest", body.chest, body.neck), ("shoulder_L", body.clav_L, body.shoulder_L)], blend=0.08)
-    bulk = 1 + spec.get("muscle", 0) * 0.15 + body.belly * 2
+    bulk = (1 + spec.get("muscle", 0) * 0.15 + body.belly * 2) * body.girth
     x0 = sh.x - 0.07
     over = [(x0, -0.13 * bulk, 1.30 * s), (x0, -0.105 * bulk, 1.42 * s), (x0 + 0.005, -0.03, 1.49 * s), (x0 + 0.005, 0.05, 1.49 * s), (x0, 0.105 * bulk, 1.42 * s), (x0, 0.12 * bulk, 1.30 * s)]
     front = [(x0 + 0.01, -0.138 * bulk, z) for z in (1.30 * s - front_len * t for t in (0.33, 0.66, 1.0))]
@@ -301,25 +308,41 @@ def shoulder_cloth(p, body, spec, key="angavastram"):
 
 
 def saree_pallu(p, body, spec):
-    """Saree end drawn from the right hip, across the chest, over the left shoulder, down the back."""
+    """Saree end: a band drawn from the right hip across the chest, over the left shoulder and down the back.
+    Built as a ribbon lying on the body surface (width across the path), with a woven border on both edges."""
     s = body.s
+    gi = body.girth
     pa = spec["pallu"]
     base, border = col(pa["color"]), col(pa.get("border", pa["color"]))
-    p.weight_fn = chain_weights([("spine", body.spine, body.chest), ("chest", body.chest, body.neck), ("shoulder_L", body.clav_L, body.shoulder_L)], blend=0.07)
-    pts = [(-0.15, -0.14, 1.02), (-0.08, -0.16, 1.16), (0.02, -0.155, 1.30), (0.1, -0.12, 1.42), (0.14, -0.03, 1.49), (0.14, 0.07, 1.45), (0.1, 0.13, 1.3), (0.02, 0.135, 1.1), (-0.05, 0.13, 0.86)]
-    wd = pa.get("width", 0.2)
-    a_pts, b_pts = [], []
-    for i, (x, y, z) in enumerate(pts):
-        off = V((0, 0, wd)) if i < 4 else (V((-wd * 0.8, 0, 0)) if i < 6 else V((0, 0, wd)))
-        pt = V((x, y * 1.06, z * s))
-        a_pts.append(tuple(pt))
-        b_pts.append(tuple(pt + off * (0.7 if i in (4, 5) else 1.0)))
-    p.quad_strip(a_pts, b_pts, "MAT_Cloth_A", base)
-    p.quad_strip(b_pts, a_pts, "MAT_Cloth_A", border)
-    # border stripe along the lower edge
-    edge = [tuple(V(q) + V((0, -0.002 if q[1] < 0 else 0.002, 0.0))) for q in a_pts]
-    edge2 = [tuple(V(q) + (V((0, 0, 0.03)) if i < 4 or i > 5 else V((-0.03, 0, 0)))) for i, q in enumerate(edge)]
-    p.quad_strip(edge, edge2, "MAT_Cloth_A", border)
+    mat = pa.get("mat", "MAT_Cloth_A")
+    p.weight_fn = chain_weights([("hips", body.hips + V((0, 0, -0.1)), body.spine), ("spine", body.spine, body.chest), ("chest", body.chest, body.neck),
+                                 ("shoulder_L", body.clav_L, body.shoulder_L)], blend=0.07)
+    bulge = 1 + body.belly * 2
+    path = [(-0.15, -0.135, 1.0), (-0.09, -0.152, 1.12), (-0.02, -0.158, 1.24), (0.05, -0.148, 1.33), (0.1, -0.12, 1.4), (0.125, -0.07, 1.452),
+            (0.13, 0.0, 1.472), (0.125, 0.07, 1.452), (0.1, 0.112, 1.38), (0.065, 0.122, 1.22), (0.03, 0.122, 1.05), (0.0, 0.118, 0.88)]
+    pts = [V((x * gi, y * gi * bulge, z * s)) for x, y, z in path]
+    wd = pa.get("width", 0.2) * gi
+    edges_a, edges_b, mids_a, mids_b = [], [], [], []
+    prev = None
+    for i, q in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+        n = V((q.x, q.y * 1.3, max(0.0, q.z - 1.4 * s) * 4)).normalized()  # roughly the body surface normal
+        d = t.cross(n).normalized()
+        if prev is not None and d.dot(prev) < 0:
+            d = -d
+        prev = d
+        lift = n * 0.006
+        # over the shoulder the band narrows into a fold
+        w = wd * (0.6 if 5 <= i <= 7 else 1.0)
+        edges_a.append(tuple(q + d * w / 2 + lift))
+        edges_b.append(tuple(q - d * w / 2 + lift))
+        mids_a.append(tuple(q + d * (w / 2 - 0.025) + lift * 1.1))
+        mids_b.append(tuple(q - d * (w / 2 - 0.025) + lift * 1.1))
+    p.quad_strip(mids_a, mids_b, mat, base)
+    p.quad_strip(mids_b, mids_a, mat, base)
+    for e, m in ((edges_a, mids_a), (edges_b, mids_b)):
+        p.quad_strip(e, m, "MAT_Cloth_A", border)
+        p.quad_strip(m, e, "MAT_Cloth_A", border)
 
 
 def accessories(p, body, spec, rng):
@@ -348,6 +371,16 @@ def accessories(p, body, spec, rng):
         p.weight_fn = fixed("hips")
         p.box((0.16, 0.06, 0.13), (-0.17, -0.1, 0.94 * s), "MAT_Wood_Teak_A", col("teak"), rot_z=0.5)
         p.box((0.16, 0.065, 0.05), (-0.17, -0.105, 0.99 * s), "MAT_Wood_Teak_A", col("teak_dark"), rot_z=0.5)
+    if spec.get("sacred_thread"):  # poonal: a thin cord from the left shoulder across to the right hip
+        p.weight_fn = chain_weights([("spine", body.spine, body.chest), ("chest", body.chest, body.neck)], blend=0.08)
+        pts = [(0.12, -0.105, 1.42 * s), (0.04, -0.14, 1.3 * s), (-0.06, -0.15, 1.17 * s), (-0.14, -0.12, 1.05 * s), (-0.16, 0.0, 1.0 * s), (-0.1, 0.11, 1.1 * s), (0.05, 0.12, 1.3 * s), (0.12, 0.09, 1.42 * s)]
+        p.tube(pts, [0.004] * len(pts), "MAT_Cloth_A", col("cloth_white"), segments=4)
+    if spec.get("vibhuti"):  # three horizontal ash stripes on the forehead and a kumkum dot
+        p.weight_fn = fixed("head")
+        hz = body.head_top.z - 0.116 * s - 0.004
+        for k in range(3):
+            p.box((0.07, 0.004, 0.006), (0, -0.006 - 0.103 * s * 0.88, hz + (0.035 + k * 0.012) * s), "MAT_Skin_A", col("vibhuti"))
+        p.ico(1.0, (0, -0.006 - 0.103 * s * 0.93, hz + 0.02 * s), "MAT_Skin_A", col("kumkum_red"), subdiv=1, scale=(0.005, 0.003, 0.005))
     if spec.get("waist_rope"):
         p.weight_fn = fixed("hips")
         p.lathe([(0.17, -0.008), (0.176, 0.0), (0.17, 0.008)], (0, -0.008, 1.02 * s), "MAT_Thatch_A", col("thatch"), segments=16)
@@ -425,6 +458,20 @@ SPECS = {
                            headwear="towel", headwear_color="red_oxide", staff=True, waist_rope=True,
                            dhoti={"color": "soil_dry", "border": "red_oxide", "hem": 0.38, "bag": 1.0},
                            angavastram={"color": "red_oxide", "border": "soil_dry", "front": 0.45, "back": 0.4}),
+    # temple visit: the playable mom (saree tinted at runtime), her family and the priest
+    "CHR_Player_Mom": dict(seed=21, height=1.6, female=True, shoulder=0.165, hip=0.095, belly=0.012, skin="warm", hair="bun", hair_color="black",
+                           flowers=True, bindi=True, earrings=True, necklace=True,
+                           veshti={"color": "saree_base", "border": GOLD, "bottom": 0.06, "flare": 0.21, "pleats": True, "mat": "MAT_Saree_A"},
+                           blouse={"color": "marigold_yellow"}, pallu={"color": "saree_base", "border": GOLD, "width": 0.22, "mat": "MAT_Saree_A"}),
+    "CHR_Family_Husband": dict(seed=22, height=1.73, belly=0.025, skin="tan", hair="short", hair_color="black", moustache="black",
+                               veshti={"color": "cloth_white", "border": GOLD, "bottom": 0.07, "flare": 0.21},
+                               angavastram={"color": "cloth_white", "border": GOLD, "front": 0.5, "back": 0.45}),
+    "CHR_Child_Boy": dict(seed=23, height=1.12, head_scale=1.38, shoulder=0.15, hip=0.085, skin="warm", hair="short", hair_color="black",
+                          dhoti={"color": "cloth_white", "border": GOLD, "hem": 0.32}, angavastram={"color": "marigold_yellow", "border": GOLD, "front": 0.4, "back": 0.35, "width": 0.1}),
+    "CHR_Child_Girl": dict(seed=24, height=1.05, head_scale=1.4, female=True, shoulder=0.14, hip=0.085, skin="light", hair="bun", hair_color="black", flowers=True, bindi=True,
+                           veshti={"color": "cloth_green", "border": GOLD, "bottom": 0.08, "flare": 0.19, "pleats": True}, blouse={"color": "cloth_saffron"}),
+    "CHR_NPC_Priest": dict(seed=25, height=1.68, belly=0.03, skin="tan", hair="bald_topknot", hair_color="black", sacred_thread=True, vibhuti=True,
+                           veshti={"color": "cloth_saffron", "border": "red_oxide", "bottom": 0.07, "flare": 0.2}),
     "CHR_Villager_A": dict(seed=7, height=1.69, skin="tan", hair="short", hair_color="black", moustache="black",
                            dhoti={"color": "cloth_white", "border": "cloth_white", "hem": 0.4}),
     "CHR_Villager_B": dict(seed=8, height=1.73, skin="deep", hair="short", hair_color="salt", moustache="salt", headwear="towel", headwear_color="cloth_white",

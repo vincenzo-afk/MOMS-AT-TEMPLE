@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS } from "../../data/text";
 import { keyLabel, type Binding } from "../../game/core/Input";
+import { VisitHud } from "./Visit";
+import { TouchControls, isTouchDevice } from "./TouchControls";
 
 function clock(minutes: number): string {
   const m = Math.floor(minutes % 1440);
@@ -29,9 +31,11 @@ export function Hud() {
             {ui.indoors ? " · indoors" : ""}
           </span>
         </div>
-        <div className="hud-coins" title="Coins" data-testid="coins">
-          <span className="coin" aria-hidden>◎</span> {s.coins}
-        </div>
+        {!ui.visit && (
+          <div className="hud-coins" title="Coins" data-testid="coins">
+            <span className="coin" aria-hidden>◎</span> {s.coins}
+          </div>
+        )}
       </div>
 
       {title && objective && (
@@ -42,6 +46,8 @@ export function Hud() {
         </div>
       )}
 
+      <VisitHud />
+      {ui.mode === "play" && ui.panel === null && isTouchDevice() && <TouchControls />}
       <InteractionPrompt prompt={ui.prompt?.primary && ui.panel === null && !ui.busyLabel ? ui.prompt : null} />
 
       {ui.busyLabel && <div className="busy">{ui.busyLabel}</div>}

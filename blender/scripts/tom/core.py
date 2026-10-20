@@ -65,6 +65,18 @@ PALETTE = {
     "kolam_pink": (0.92, 0.36, 0.52),
     "kolam_green": (0.30, 0.66, 0.34),
     "flame": (1.0, 0.72, 0.25),
+    # temple visit (session 4)
+    "auto_yellow": (0.95, 0.74, 0.12),
+    "auto_black": (0.09, 0.09, 0.09),
+    "steel": (0.64, 0.66, 0.68),
+    "saree_base": (0.93, 0.93, 0.93),
+    "laddoo": (0.93, 0.62, 0.16),
+    "banana_leaf": (0.24, 0.52, 0.17),
+    "coconut": (0.44, 0.29, 0.15),
+    "vibhuti": (0.93, 0.93, 0.9),
+    "chappal": (0.42, 0.26, 0.15),
+    "paper": (0.95, 0.93, 0.85),
+    "kumkum_red": (0.75, 0.08, 0.1),
     "banana_fruit": (0.90, 0.80, 0.24),
     "coconut": (0.42, 0.34, 0.16),
     "vegetable_purple": (0.38, 0.16, 0.36),
@@ -90,6 +102,7 @@ MATERIAL_DEFS = {
     "MAT_Brick_A": (0.86, 0.0),
     "MAT_Iron_A": (0.55, 0.8),
     "MAT_Emissive_A": (0.5, 0.0),
+    "MAT_Saree_A": (0.75, 0.0),  # light base; the game tints it per mom and unlocked saree
 }
 
 

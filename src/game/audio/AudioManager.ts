@@ -107,6 +107,18 @@ export class AudioManager {
     this.count("door");
     this.soundscape?.door(open);
   }
+  /** Temple Visit sound cues (procedural placeholders until recorded audio exists). */
+  visitCue(kind: "bell" | "chime" | "nadaswaram" | "aiyyo" | "horn"): void {
+    this.count(kind);
+    this.soundscape?.[kind]();
+  }
+  engine(on: boolean): void {
+    this.count(on ? "engine_on" : "engine_off");
+    this.soundscape?.engine(on);
+  }
+  engineSpeed(v: number): void {
+    this.soundscape?.engineSpeed(v);
+  }
   alarm(): void {
     this.count("alarm");
     this.soundscape?.alarm();

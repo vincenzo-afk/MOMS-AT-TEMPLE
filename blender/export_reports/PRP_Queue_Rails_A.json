@@ -1,0 +1,42 @@
+{
+  "assetId": "PRP_Queue_Rails_A",
+  "glb": "public/assets/models/props/PRP_Queue_Rails_A.glb",
+  "blend": "blender/source/PRP_Queue_Rails_A.blend",
+  "bytes": 44764,
+  "triangles": 1288,
+  "objects": [
+    "COL_Rail_0",
+    "COL_Rail_1",
+    "COL_Rail_2",
+    "COL_Rail_3",
+    "PRP_Queue_Rails_A",
+    "PRP_Queue_Rails_A_Mesh",
+    "SOCKET_LaneEnd_0",
+    "SOCKET_LaneEnd_1",
+    "SOCKET_LaneEnd_2",
+    "SOCKET_Lane_0",
+    "SOCKET_Lane_1",
+    "SOCKET_Lane_2"
+  ],
+  "colliders": [
+    "COL_Rail_0",
+    "COL_Rail_1",
+    "COL_Rail_2",
+    "COL_Rail_3"
+  ],
+  "materials": [
+    "MAT_Iron_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -2.435,
+    -14.035,
+    0.0
+  ],
+  "boundsMax": [
+    2.435,
+    0.175,
+    1.875
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -1,45 +1,73 @@
 {
-  "checkedAt": "2026-10-20T04:57:59.804Z",
+  "checkedAt": "2026-10-20T05:27:56.537Z",
   "results": [
     {
+      "id": "CHR_Child_Boy",
+      "bytes": 300256,
+      "triangles": 8008,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_Child_Girl",
+      "bytes": 327116,
+      "triangles": 8800,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "CHR_Family_Husband",
+      "bytes": 304792,
+      "triangles": 8108,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "CHR_NPC_Amudha",
-      "bytes": 335344,
-      "triangles": 8960,
+      "bytes": 340524,
+      "triangles": 9044,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Kaaval",
-      "bytes": 318860,
+      "bytes": 318864,
       "triangles": 8472,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Meena",
-      "bytes": 331180,
-      "triangles": 8888,
+      "bytes": 336364,
+      "triangles": 8972,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Ponnan",
-      "bytes": 301044,
+      "bytes": 301052,
       "triangles": 8070,
       "animations": 0,
       "problems": []
     },
     {
+      "id": "CHR_NPC_Priest",
+      "bytes": 285452,
+      "triangles": 7758,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "CHR_NPC_Selvam",
-      "bytes": 316108,
+      "bytes": 316112,
       "triangles": 8362,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_NPC_Valli",
-      "bytes": 331108,
-      "triangles": 8888,
+      "bytes": 336288,
+      "triangles": 8972,
       "animations": 0,
       "problems": []
     },
@@ -52,29 +80,36 @@
     },
     {
       "id": "CHR_Player_Base",
-      "bytes": 721564,
+      "bytes": 721576,
       "triangles": 8356,
       "animations": 53,
       "problems": []
     },
     {
+      "id": "CHR_Player_Mom",
+      "bytes": 342088,
+      "triangles": 9072,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "CHR_Villager_A",
-      "bytes": 293740,
+      "bytes": 293736,
       "triangles": 7900,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_B",
-      "bytes": 298840,
+      "bytes": 298848,
       "triangles": 8056,
       "animations": 0,
       "problems": []
     },
     {
       "id": "CHR_Villager_C",
-      "bytes": 323188,
-      "triangles": 8688,
+      "bytes": 328368,
+      "triangles": 8772,
       "animations": 0,
       "problems": []
     },
@@ -145,6 +180,13 @@
       "id": "ENV_Granary_A",
       "bytes": 141960,
       "triangles": 3936,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "ENV_Hill_Temple_A",
+      "bytes": 100248,
+      "triangles": 1128,
       "animations": 0,
       "problems": []
     },
@@ -268,6 +310,13 @@
       "problems": []
     },
     {
+      "id": "ENV_Shrine_Small_A",
+      "bytes": 19456,
+      "triangles": 356,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "ENV_Sluice_Gate_A",
       "bytes": 56356,
       "triangles": 868,
@@ -345,6 +394,20 @@
       "problems": []
     },
     {
+      "id": "PRP_Annadanam_Mats_A",
+      "bytes": 46816,
+      "triangles": 1404,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Auto_Rickshaw_A",
+      "bytes": 45812,
+      "triangles": 1152,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Balance_Scale_A",
       "bytes": 30820,
       "triangles": 972,
@@ -401,6 +464,20 @@
       "problems": []
     },
     {
+      "id": "PRP_Bush_Hide_A",
+      "bytes": 24480,
+      "triangles": 932,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Calendar_A",
+      "bytes": 6284,
+      "triangles": 72,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Carved_Fragment_A",
       "bytes": 24648,
       "triangles": 520,
@@ -422,6 +499,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Chappal_Stand_A",
+      "bytes": 106160,
+      "triangles": 1476,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Chisel_A",
       "bytes": 6344,
       "triangles": 96,
@@ -439,6 +523,13 @@
       "id": "PRP_Cloth_Rolls_A",
       "bytes": 18196,
       "triangles": 312,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Coconut_Stone_A",
+      "bytes": 14852,
+      "triangles": 356,
       "animations": 0,
       "problems": []
     },
@@ -632,6 +723,13 @@
       "problems": []
     },
     {
+      "id": "PRP_Lamp_Stand_A",
+      "bytes": 83480,
+      "triangles": 3108,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Laundry_Line_A",
       "bytes": 15744,
       "triangles": 388,
@@ -737,6 +835,20 @@
       "problems": []
     },
     {
+      "id": "PRP_Prasadam_Counter_A",
+      "bytes": 43216,
+      "triangles": 1288,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Queue_Rails_A",
+      "bytes": 44764,
+      "triangles": 1336,
+      "animations": 0,
+      "problems": []
+    },
+    {
       "id": "PRP_Rain_Shelter_A",
       "bytes": 81148,
       "triangles": 1408,
@@ -789,6 +901,13 @@
       "id": "PRP_Tally_Board_A",
       "bytes": 31040,
       "triangles": 548,
+      "animations": 0,
+      "problems": []
+    },
+    {
+      "id": "PRP_Temple_Bag_A",
+      "bytes": 7444,
+      "triangles": 158,
       "animations": 0,
       "problems": []
     },

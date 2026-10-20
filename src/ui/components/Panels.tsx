@@ -3,6 +3,7 @@ import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, RECORD_TEXT } from "../../data/text";
 import { countItem } from "../../game/inventory/inventory";
 import { CommunityPanel, ContainerPanel, DecorPanel, MapPanel, NoticesPanel, StoragePanel } from "./WorldPanels";
+import { MiniGamePanel, VisitScore } from "./Visit";
 import { SKILL_NAMES, skillLevel } from "../../data/farming";
 import type { SkillId } from "../../game/core/types";
 
@@ -35,6 +36,10 @@ export function Panels() {
       return <MapPanel />;
     case "community":
       return <CommunityPanel />;
+    case "minigame":
+      return <MiniGamePanel />;
+    case "visitScore":
+      return <VisitScore />;
     case "container":
       return <ContainerPanel />;
     default:

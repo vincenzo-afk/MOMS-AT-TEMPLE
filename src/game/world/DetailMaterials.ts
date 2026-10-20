@@ -25,6 +25,7 @@ export const DETAIL_SPECS: Record<string, DetailSpec> = {
   MAT_Soil_A: { set: "soil", scale: 0.9, albedo: 0.9, normal: 0.6, roughness: 0.03 },
   MAT_Foliage_A: { set: "foliage", scale: 2.0, albedo: 0.55, normal: 0.35 },
   MAT_Cloth_A: { set: "cloth", scale: 4.0, albedo: 0.5, normal: 0.35 },
+  MAT_Saree_A: { set: "cloth", scale: 4.0, albedo: 0.45, normal: 0.3 },
   MAT_Brass_A: { set: "brass", scale: 2.5, albedo: 0.6, normal: 0.25, roughness: 0.15 },
   MAT_Skin_A: { set: "skin", scale: 4.0, albedo: 0.35, normal: 0.12 },
   MAT_Brick_A: { set: "brick", scale: 0.85, albedo: 0.9, normal: 0.7, roughness: 0.06 },

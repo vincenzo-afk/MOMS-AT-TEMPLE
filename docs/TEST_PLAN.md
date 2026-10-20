@@ -13,9 +13,9 @@
 
 Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because Playwright's own Chromium download did not complete in this environment. Set `PW_CHANNEL=` (empty) to use the bundled Chromium after `npx playwright install chromium`.
 
-## Automated coverage (state at the end of session 3)
+## Automated coverage (state at the end of session 4)
 
-### Unit / integration (Vitest, 29 tests, all passing)
+### Unit / integration (Vitest, 40 tests, all passing)
 - Definitions cross-reference cleanly (`validateDefinitions`).
 - Inventory: never partially adds when full; never partially removes.
 - Full rules-engine loop: arrival → channel (inspect gate, recipe-knowledge gate, insufficient materials) → craft → repair → consequence restoration → report → garland via trade and craft → Living Record order and causes → rewards not re-granted when dialogue is replayed.
@@ -32,7 +32,7 @@ Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because
 - Dialogue item gifts given only once; the festival offered only after the garland, fields and weaver.
 - *Session 3 (`src/game/core/world.test.ts`):* doors open and close, and the granary locks at night unless the key flag is set; unowned crates can be emptied and refilled without duplication; witnessed theft sets the pending crime and the opinion drops, blocks further taking, and the watchman's confrontation outranks other dialogue; returning restores the crate and paying the fine keeps the goods; with no goods and no coins it still resolves; unwitnessed theft is remembered; Selvam's key permits taking; pickups are taken once and the bangle only appears with its quest active; *The Lost Bangle* completes end to end; keeping (using) or returning the pouch has consequences in Raman's dialogue; topic answers follow knowledge boundaries and world state; asking Velan about the ruins unlocks his request and is logged; weather is deterministic, clear on the first morning and on festival evenings, and rain occurs; v3 save round trip including doors, containers, pickups, crime and talk log; v2 -> v3 migration refills crates from data.
 
-### Browser (Playwright + Edge, 23 tests, all passing)
+### Browser (Playwright + Edge, 34 tests, all passing)
 | Test | Verifies |
 |---|---|
 | boots to title | all manifest GLBs load, >100 colliders built, **no console errors** |
@@ -60,11 +60,17 @@ Browser tests use the installed **Microsoft Edge** (`channel: "msedge"`) because
 
 Screenshots are written to `test-results/screens/` (ignored by git).
 
+### Session 4 additions
+- `src/game/visit/rules.test.ts` (11): scoring, passives, combos, the Blessings table, the Stress end, festival doubling, settlement, unlocks, missions, festival days.
+- `tests/e2e/movement.spec.ts` (6): bench sitting with numeric checks and a 360° orbit; jump and ledge fall timing against gravity; sprint-circle foot slide (4%) and lean; vault, climb, crouch and focus; the camera never inside geometry plus mid-air interaction and input spam; face and hand close-ups. Each tracks the clip-weight sum (T-pose detector).
+- `tests/e2e/visit.spec.ts` (4): home stage; the full visit from the auto to the score screen and saved profile; the hill steps and the neighbourhood shrine; the Stress end and Esc-out of a mini-game.
+- `tests/e2e/touch.spec.ts` (1): the on-screen stick and the Jump button.
+
 ## Asset tests (`scripts/validate-glb.mjs`)
 For every manifest entry: file exists; expected collider nodes exist; every visible primitive has non-placeholder vertex colours (this check caught 6 assets exported white); skinned characters have a skin and all 11 named clips; triangle and byte budgets. Results: `blender/export_reports/glb_validation.json`.
 
 ## Performance sample (measured, not a target)
-Headless Edge, AMD Radeon integrated GPU (ANGLE/D3D11), 1280x760, high quality, courtyard view. **Session 3:** 67-101 fps across runs (frame 9-15 ms; the low end was measured while a second dev server shared the GPU), 709-744 draw calls, 0.82-0.86M triangles; per-frame game logic about 0.5 ms (NPCs 0.28 ms, player 0.12 ms, environment 0.10 ms, atmosphere 0.03 ms, interaction 0.01 ms) and `renderer.render` about 12 ms including the GPU wait. A same-day A/B against commit 82c0e92 on the same machine and view measured 11.45 ms (642 calls) before versus 12.0-12.6 ms (709 calls) after, roughly +5-10% for the new assets, LOD sets and shaders. Rendering is neither fill-rate bound (a quarter of the pixels saves only about 1 ms) nor shadow bound (skipping the shadow pass saves about 2 ms); it is bound by draw calls and vertices. The session 2 figures below were measured on a different day and are not directly comparable. Session 1 (small map): ~100 fps (headless rAF cap), CPU frame 1.9 ms, 206 draw calls, 550k triangles. Session 2 (300 m map, 113 models, detail textures): ~100 fps, CPU frame 6.3 ms, 664 draw calls, 970k triangles (shadow pass included), 303 geometries, 89 textures. **Budgets are not set yet.** Profiling on representative lower-end hardware is a next-milestone task.
+Headless Edge, AMD Radeon integrated GPU (ANGLE/D3D11), 1280x760, high quality, courtyard view. **Session 4 (post-processing on, all passes counted):** 92.7 fps, 9.2 ms frame, 761 draw calls, 1.02M triangles (heavier characters with jointed hands and sculpted heads). **Session 3:** 67-101 fps across runs (frame 9-15 ms; the low end was measured while a second dev server shared the GPU), 709-744 draw calls, 0.82-0.86M triangles; per-frame game logic about 0.5 ms (NPCs 0.28 ms, player 0.12 ms, environment 0.10 ms, atmosphere 0.03 ms, interaction 0.01 ms) and `renderer.render` about 12 ms including the GPU wait. A same-day A/B against commit 82c0e92 on the same machine and view measured 11.45 ms (642 calls) before versus 12.0-12.6 ms (709 calls) after, roughly +5-10% for the new assets, LOD sets and shaders. Rendering is neither fill-rate bound (a quarter of the pixels saves only about 1 ms) nor shadow bound (skipping the shadow pass saves about 2 ms); it is bound by draw calls and vertices. The session 2 figures below were measured on a different day and are not directly comparable. Session 1 (small map): ~100 fps (headless rAF cap), CPU frame 1.9 ms, 206 draw calls, 550k triangles. Session 2 (300 m map, 113 models, detail textures): ~100 fps, CPU frame 6.3 ms, 664 draw calls, 970k triangles (shadow pass included), 303 geometries, 89 textures. **Budgets are not set yet.** Profiling on representative lower-end hardware is a next-milestone task.
 
 ## Manual checks still required (not automatable here)
 - Pointer-lock mouse look in a headed browser (headless runs set the camera angle directly).

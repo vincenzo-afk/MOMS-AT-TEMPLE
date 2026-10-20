@@ -209,7 +209,15 @@ Defer: other moms, other temples, festival mode, daily missions, badges, Kumkum 
 
 ## 10. Implementation status
 
-The v1 MVP in `src/` is a walkable pixel temple with all six stages, the three meters, combos, badges, and a local personal best. Art is generated in code as placeholders. See `README.md` to run it and for how hotspots, zones, and phases are wired.
+Built in the existing **Three.js 3D game** (not Phaser 2D; see `PLAN.md` §0 for the reasons) as the **Temple Visit** mode on the title screen. Code: `src/game/visit/` (rules, director, world, followers), content in `src/data/visit.ts`, UI in `src/ui/components/Visit.tsx`, tests in `src/game/visit/rules.test.ts` and `tests/e2e/visit.spec.ts`.
+
+- §2 core loop: pick a mom and a temple → six stages as places in the world → exit → score → Kumkum. **Done.**
+- §3 Punya, the Blessings multiplier table, Stress (ends the run at 100), combos. **Done.** "Stress caps it" is implemented as a cap of (1 - stress/200) on the final score (interpretation).
+- §4 all activities in all six stages, each stage with its mini-game (bag packing, chappal hiding and memory test, the lane-switching queue runner in-world, coconut timing bar, lamps with matchsticks, sloka quiz, darshan hold, photo timing). **Done.** The driving to the temple uses a drivable auto-rickshaw.
+- §5 all five moms with their passives; §6 all three temples, including the hill steps stage and festival mode. **Done** (beyond the v1 MVP).
+- §7 Kumkum, unlocks (moms, temples, sarees), daily missions, badges, personal best per temple. **Done.**
+- §8 sounds: bell, nadaswaram sting and "aiyyo" are **procedural placeholders** until recordings exist. Hand-drawn 2D art is replaced by the 3D art of this game.
+- §9 local save (IndexedDB). **Done.** Touch controls: an on-screen stick and buttons on touch devices. Capacitor wrapping: not started.
 
 ## 11. Open questions
 

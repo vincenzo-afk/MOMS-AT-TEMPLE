@@ -1,0 +1,32 @@
+{
+  "assetId": "PRP_Annadanam_Mats_A",
+  "glb": "public/assets/models/props/PRP_Annadanam_Mats_A.glb",
+  "blend": "blender/source/PRP_Annadanam_Mats_A.blend",
+  "bytes": 46816,
+  "triangles": 1392,
+  "objects": [
+    "PRP_Annadanam_Mats_A",
+    "PRP_Annadanam_Mats_A_Mesh",
+    "SOCKET_Serve",
+    "WALK_Floor"
+  ],
+  "colliders": [
+    "WALK_Floor"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Foliage_A"
+  ],
+  "boundsMin": [
+    -2.0,
+    -1.1,
+    -0.004
+  ],
+  "boundsMax": [
+    2.54,
+    1.1,
+    0.492
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

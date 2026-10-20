@@ -1,0 +1,35 @@
+{
+  "assetId": "ENV_Shrine_Small_A",
+  "glb": "public/assets/models/buildings/ENV_Shrine_Small_A.glb",
+  "blend": "blender/source/ENV_Shrine_Small_A.blend",
+  "bytes": 19456,
+  "triangles": 332,
+  "objects": [
+    "COL_Cell",
+    "ENV_Shrine_Small_A",
+    "ENV_Shrine_Small_A_Mesh",
+    "SOCKET_Darshan",
+    "WALK_Plinth"
+  ],
+  "colliders": [
+    "COL_Cell",
+    "WALK_Plinth"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Iron_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Stone_Granite_A"
+  ],
+  "boundsMin": [
+    -2.5,
+    -2.5,
+    0.0
+  ],
+  "boundsMax": [
+    2.5,
+    2.5,
+    5.35
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

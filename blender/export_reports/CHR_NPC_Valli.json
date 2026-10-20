@@ -2,8 +2,8 @@
   "assetId": "CHR_NPC_Valli",
   "glb": "public/assets/models/characters/CHR_NPC_Valli.glb",
   "blend": "blender/source/CHR_NPC_Valli.blend",
-  "bytes": 331108,
-  "triangles": 8888,
+  "bytes": 336288,
+  "triangles": 8972,
   "objects": [
     "CHR_NPC_Valli",
     "CHR_NPC_Valli_Mesh",
@@ -21,11 +21,11 @@
   "boundsMin": [
     -0.272,
     -0.205,
-    -0.013
+    -0.01
   ],
   "boundsMax": [
     0.272,
-    0.149,
+    0.17,
     1.613
   ],
   "blenderVersion": "5.2.2 LTS",

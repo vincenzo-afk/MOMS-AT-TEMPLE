@@ -17,7 +17,7 @@
 
 > This section tracks what is actually built. Everything from §1 onward is the unchanged design specification.
 
-**Milestone reached:** systemic vertical slice (session 3). A full beginning-to-festival story arc is playable in a world with enterable interiors, doors, owned containers, a watchman, weather and a reactive population. It is still a prototype with first-pass procedural art and placeholder audio, not a finished game.
+**Milestone reached:** systemic vertical slice (session 3) plus, in session 4, GTA V-style movement and camera, rebuilt faces and hands, IK sitting, post-processing, and the **Temple Visit** mode from `GAME_DESIGN.md` (see `CHANGELOG.md`). A full beginning-to-festival story arc is playable in a world with enterable interiors, doors, owned containers, a watchman, weather and a reactive population. It is still a prototype with first-pass procedural art and placeholder audio, not a finished game.
 
 ## Quick start
 
@@ -26,11 +26,12 @@ npm install          # if your global npm cache is unavailable: npm install --ca
 npm run dev          # http://localhost:5173
 npm test             # unit tests (Vitest)
 npm run test:e2e     # browser tests (Playwright, uses installed Microsoft Edge)
-npm run build        # typecheck + production build in dist/
+npm run lint         # oxlint
+npm run build        # typecheck + lint + production build in dist/
 npm run assets       # rebuild all 3D assets in Blender (headless), manifest + GLB validation
 ```
 
-Controls: WASD move · Shift run · mouse look (click the scene, or hold right mouse) · E interact · R secondary · I inventory · J journal · L Living Record · M map · C community and skills · Esc pause/close. Keys can be remapped in Settings; a standard gamepad works (see `docs/GAMEPLAY_SYSTEMS.md`).
+Controls: WASD move · Shift jog (keep holding to sprint) · Space jump / vault / climb · C crouch · hold right mouse to focus (strafe) · mouse look (click the scene) · E interact · R secondary · I inventory · J journal · L Living Record · M map · K community and skills · Esc pause/close. Gamepad and on-screen touch controls are supported; keys can be remapped. In the auto-rickshaw: W/S drive, A/D steer, Space brake, H horn, E get out. Keys can be remapped in Settings; a standard gamepad works (see `docs/GAMEPLAY_SYSTEMS.md`).
 
 ## What works (verified in the browser)
 
@@ -50,6 +51,10 @@ Controls: WASD move · Shift run · mouse look (click the scene, or hold right m
 | Audio | Web Audio buses and 17 Lyria slots. **No audio files supplied yet.** A **procedural placeholder soundscape** (wind, rain, water, market murmur, birds, crickets, surface footsteps, doors, alarm) is synthesized in code; each layer mutes once its recording exists. |
 
 Tests: 29 unit tests, 23 browser tests and 123 GLB validations pass; typecheck is clean; the production build succeeds. Details are in `docs/TEST_PLAN.md`; the session 3 audit and checklist are in `docs/PROGRESS_CHECKLIST.md`.
+
+## Temple Visit (Moms at Temples)
+
+Title screen → **Temple Visit**: pick one of five moms and one of three temples, then play one visit across six stages in the 3D world. Home → auto-rickshaw → chappals → the darshan queue → rituals → darshan → exit. You score Punya Points, Blessings (a multiplier) and Stress (ends the run at 100), with combos, mini-games, Kumkum unlocks, daily missions, badges and personal bests. The rules are in `GAME_DESIGN.md`, and its §10 says how they map to this game.
 
 ## Documentation
 

@@ -1,6 +1,7 @@
 import type { GameState, Settings } from "../core/types";
 import type { Definitions } from "../core/defs";
 import { validateSave } from "./validateSave";
+import { BADGES, MISSIONS, MOM_BY_ID, SAREES, TEMPLE_BY_ID, newProfile, type Profile } from "../visit/rules";
 
 const DB_NAME = "temple-of-monks";
 const DB_VERSION = 1;
@@ -138,6 +139,19 @@ export class SaveSystem {
     await this.putMany([[SETTINGS, { ...s }]]);
   }
 
+  /** Temple Visit progression (Kumkum, unlocks, personal bests, badges, missions); validated on read. */
+  async loadVisitProfile(): Promise<Profile> {
+    try {
+      return sanitizeProfile(await this.get(VISIT_PROFILE));
+    } catch {
+      return newProfile();
+    }
+  }
+
+  async saveVisitProfile(p: Profile): Promise<void> {
+    await this.putMany([[VISIT_PROFILE, JSON.parse(JSON.stringify(p))]]);
+  }
+
   /** Test hook: write arbitrary raw data into the main slot. */
   async writeRawForTesting(raw: unknown): Promise<void> {
     await this.putMany([[MAIN, raw]]);
@@ -173,4 +187,29 @@ export function sanitizeSettings(raw: unknown): Settings {
   if (r.graphicsQuality === "low" || r.graphicsQuality === "medium" || r.graphicsQuality === "high") s.graphicsQuality = r.graphicsQuality;
   if (typeof r.ambientOcclusion === "boolean") s.ambientOcclusion = r.ambientOcclusion;
   return s;
+}
+
+const VISIT_PROFILE = "visit_profile";
+
+/** Untrusted stored profile -> a valid Profile (unknown ids dropped, numbers clamped). */
+export function sanitizeProfile(raw: unknown): Profile {
+  const p = newProfile();
+  if (!raw || typeof raw !== "object") return p;
+  const r = raw as Record<string, unknown>;
+  const num = (v: unknown, d = 0) => (typeof v === "number" && Number.isFinite(v) ? Math.max(0, Math.floor(v)) : d);
+  const ids = (v: unknown, valid: (x: string) => boolean, base: string[]) => (Array.isArray(v) ? [...new Set([...base, ...v.filter((x): x is string => typeof x === "string" && valid(x))])] : base);
+  p.kumkum = num(r.kumkum);
+  p.runs = num(r.runs);
+  p.chappalStreak = num(r.chappalStreak);
+  p.unlockedMoms = ids(r.unlockedMoms, (x) => MOM_BY_ID.has(x), p.unlockedMoms);
+  p.unlockedTemples = ids(r.unlockedTemples, (x) => TEMPLE_BY_ID.has(x), p.unlockedTemples);
+  p.unlockedSarees = ids(r.unlockedSarees, (x) => SAREES.some((s) => s.id === x), p.unlockedSarees);
+  p.badges = ids(r.badges, (x) => BADGES.some((b) => b.id === x), []);
+  if (r.personalBest && typeof r.personalBest === "object")
+    for (const [k, v] of Object.entries(r.personalBest as Record<string, unknown>)) if (TEMPLE_BY_ID.has(k)) p.personalBest[k] = num(v);
+  if (r.sareeChoice && typeof r.sareeChoice === "object")
+    for (const [k, v] of Object.entries(r.sareeChoice as Record<string, unknown>)) if (MOM_BY_ID.has(k) && typeof v === "string" && p.unlockedSarees.includes(v)) p.sareeChoice[k] = v;
+  const m = r.missions as Record<string, unknown> | undefined;
+  if (m && typeof m.day === "string") p.missions = { day: m.day, ids: ids(m.ids, (x) => MISSIONS.some((q) => q.id === x), []), done: ids(m.done, (x) => MISSIONS.some((q) => q.id === x), []) };
+  return p;
 }

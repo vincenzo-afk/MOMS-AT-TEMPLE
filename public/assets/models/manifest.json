@@ -1,12 +1,48 @@
 {
-  "generatedAt": "2026-10-20T04:57:59.541Z",
+  "generatedAt": "2026-10-20T05:27:56.271Z",
   "assets": [
+    {
+      "id": "CHR_Child_Boy",
+      "url": "/assets/models/characters/CHR_Child_Boy.glb",
+      "type": "character",
+      "triangles": 8008,
+      "bytes": 300256,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "CHR_Child_Girl",
+      "url": "/assets/models/characters/CHR_Child_Girl.glb",
+      "type": "character",
+      "triangles": 8800,
+      "bytes": 327116,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "CHR_Family_Husband",
+      "url": "/assets/models/characters/CHR_Family_Husband.glb",
+      "type": "character",
+      "triangles": 8108,
+      "bytes": 304792,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
     {
       "id": "CHR_NPC_Amudha",
       "url": "/assets/models/characters/CHR_NPC_Amudha.glb",
       "type": "character",
-      "triangles": 8960,
-      "bytes": 335344,
+      "triangles": 9044,
+      "bytes": 340524,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -18,7 +54,7 @@
       "url": "/assets/models/characters/CHR_NPC_Kaaval.glb",
       "type": "character",
       "triangles": 8472,
-      "bytes": 318860,
+      "bytes": 318864,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -29,8 +65,8 @@
       "id": "CHR_NPC_Meena",
       "url": "/assets/models/characters/CHR_NPC_Meena.glb",
       "type": "character",
-      "triangles": 8888,
-      "bytes": 331180,
+      "triangles": 8972,
+      "bytes": 336364,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -42,7 +78,19 @@
       "url": "/assets/models/characters/CHR_NPC_Ponnan.glb",
       "type": "character",
       "triangles": 8070,
-      "bytes": 301044,
+      "bytes": 301052,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "CHR_NPC_Priest",
+      "url": "/assets/models/characters/CHR_NPC_Priest.glb",
+      "type": "character",
+      "triangles": 7758,
+      "bytes": 285452,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -54,7 +102,7 @@
       "url": "/assets/models/characters/CHR_NPC_Selvam.glb",
       "type": "character",
       "triangles": 8362,
-      "bytes": 316108,
+      "bytes": 316112,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -65,8 +113,8 @@
       "id": "CHR_NPC_Valli",
       "url": "/assets/models/characters/CHR_NPC_Valli.glb",
       "type": "character",
-      "triangles": 8888,
-      "bytes": 331108,
+      "triangles": 8972,
+      "bytes": 336288,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -90,7 +138,7 @@
       "url": "/assets/models/characters/CHR_Player_Base.glb",
       "type": "character",
       "triangles": 8356,
-      "bytes": 721564,
+      "bytes": 721576,
       "expect": {
         "nodes": [],
         "maxBytes": 1500000,
@@ -421,11 +469,23 @@
       ]
     },
     {
+      "id": "CHR_Player_Mom",
+      "url": "/assets/models/characters/CHR_Player_Mom.glb",
+      "type": "character",
+      "triangles": 9072,
+      "bytes": 342088,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "CHR_Villager_A",
       "url": "/assets/models/characters/CHR_Villager_A.glb",
       "type": "character",
       "triangles": 7900,
-      "bytes": 293740,
+      "bytes": 293736,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -437,7 +497,7 @@
       "url": "/assets/models/characters/CHR_Villager_B.glb",
       "type": "character",
       "triangles": 8056,
-      "bytes": 298840,
+      "bytes": 298848,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -448,8 +508,8 @@
       "id": "CHR_Villager_C",
       "url": "/assets/models/characters/CHR_Villager_C.glb",
       "type": "character",
-      "triangles": 8688,
-      "bytes": 323188,
+      "triangles": 8772,
+      "bytes": 328368,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,
@@ -603,6 +663,22 @@
           "COL_Bin_-1",
           "COL_Bin_1",
           "COL_Ceiling"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "ENV_Hill_Temple_A",
+      "url": "/assets/models/buildings/ENV_Hill_Temple_A.glb",
+      "type": "building",
+      "triangles": 696,
+      "bytes": 100248,
+      "expect": {
+        "nodes": [
+          "COL_Parapet_L",
+          "COL_Parapet_R",
+          "COL_Rock_E"
         ],
         "maxBytes": 800000,
         "maxTriangles": 12000
@@ -861,6 +937,21 @@
       }
     },
     {
+      "id": "ENV_Shrine_Small_A",
+      "url": "/assets/models/buildings/ENV_Shrine_Small_A.glb",
+      "type": "building",
+      "triangles": 332,
+      "bytes": 19456,
+      "expect": {
+        "nodes": [
+          "COL_Cell",
+          "WALK_Plinth"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "ENV_Sluice_Gate_A",
       "url": "/assets/models/environment/ENV_Sluice_Gate_A.glb",
       "type": "environment",
@@ -1027,6 +1118,34 @@
       }
     },
     {
+      "id": "PRP_Annadanam_Mats_A",
+      "url": "/assets/models/props/PRP_Annadanam_Mats_A.glb",
+      "type": "prop",
+      "triangles": 1392,
+      "bytes": 46816,
+      "expect": {
+        "nodes": [
+          "WALK_Floor"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Auto_Rickshaw_A",
+      "url": "/assets/models/props/PRP_Auto_Rickshaw_A.glb",
+      "type": "prop",
+      "triangles": 1140,
+      "bytes": 45812,
+      "expect": {
+        "nodes": [
+          "COL_Body"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Balance_Scale_A",
       "url": "/assets/models/props/PRP_Balance_Scale_A.glb",
       "type": "prop",
@@ -1138,6 +1257,32 @@
       }
     },
     {
+      "id": "PRP_Bush_Hide_A",
+      "url": "/assets/models/props/PRP_Bush_Hide_A.glb",
+      "type": "prop",
+      "triangles": 920,
+      "bytes": 24480,
+      "expect": {
+        "nodes": [
+          "COL_Bush"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Calendar_A",
+      "url": "/assets/models/props/PRP_Calendar_A.glb",
+      "type": "prop",
+      "triangles": 72,
+      "bytes": 6284,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Carved_Fragment_A",
       "url": "/assets/models/props/PRP_Carved_Fragment_A.glb",
       "type": "prop",
@@ -1184,6 +1329,21 @@
       }
     },
     {
+      "id": "PRP_Chappal_Stand_A",
+      "url": "/assets/models/props/PRP_Chappal_Stand_A.glb",
+      "type": "prop",
+      "triangles": 1452,
+      "bytes": 106160,
+      "expect": {
+        "nodes": [
+          "COL_Counter",
+          "COL_Racks"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Chisel_A",
       "url": "/assets/models/props/PRP_Chisel_A.glb",
       "type": "prop",
@@ -1218,6 +1378,21 @@
       "expect": {
         "nodes": [
           "COL_Bench"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Coconut_Stone_A",
+      "url": "/assets/models/props/PRP_Coconut_Stone_A.glb",
+      "type": "prop",
+      "triangles": 332,
+      "bytes": 14852,
+      "expect": {
+        "nodes": [
+          "COL_Rail",
+          "COL_Stone"
         ],
         "maxBytes": 800000,
         "maxTriangles": 12000
@@ -1579,6 +1754,20 @@
       }
     },
     {
+      "id": "PRP_Lamp_Stand_A",
+      "url": "/assets/models/props/PRP_Lamp_Stand_A.glb",
+      "type": "prop",
+      "triangles": 3096,
+      "bytes": 83480,
+      "expect": {
+        "nodes": [
+          "COL_Stand"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Laundry_Line_A",
       "url": "/assets/models/props/PRP_Laundry_Line_A.glb",
       "type": "prop",
@@ -1778,6 +1967,36 @@
       }
     },
     {
+      "id": "PRP_Prasadam_Counter_A",
+      "url": "/assets/models/props/PRP_Prasadam_Counter_A.glb",
+      "type": "prop",
+      "triangles": 1276,
+      "bytes": 43216,
+      "expect": {
+        "nodes": [
+          "COL_Counter"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Queue_Rails_A",
+      "url": "/assets/models/props/PRP_Queue_Rails_A.glb",
+      "type": "prop",
+      "triangles": 1288,
+      "bytes": 44764,
+      "expect": {
+        "nodes": [
+          "COL_Rail_0",
+          "COL_Rail_1",
+          "COL_Rail_2"
+        ],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
       "id": "PRP_Rain_Shelter_A",
       "url": "/assets/models/props/PRP_Rain_Shelter_A.glb",
       "type": "prop",
@@ -1883,6 +2102,18 @@
       "type": "prop",
       "triangles": 548,
       "bytes": 31040,
+      "expect": {
+        "nodes": [],
+        "maxBytes": 800000,
+        "maxTriangles": 12000
+      }
+    },
+    {
+      "id": "PRP_Temple_Bag_A",
+      "url": "/assets/models/props/PRP_Temple_Bag_A.glb",
+      "type": "prop",
+      "triangles": 158,
+      "bytes": 7444,
       "expect": {
         "nodes": [],
         "maxBytes": 800000,

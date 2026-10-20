@@ -1,0 +1,35 @@
+{
+  "assetId": "CHR_Child_Girl",
+  "glb": "public/assets/models/characters/CHR_Child_Girl.glb",
+  "blend": "blender/source/CHR_Child_Girl.blend",
+  "bytes": 327116,
+  "triangles": 8800,
+  "objects": [
+    "CHR_Child_Girl",
+    "CHR_Child_Girl_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Foliage_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.165,
+    -0.147,
+    -0.004
+  ],
+  "boundsMax": [
+    0.165,
+    0.127,
+    1.063
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.05,
+  "sharesClipsFrom": "CHR_Player_Base"
+}

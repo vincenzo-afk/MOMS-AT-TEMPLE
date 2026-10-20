@@ -2,7 +2,7 @@
   "assetId": "CHR_NPC_Kaaval",
   "glb": "public/assets/models/characters/CHR_NPC_Kaaval.glb",
   "blend": "blender/source/CHR_NPC_Kaaval.blend",
-  "bytes": 318860,
+  "bytes": 318864,
   "triangles": 8472,
   "objects": [
     "CHR_NPC_Kaaval",
@@ -21,7 +21,7 @@
   "boundsMin": [
     -0.386,
     -0.184,
-    -0.008
+    -0.009
   ],
   "boundsMax": [
     0.347,

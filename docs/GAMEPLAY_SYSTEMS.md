@@ -5,13 +5,16 @@
 | Key | Action |
 |---|---|
 | W A S D / arrows | move (camera-relative) |
-| Shift | run |
+| Shift | jog; keep holding to build into a sprint |
+| Space | jump; near a waist-high obstacle: vault; at a ledge up to 2.1 m: climb |
+| C | crouch (toggle) |
+| Right mouse (hold) | focus: face where the camera looks, strafe and backpedal |
 | Mouse | rotate camera (click the scene to capture the mouse, or hold the right button and drag) |
 | Wheel | camera distance 2.2–9 m |
 | E | primary interaction / advance dialogue |
 | R | secondary interaction (e.g. inspect when repair is available) |
 | I / J / L | inventory / journal / Living Record |
-| M / C | map / community and skills |
+| M / K | map / community and skills |
 | Esc | close panel, or pause |
 | 1–4, Space, Enter | dialogue options / continue |
 | Movement key while seated | stand up |
@@ -66,6 +69,23 @@ The notice board by the south gate lists every quest whose prerequisites are met
 - **Living Record:** significant events with causes and effects; "Show on map" highlights the location.
 - **Map (M):** regions, roads, buildings, live story-NPC positions, restoration markers (amber = needs work, green = restored), your position and heading, the current objective.
 - **World time:** 1 real second = 1 world minute. Day/dusk/night lighting; warm point lights follow the nearest lit lamps at night; evening ambience after 18:00.
+
+## Movement (session 4)
+
+Walk 1.75 m/s, jog 3.9, sprint 6.2. Each gait's animation stride matches its speed (measured foot drift is under 4% of the distance run). Jump height is 0.6 m with a 0.08 s anticipation dip, 0.12 s coyote time and 0.15 s input buffering; falling is 1.35× gravity. Landing from 1.7 m or more is hard (a short lock, camera shake, dust). From 3.6 m or more it hurts: a stagger, a 6 s limp, and Stress during a temple visit. Sitting on any bench measures the seat and plants the feet; a movement key stands up.
+
+## Temple Visit (GAME_DESIGN.md)
+
+Start it from the title screen. One visit is a run through six stages placed in the world:
+
+1. **Home** (your house): wake at the cot before 5:00, pack the temple bag (12 s mini-game; forget the coconut and it's a penalty), check today's tithi on the calendar, and get the family into matching pattu.
+2. **Arrival:** drive the auto-rickshaw (W/S, A/D, Space brake, H horn, E out) and park within 100 m of the gate. Then deal with the chappals: the stand, a secret bush (remember the spot), the auto, or the side-gate guard. The gate attendant turns you back with chappals on.
+3. **Queue:** join the FREE, Rs 20 or Rs 100 lane (the fastest lane today scores). Shuffle with W, switch lanes with A/D, chat with an aunty (E), hold R to pray, send a kid ahead (T), merge with relatives (E), handle the line cutter (calm or scold), take the prasadam shortcut, and watch for the child who wanders off.
+4. **Rituals:** the coconut timing bar, lamps (one per wish, limited matchsticks), clockwise pradakshina laps around the sanctum (combos at 9, and at 108 on festival days), the sloka quiz, vibhuti for the family (10 s), and the archana (nakshatra and gotra, no pausing).
+5. **Darshan:** hold Space for 5 s while A/D resists the crowd. Then pray for everyone, including the one abroad, and ask the priest for prasadam and tulsi.
+6. **Exit:** collect the chappals (theft risk depends on the temple; a missing pair may turn into a better one), prasadam for the neighbours, gossip with Lakshmi-aunty, annadanam for the kids, the gopuram photo (nobody blinking), then head home in the auto.
+
+**Scoring.** Each action's points are multiplied by the mom's passive, ×2 on festival days, and ×2 on the fourth action after three of one category in a row. Blessings (devotion only) set the final multiplier (1×–3×). Stress caps the final score, and at 100 the run ends early. The final score earns Kumkum (a tenth of it) plus daily-mission rewards, spent on moms, temples and sarees.
 
 ## Session 3 systems
 

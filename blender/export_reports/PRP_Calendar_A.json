@@ -1,0 +1,26 @@
+{
+  "assetId": "PRP_Calendar_A",
+  "glb": "public/assets/models/props/PRP_Calendar_A.glb",
+  "blend": "blender/source/PRP_Calendar_A.blend",
+  "bytes": 6284,
+  "triangles": 72,
+  "objects": [
+    "PRP_Calendar_A",
+    "PRP_Calendar_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A"
+  ],
+  "boundsMin": [
+    -0.16,
+    -0.016,
+    -0.225
+  ],
+  "boundsMax": [
+    0.16,
+    0.01,
+    0.225
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

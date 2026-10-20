@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useGame, useUi } from "../hooks";
 import { CONTROLS_HELP, REMAPPABLE, keyLabel, type Binding } from "../../game/core/Input";
 import type { Settings } from "../../game/core/types";
+import { VisitMenu } from "./Visit";
 
 export function LoadingScreen() {
   const ui = useUi();
@@ -34,7 +35,7 @@ export function ErrorScreen({ message }: { message: string }) {
 export function TitleScreen() {
   const game = useGame();
   const ui = useUi();
-  const [view, setView] = useState<"menu" | "settings" | "credits" | "controls">("menu");
+  const [view, setView] = useState<"menu" | "settings" | "credits" | "controls" | "visit">("menu");
   const [msg, setMsg] = useState<string | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
   return (
@@ -69,6 +70,9 @@ export function TitleScreen() {
             >
               {confirmNew ? "Start over? Your current save will be replaced on the next save" : "New Game"}
             </button>
+            <button data-testid="temple-visit" onClick={() => setView("visit")}>
+              Temple Visit <span className="small muted">(Moms at Temples)</span>
+            </button>
             <button onClick={() => setView("controls")}>Controls</button>
             <button onClick={() => setView("settings")}>Settings</button>
             <button onClick={() => setView("credits")}>Credits</button>
@@ -79,6 +83,7 @@ export function TitleScreen() {
         )}
         {view === "settings" && <SettingsForm onBack={() => setView("menu")} />}
         {view === "controls" && <Controls onBack={() => setView("menu")} />}
+        {view === "visit" && <VisitMenu onBack={() => setView("menu")} />}
         {view === "credits" && (
           <div className="credits">
             <p>Design, code and procedural 3D assets generated with Claude Code and Blender {`5.2`} scripts in this repository.</p>

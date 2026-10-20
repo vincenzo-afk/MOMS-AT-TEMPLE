@@ -32,6 +32,8 @@ class Body:
     def __init__(self, height=1.75, shoulder=0.19, hip=0.095, female=False, belly=0.0, arm_out_deg=11.0):
         s = height / 1.75
         self.s = s
+        # limb and torso radii are authored for adults; children (short bodies) get proportionally slimmer
+        self.girth = 1.0 if s >= 0.85 else s / 0.85
         self.female = female
         self.belly = belly
         self.hip_joint_z = 0.92 * s

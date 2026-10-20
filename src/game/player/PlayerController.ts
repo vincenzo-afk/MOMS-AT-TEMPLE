@@ -443,6 +443,14 @@ export class PlayerController {
     }
   }
 
+  /**
+   * Animate without simulating movement: a scripted system (the queue, the auto-rickshaw) owns the position and
+   * reports the speed and direction it moved the body.
+   */
+  animateInPlace(dt: number, speed: number, dirX = 0, dirZ = 1, strafe = false): void {
+    this.animate(dt, speed, dirX, dirZ, strafe);
+  }
+
   /** Clip blend, then the procedural layers (seat offset, lean, foot planting, hand IK, look-at). */
   private animate(dt: number, speed: number, dirX: number, dirZ: number, focus: boolean): void {
     this.animator.setLocomotion({ speed, dirX, dirZ, crouch: this.crouched, strafe: focus });

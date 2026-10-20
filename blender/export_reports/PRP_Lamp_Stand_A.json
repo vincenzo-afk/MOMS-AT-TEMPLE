@@ -1,0 +1,41 @@
+{
+  "assetId": "PRP_Lamp_Stand_A",
+  "glb": "public/assets/models/props/PRP_Lamp_Stand_A.glb",
+  "blend": "blender/source/PRP_Lamp_Stand_A.blend",
+  "bytes": 83480,
+  "triangles": 3096,
+  "objects": [
+    "COL_Stand",
+    "FLAME_L1",
+    "FLAME_L2",
+    "FLAME_L3",
+    "FLAME_L4",
+    "FLAME_L5",
+    "FLAME_L6",
+    "FLAME_L7",
+    "FLAME_L8",
+    "FLAME_L9",
+    "PRP_Lamp_Stand_A",
+    "PRP_Lamp_Stand_A_Mesh",
+    "SOCKET_Stand"
+  ],
+  "colliders": [
+    "COL_Stand"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Emissive_A",
+    "MAT_Terracotta_A"
+  ],
+  "boundsMin": [
+    -0.43,
+    -0.428,
+    0.0
+  ],
+  "boundsMax": [
+    0.43,
+    0.428,
+    1.113
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

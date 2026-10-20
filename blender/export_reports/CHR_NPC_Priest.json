@@ -1,0 +1,33 @@
+{
+  "assetId": "CHR_NPC_Priest",
+  "glb": "public/assets/models/characters/CHR_NPC_Priest.glb",
+  "blend": "blender/source/CHR_NPC_Priest.blend",
+  "bytes": 285452,
+  "triangles": 7758,
+  "objects": [
+    "CHR_NPC_Priest",
+    "CHR_NPC_Priest_Mesh",
+    "SK_Humanoid_A"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Cloth_A",
+    "MAT_Eye_A",
+    "MAT_Hair_A",
+    "MAT_Skin_A"
+  ],
+  "boundsMin": [
+    -0.31,
+    -0.194,
+    -0.01
+  ],
+  "boundsMax": [
+    0.31,
+    0.149,
+    1.676
+  ],
+  "blenderVersion": "5.2.2 LTS",
+  "skeleton": "SK_Humanoid_A",
+  "height": 1.68,
+  "sharesClipsFrom": "CHR_Player_Base"
+}
