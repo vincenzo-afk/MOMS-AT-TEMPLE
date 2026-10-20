@@ -1,0 +1,27 @@
+{
+  "assetId": "PRP_Brass_Scrap_A",
+  "glb": "public/assets/models/props/PRP_Brass_Scrap_A.glb",
+  "blend": "blender/source/PRP_Brass_Scrap_A.blend",
+  "bytes": 11816,
+  "triangles": 392,
+  "objects": [
+    "PRP_Brass_Scrap_A",
+    "PRP_Brass_Scrap_A_Mesh"
+  ],
+  "colliders": [],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Soil_A"
+  ],
+  "boundsMin": [
+    -0.145,
+    -0.11,
+    -0.006
+  ],
+  "boundsMax": [
+    0.22,
+    0.125,
+    0.093
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

@@ -780,8 +780,11 @@ export class GameSession {
         const blocked = node && !evaluateAll(node.conditions, this.state, this.defs);
         return [{ verb: "gather", label: `Gather from ${it.label}`, enabled: avail, reason: avail ? undefined : blocked ? "Withered. Nothing to pick." : "Picked clean. It will regrow." }];
       }
-      case "station":
+      case "station": {
+        const gate = this.defs.stationConditions[it.refId];
+        if (gate && !evaluateAll(gate, this.state, this.defs)) return [];
         return [{ verb: "craft", label: `Work at ${it.label}`, enabled: true }];
+      }
       case "restoration": {
         const r = this.defs.restorations.get(it.refId);
         const restored = r && this.state.restorations[it.refId] === r.restoredState;

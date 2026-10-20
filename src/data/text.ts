@@ -91,6 +91,18 @@ export const RECORD_TEXT: Record<string, { title: string; body: string }> = {
     title: "The weaver comes home",
     body: "You re-thatched and repaired the neglected house on the east lane. Meena the weaver has moved back in and her loom is working again.",
   },
+  rec_casting: {
+    title: "The casting corner reopens",
+    body: "You patched the furnace and hung the shelf in Kamala's old lamp-casting corner behind the workshop. Velan has brass and wax on the bench again, and the craft his grandmother kept is being practised for the first time in a generation.",
+  },
+  rec_ledger: {
+    title: "Kamala's mould ledger",
+    body: "A palm-leaf ledger in the casting corner lists every lamp Kamala cast: who ordered it, how much brass, and which festival it was for. The last entry is for the Karthigai lamps of the temple walls.",
+  },
+  rec_deepam: {
+    title: "Karthigai Deepam is kept again",
+    body: "A cast brass lamp burns at the sanctum door and clay lamps line the temple walls, as Kamala's ledger says they once did every Karthigai. Sundaram lit the first wick himself.",
+  },
   rec_festival: {
     title: "The lamp festival returns",
     body: "With water in the garden and fields, a working well and a loom weaving again, the settlement held its lamp festival for the first time in years. Your offering bundle opened the evening.",
@@ -113,4 +125,6 @@ export const NOTICE_HINTS: Record<string, string> = {
   q_archaka_lamp: "Sundaram the archaka needs one more lamp for the evening puja.",
   q_bangle: "Valli has lost a bangle near the temple tank.",
   q_chisel: "Velan is missing a chisel somewhere in the western ruins.",
+  q_casting: "Velan says there is an old lamp-casting corner behind the workshop that nobody has used in years.",
+  q_deepam: "Sundaram the archaka hopes to keep Karthigai Deepam: lamps on every ledge of the temple.",
 };

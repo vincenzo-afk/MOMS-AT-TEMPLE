@@ -105,7 +105,7 @@ export function validateDefinitions(d: Definitions): string[] {
     }
     (npc.appearsWhen ?? []).forEach((c) => cond(c, `npc ${npc.id} appearsWhen`));
   }
-  for (const r of d.recipes.values()) need(["st_workshop_bench", "st_festival_station"].includes(r.stationId), `recipe ${r.id}: unknown station ${r.stationId}`);
+  for (const r of d.recipes.values()) need(["st_workshop_bench", "st_festival_station", "st_casting"].includes(r.stationId), `recipe ${r.id}: unknown station ${r.stationId}`);
   for (const r of d.recipes.values()) if (r.skill) need(r.skill.level >= 1 && r.skill.level <= 10, `recipe ${r.id}: skill level out of range`);
   for (const slot of d.decorSlots.values()) slot.accepts.forEach((i) => item(i, `decor slot ${slot.id}`));
   for (const w of d.waterSources.values()) w.conditions.forEach((c) => cond(c, `water source ${w.id}`));

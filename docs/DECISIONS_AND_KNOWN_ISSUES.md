@@ -70,11 +70,11 @@
 
 | Area | Issue | Severity | Next step |
 |---|---|---|---|
-| Characters | cloth stretches on wide strides (no cloth simulation); faces have no rig or blinking; procedural, not hand-modelled | medium | hand-modelled pass keeping SK_Humanoid_A |
+| Characters | cloth stretches on wide strides (no cloth simulation); faces have jaw, eye and lid bones (blink, gaze, talking jaw) but no lip shapes or expressions; procedural, not hand-modelled | medium | hand-modelled pass keeping SK_Humanoid_A |
 | Performance | about 710 draw calls and 0.82M triangles per frame in the courtyard (67-101 fps headless on an AMD iGPU, depending on what else shares the GPU); draw-call bound; not measured on low-end hardware. Palm and neem LOD (session 3) cut triangles by about 26% in that view | medium | merge static props per chunk, LOD for walls and houses |
 | Environment | the C: drive was full during session 2; npm installs need --cache on another drive | environment | free space on C: |
 | Characters | no UVs or textures | low | after modelling pass |
-| Animation | 28 of the README's ~35 clips exist (see ANIMATION_SPEC) | low | walk start/stop, carry, close_container |
+| Animation | most README clips exist, including carry, door push and close container (see ANIMATION_SPEC); there are no walk start/stop transition clips (starts and stops are blended) | low | walk start/stop clips |
 | NPCs | stuck recovery (re-plan, skip a waypoint, step past) is implemented but no automated test forces an NPC into a stuck state; the sampled runs recorded 0 repaths | low | a test that blocks a route with a collider |
 | Temple Visit | gossip, annadanam, vibhuti and the chappal-bush memory test are implemented and reachable but not driven by a browser test (the full-visit test covers the stand route) | low | extend visit.spec |
 | Temple Visit | the drive from home to the temple is free driving through the settlement with no road guidance; the auto can scrape walls in narrow lanes | low | a road path with the map marker |
@@ -82,10 +82,9 @@
 | Characters | the saree pallu is a stylised band; there is no cloth simulation | low | production cloth pass |
 | Movement | cover snap not implemented (no combat or stealth in either design) | n/a | only if a stealth system is ever designed |
 | Touch | the touch controls are tested with mouse-driven pointer events, not on a physical phone | low | manual check on a phone |
-| NPCs | NPCs do not react to the player running, entering homes or carrying stolen goods later; only witnessed container theft is a crime | low | trespass rules per interior |
-| Interaction | opening doors and containers reuses the reach animation (no dedicated door or lid animation; crates have no opening lid) | low | door_push and open_container clips, an animated lid |
+| NPCs | villagers remark on sprinting past them and on entering a house uninvited, but nobody notices stolen goods carried later; only witnessed container theft is a crime | low | recognise stolen items on sight |
 | Input | gamepad tested only with a scripted `navigator.getGamepads()` stub, not a physical controller | low | manual check with an Xbox/PS pad |
-| Audio | the procedural soundscape is a placeholder and has not been mixed or listened to by a person | medium | Lyria recordings, mix pass |
+| Audio | the procedural soundscape and the synthesized placeholder score have not been mixed or listened to by a person or a musician; stings do not duck the music bed | medium | Lyria recordings, mix pass, ducking |
 | Characters | Kannan the watchman is a first-pass procedural character like the others | low | production pass |
 | Rendering | ≈ 550k triangles/frame including the shadow pass; grass and palm instances cast shadows | low-medium | LOD for palms, no grass shadows, cascade or tighter shadow box |
 | Rendering | changing graphics quality at runtime toggles shadows; pixel ratio applies immediately, but some materials may need a reload to update shadow receiving | low | force `material.needsUpdate` on change |

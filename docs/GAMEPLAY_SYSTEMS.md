@@ -35,7 +35,7 @@ Every keyboard action except pause can be rebound in Settings → Controls. A ke
 | Western ruins | broken brick gate, **brick wall and fallen pillar**, **overgrown path** into a walled enclosure, the old pavilion with the **manuscript case** | west |
 | Woodland | neem trees and **log piles** (timber) | via the ruins |
 
-## Story (12 quests)
+## Story (12-quest arc, then the casting corner and Karthigai Deepam)
 
 | Quest | Giver | What happens | Changes the world |
 |---|---|---|---|
@@ -51,6 +51,9 @@ Every keyboard action except pause can be rebound in Settings → Controls. A ke
 | Leaves in the Old Pavilion | Ponnan | buy a sickle, clear the overgrown path, find the manuscript, deliver | the **channel rota** is posted on the notice board; villagers talk about their month |
 | The Empty Loom | Valli | inspect, learn thatching, make thatch bundles, timber, mortar, restore the house | **Meena the weaver returns**; her shop opens |
 | The Lamp Festival | Ponnan (needs garland, fields and weaver done) | plan with Valli, harvest vegetables, cloth from Meena, a fresh garland, prepare the bundle at the festival table, deliver | **festival**: kolams, bunting, banana arches and lit lamps; everyone gathers in the courtyard each evening 17:00–23:00; record links back to five earlier events |
+
+| The Forgotten Craft | Velan (after *Velan's Chisel*) | inspect Kamala's old lamp-casting corner behind the workshop, read her palm-leaf ledger (discovery), timber + mortar + rope to reopen it, broken brass from the ruins and the old grounds (pickups; Selvam's cart also brings some), beeswax from Selvam, cast a brass lamp at the furnace, show Velan | the corner changes from **neglected** (dust sheet, fallen shelf, cracked cold furnace) to **reopened** (glowing furnace, wax models, lamps on the shelf); the **casting furnace** station appears; Selvam buys cast lamps |
+| Karthigai Deepam | Sundaram (needs the lamp festival and the casting corner) | ask Velan, cast a brass lamp, three clay lamps, bring both to Sundaram, help Valli line the walls | **lamps along the temple walls** and a brass lamp stand at the sanctum door, lit from dusk; record links back to the casting corner and the lamp festival |
 
 The notice board by the south gate lists every quest whose prerequisites are met but which has not been started, with who to ask.
 
@@ -102,6 +105,13 @@ Start it from the title screen. One visit is a run through six stages placed in 
 - **NPC behaviour:** NPCs steer with collision (they slide along props and walls), keep apart from each other and from you, and recover when stuck (re-plan, skip a waypoint, then step past). Near you they turn their heads to look, greet you, react if you walk into them, and comment on the weather, the festival, a restored place or missing goods (speech bubbles, with per-NPC cooldowns). Talking pauses their errand, which resumes afterwards. They go indoors at night (21:00–05:00) and **head for cover when it rains** (bazaar, field and roadside shelters, the workshop and the courtyard cloister). Distant NPCs animate at a reduced rate.
 - **Weather:** clear, cloudy or rain, decided deterministically from the world time in 3-hour blocks (so it survives a reload without being saved). It eases in and out over 20 minutes. The first morning and the festival evening are always clear. Rain brings falling streaks, wet darker ground, a grey sky, diffused light and nearer fog. Wind sways foliage and cloth, and dust motes and fireflies (at night) drift.
 - **Soundscape (procedural placeholder):** wind, rain, water near the tank and channels, a market murmur near the bazaar, birds by day, crickets by night, footsteps that match the walk cycle and surface (stone, soil, wood), door creaks and an alarm when you are seen stealing. All of it is synthesized with Web Audio until the Lyria recordings exist; each layer goes quiet automatically once its recording is supplied.
+
+## Session 5
+
+- **Faces:** blinking, eyes that follow the look target, and a jaw that moves while a character speaks (player and nearby villagers).
+- **Everyday clips:** door push, closing a lid, picking up from table height, carrying a full water pot (walking pace only; the pot is held in the hands), sweeping, kneeling at a garden bed, explaining with open palms. Chest and crate lids swing open with their panels.
+- **Music:** cue by hour and place (morning, day, workshop, evening, festival evenings; silence late at night and during a Temple Visit). A synthesized placeholder score plays each cue until its Lyria file exists. Restorations and discoveries play short stings.
+- **Spatial audio:** positional loops through an HRTF panner; the listener follows the camera. Velan's chisel is heard from his bench while he works.
 
 ## Not implemented yet
 

@@ -1,0 +1,51 @@
+{
+  "assetId": "PRP_Casting_Corner_A",
+  "glb": "public/assets/models/props/PRP_Casting_Corner_A.glb",
+  "blend": "blender/source/PRP_Casting_Corner_A.blend",
+  "bytes": 343848,
+  "triangles": 5920,
+  "objects": [
+    "COL_Back",
+    "COL_Bench",
+    "COL_Furnace",
+    "COL_Post_-1",
+    "COL_Post_1",
+    "FLAME_Forge",
+    "PRP_Casting_Corner_A",
+    "PRP_Casting_Corner_A_Base",
+    "SOCKET_Work",
+    "STATE_neglected",
+    "STATE_reopened"
+  ],
+  "colliders": [
+    "COL_Back",
+    "COL_Bench",
+    "COL_Furnace",
+    "COL_Post_-1",
+    "COL_Post_1"
+  ],
+  "materials": [
+    "MAT_Brass_A",
+    "MAT_Cloth_A",
+    "MAT_Emissive_A",
+    "MAT_Foliage_A",
+    "MAT_Iron_A",
+    "MAT_Plaster_Lime_A",
+    "MAT_Soil_A",
+    "MAT_Stone_Granite_A",
+    "MAT_Terracotta_A",
+    "MAT_Thatch_A",
+    "MAT_Wood_Teak_A"
+  ],
+  "boundsMin": [
+    -1.85,
+    -1.535,
+    0.0
+  ],
+  "boundsMax": [
+    1.85,
+    1.535,
+    3.03
+  ],
+  "blenderVersion": "5.2.2 LTS"
+}

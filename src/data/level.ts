@@ -248,6 +248,18 @@ export const PLACEMENTS: Placement[] = [
   P("PRP_Rain_Shelter_A", 12, 84, 90, { id: "shelter_road" }),
   { asset: "PRP_Bangle_A", pos: [-29.6, 0.09, 78], rotY: 0, id: "pickup_bangle" },
   P("PRP_Chisel_A", -66.5, -41.6, 30, { id: "pickup_chisel" }),
+  // the casting corner behind the workshop and the broken brass it needs (session 5)
+  P("PRP_Casting_Corner_A", 20.8, 13.6, 0, { id: "casting_corner" }),
+  P("PRP_Brass_Scrap_A", -58.5, -30.2, 40, { id: "pickup_scrap_ruins" }),
+  P("PRP_Brass_Scrap_A", -31.2, -38.4, 120, { id: "pickup_scrap_grounds" }),
+  P("PRP_Brass_Scrap_A", -75.0, -12.0, 200, { id: "pickup_scrap_ruins2" }),
+  // Karthigai Deepam: lamps along the temple walls and a cast brass lamp at the sanctum door
+  ...[-10.6, -6.4, 6.4, 10.6].map((x, i) => P("PRP_Festival_Lamp_Row_A", x, 0.75, 0, { id: `deepam_front_${i}` })),
+  ...[-4, -10, -16, -22, -28].flatMap((z, i) => [
+    P("PRP_Festival_Lamp_Row_A", -12.75, z, 90, { id: `deepam_west_${i}` }),
+    P("PRP_Festival_Lamp_Row_A", 12.75, z, -90, { id: `deepam_east_${i}` }),
+  ]),
+  P("PRP_Brass_Lamp_Stand_A", 3.4, -1.2, 0, { id: "deepam_door_lamp" }),
   P("PRP_Coin_Pouch_A", 64.5, 10.8, 0, { id: "pickup_pouch" }),
   // ---- east lane
   P("ENV_House_Village_A", 71, 34, 90),
@@ -335,6 +347,12 @@ export const INTERACTABLES: InteractablePlacement[] = [
   { id: "int_ct_ruins", kind: "container", refId: "ct_ruins_crate", label: "crate", locationId: "loc_ruins", pos: [-108, 0, -29.3], radius: 1.4 },
   { id: "int_ct_field", kind: "container", refId: "ct_field_crate", label: "crate", locationId: "loc_fields", pos: [43.6, 0, -57.5], radius: 1.4 },
   { id: "int_pk_bangle", kind: "pickup", refId: "pk_bangle", label: "bangle", locationId: "loc_kulam", pos: [-29.6, 0.09, 78], radius: 1.4, visualId: "pickup_bangle" },
+  { id: "int_casting_corner", kind: "restoration", refId: "rest_casting_corner", label: "the old casting corner", locationId: "loc_workshop", pos: [21.75, 0.12, 14.0], radius: 2.0 },
+  { id: "int_casting", kind: "station", refId: "st_casting", label: "the casting furnace", locationId: "loc_workshop", pos: [20.3, 0.12, 14.35], radius: 1.8 },
+  { id: "int_casting_ledger", kind: "discovery", refId: "disc_casting_ledger", label: "a palm-leaf ledger", locationId: "loc_workshop", pos: [19.7, 1.0, 13.4], radius: 1.6 },
+  { id: "int_pk_scrap_ruins", kind: "pickup", refId: "pk_scrap_ruins", label: "broken brass", locationId: "loc_ruins", pos: [-58.5, 0, -30.2], radius: 1.4, visualId: "pickup_scrap_ruins" },
+  { id: "int_pk_scrap_grounds", kind: "pickup", refId: "pk_scrap_grounds", label: "broken brass", locationId: "loc_forgotten", pos: [-31.2, 0, -38.4], radius: 1.4, visualId: "pickup_scrap_grounds" },
+  { id: "int_pk_scrap_ruins2", kind: "pickup", refId: "pk_scrap_ruins2", label: "broken brass", locationId: "loc_ruins", pos: [-75.0, 0, -12.0], radius: 1.4, visualId: "pickup_scrap_ruins2" },
   { id: "int_pk_chisel", kind: "pickup", refId: "pk_chisel", label: "chisel", locationId: "loc_ruins", pos: [-66.5, 0, -41.6], radius: 1.4, visualId: "pickup_chisel" },
   { id: "int_pk_pouch", kind: "pickup", refId: "pk_pouch", label: "pouch", locationId: "loc_bazaar", pos: [64.5, 0, 10.8], radius: 1.4, visualId: "pickup_pouch" },
   { id: "int_home_chest", kind: "storage", refId: "home_chest", label: "your chest", locationId: "loc_home", pos: [-21.6, 0.6, 30.3], radius: 1.4 },
@@ -477,7 +495,9 @@ export const VISUAL_BINDINGS: VisualBinding[] = [
   { placementId: "old_path", restorationId: "rest_old_path" },
   { placementId: "weaver_house", restorationId: "rest_weaver_house" },
   ...[1, 2, 3, 4].map((i) => ({ placementId: `plot_${i}`, plotId: `plot_${i}` })),
-  ...["pickup_bangle", "pickup_chisel", "pickup_pouch"].map((p) => ({ placementId: p, pickupId: `pk_${p.slice(7)}` })),
+  ...["pickup_bangle", "pickup_chisel", "pickup_pouch", "pickup_scrap_ruins", "pickup_scrap_grounds", "pickup_scrap_ruins2"].map((p) => ({ placementId: p, pickupId: `pk_${p.slice(7)}` })),
+  { placementId: "casting_corner", restorationId: "rest_casting_corner" },
+  ...["deepam_front_0", "deepam_front_1", "deepam_front_2", "deepam_front_3", "deepam_door_lamp", ...[0, 1, 2, 3, 4].flatMap((i) => [`deepam_west_${i}`, `deepam_east_${i}`])].map((p) => ({ placementId: p, flag: "deepam_held" })),
   ...["decor_doorway", "decor_doorstep", "decor_lamp", "decor_mat", "decor_plant"].map((s) => ({ placementId: s, decorSlot: s })),
   // festival build-up (README §4.6): bunting and arches when preparations are announced, kolams once the
   // offering bundle is ready, lamps on the night itself

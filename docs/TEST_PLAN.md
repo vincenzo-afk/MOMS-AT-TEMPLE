@@ -66,6 +66,12 @@ Screenshots are written to `test-results/screens/` (ignored by git).
 - `tests/e2e/visit.spec.ts` (4): home stage; the full visit from the auto to the score screen and saved profile; the hill steps and the neighbourhood shrine; the Stress end and Esc-out of a mini-game.
 - `tests/e2e/touch.spec.ts` (1): the on-screen stick and the Jump button.
 
+### Session 5 additions
+- `src/game/audio/musicCues.test.ts` (3): the cue for each hour, the workshop cue by day only, festival evenings and silence during a Temple Visit.
+- `tests/e2e/anim.spec.ts` (2): blinking, a talking jaw that closes after the conversation, and a face close-up; the chest lid opening and closing with its panel; carrying a full pot at walking pace with the carry clip (front and back screenshots); the door push.
+- `tests/e2e/audio.spec.ts` (2): the music cue follows the hour, the placeholder score schedules drone plucks, phrases and festival drums, the restoration sting plays; the workshop cue in the yard, Velan's chisel heard by day and not at night, the listener rides with the camera.
+- `tests/e2e/casting.spec.ts` (2): *The Forgotten Craft* end to end (the neglected corner, the ledger discovery, the repair and its visual swap, real brass pickups in the ruins and old grounds, casting at the furnace, the Living Record); *Karthigai Deepam* end to end, with the wall lamps appearing and a dusk screenshot.
+
 ## Asset tests (`scripts/validate-glb.mjs`)
 For every manifest entry: file exists; expected collider nodes exist; every visible primitive has non-placeholder vertex colours (this check caught 6 assets exported white); skinned characters have a skin and all 11 named clips; triangle and byte budgets. Results: `blender/export_reports/glb_validation.json`.
 

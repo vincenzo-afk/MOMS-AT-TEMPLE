@@ -200,4 +200,32 @@ export const RESTORATIONS: RestorationDefinition[] = [
     },
     action: { anim: "craft_at_station", seconds: 3.5, label: "Re-thatching the roof..." },
   },
+  {
+    id: "rest_casting_corner",
+    name: "Lamp-casting corner",
+    locationId: "loc_workshop",
+    initialState: "neglected",
+    states: ["neglected", "reopened"],
+    restoredState: "reopened",
+    requiredMaterials: [
+      { itemId: "timber", quantity: 2 },
+      { itemId: "lime_mortar", quantity: 1 },
+      { itemId: "rope", quantity: 1 },
+    ],
+    prerequisites: [{ type: "flag", id: "casting_inspected", value: true }],
+    resultingWorldFlags: ["casting_reopened"],
+    recordEventType: "restoration",
+    descriptionKey: "rec_casting",
+    causeEventIds: [],
+    interactableId: "int_casting_corner",
+    inspectFlag: "casting_inspected",
+    inspectText: {
+      before: [
+        "A dust sheet hides the casting bench. The shelf has come off the wall, clay mould halves lie in the ash, and the furnace has a crack you could put a hand through.",
+        "Two timbers for the shelf and the roof poles, mortar to patch the furnace, a rope to hang the bellows.",
+      ],
+      after: ["The furnace glows behind its patch. Wax models wait on the bench and the shelf holds a row of new brass lamps."],
+    },
+    action: { anim: "craft_at_station", seconds: 3.2, label: "Patching the furnace and hanging the shelf..." },
+  },
 ];

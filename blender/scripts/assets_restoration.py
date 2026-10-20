@@ -6,7 +6,7 @@ import math
 import random
 from tom.core import Part, rgb, root, collider, empty, export_asset
 from tom.arch import pillar
-from tom.props import plank, rope_path, thatch_roof, heap, bamboo, pot, basket
+from tom.props import plank, rope_path, thatch_roof, heap, bamboo, pot, basket, cloth_sheet, sack
 
 ASSETS = {}
 
@@ -191,3 +191,100 @@ def ENV_House_Thatch_A():
         collider(f"Post_{sx}", (0.2, 0.2, 2.6), (sx * (W / 2 - 0.2), -D / 2 - 0.9, 1.65), parent=rt)
     empty("SOCKET_Door", (0, -D / 2 - 0.4, 0.35), parent=rt)
     return export_asset("ENV_House_Thatch_A", "buildings", rt, required=["STATE_neglected", "STATE_restored"]), rt
+
+
+@asset
+def PRP_Casting_Corner_A():
+    """Lamp-casting corner beside Velan's workshop (README §4 "a disused workshop contains tools from a forgotten
+    craft"; §9.5 restored or neglected states). A thatched lean-to over a casting bench, a clay furnace and a shelf.
+    STATE_neglected: a dust sheet over the bench, the shelf fallen, mould halves scattered, a cracked cold furnace
+    choked with weeds, cobwebs. STATE_reopened: wax models and moulds on the bench, the furnace patched and glowing
+    (FLAME_Forge), crucible and tongs, bellows, finished brass lamps on the shelf."""
+    rng = random.Random(6201)
+    rt = root("PRP_Casting_Corner_A")
+    W, D = 3.0, 2.4
+    base = Part()
+    base.box((W + 0.3, D + 0.3, 0.12), (0, 0, 0.06), "MAT_Stone_Granite_A", rgb("granite", 0.05, rng))
+    base.box((W, 0.25, 2.2), (0, D / 2 - 0.12, 0.12 + 1.1), "MAT_Plaster_Lime_A", rgb("plaster_warm", 0.03, rng))
+    base.box((W, 0.27, 0.4), (0, D / 2 - 0.12, 0.12 + 0.2), "MAT_Plaster_Lime_A", rgb("red_oxide", 0.03, rng))
+    for sx in (-1, 1):
+        plank(base, (0.14, 0.14, 2.2), (sx * (W / 2 - 0.1), -D / 2 + 0.15, 0.12 + 1.1), rng, color="teak_dark")
+    thatch_roof(base, W, D, 2.05, 2.75, rng, overhang=0.3)
+    # the casting bench (same frame in both states)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            base.box((0.08, 0.08, 0.78), (-0.5 + sx * 0.65, 0.2 + sy * 0.25, 0.12 + 0.39), "MAT_Wood_Teak_A", rgb("teak_dark", 0.04, rng))
+    base.box((1.45, 0.62, 0.07), (-0.5, 0.2, 0.12 + 0.8), "MAT_Wood_Teak_A", rgb("teak", 0.05, rng))
+    # furnace body (right)
+    base.lathe([(0, 0), (0.36, 0), (0.38, 0.3), (0.3, 0.62), (0.16, 0.72), (0.0, 0.72)], (0.95, 0.35, 0.12), "MAT_Terracotta_A", rgb("clay_lime", 0.06, rng), segments=14)
+    base.box((0.22, 0.1, 0.18), (0.95, 0.0, 0.12 + 0.18), "MAT_Stone_Granite_A", rgb("dark_recess"))  # stoke hole
+    base.to_object("PRP_Casting_Corner_A_Base", bevel=0.01).parent = rt
+
+    n = Part()  # ------------------------------------------------ neglected
+    cloth_sheet(n, [(-1.28, -0.16, 0.95), (0.28, -0.16, 0.95), (0.28, 0.56, 0.95), (-1.28, 0.56, 0.95)], 6, 4, 0.06, lambda i, j: "paper" if (i + j) % 3 else "cloth_white", rng)
+    for k in range(5):  # sheet hem hanging off the front
+        n.box((0.3, 0.02, 0.35 + rng.random() * 0.1), (-1.15 + k * 0.32, -0.17, 0.12 + 0.62), "MAT_Cloth_A", rgb("paper", 0.08, rng))
+    plank(n, (1.3, 0.3, 0.05), (-0.6, D / 2 - 0.5, 0.2), rng, color="teak_dark", rot_z=0.25)  # the fallen shelf
+    plank(n, (0.06, 0.3, 0.9), (-1.3, D / 2 - 0.35, 0.55), rng, color="teak_dark", rot_z=0.1)
+    for k in range(7):  # mould halves and scraps on the floor
+        x, y = -1.2 + rng.random() * 2.2, -0.9 + rng.random() * 0.8
+        n.lathe([(0, 0), (0.08, 0), (0.1, 0.05), (0.0, 0.06)], (x, y, 0.12), "MAT_Terracotta_A", rgb("clay_lime", 0.1, rng), segments=8)
+    heap(n, (0.95, -0.15, 0.12), 0.25, 10, "dark_recess", rng, size=0.05, mat="MAT_Soil_A")  # spilled ash
+    for k in range(5):  # weeds round the furnace
+        a = rng.random() * 6.28
+        n.ico(0.12, (0.95 + math.cos(a) * 0.4, 0.35 + math.sin(a) * 0.4, 0.2), "MAT_Foliage_A", rgb("leaf_dry", 0.1, rng), subdiv=1, scale=(1, 1, 1.4), noise=0.2, rng=rng)
+    n.box((0.03, 0.2, 0.5), (0.95, 0.12, 0.12 + 0.5), "MAT_Stone_Granite_A", rgb("dark_recess"), rot_z=0.3)  # the crack
+    for k in range(4):  # cobwebs in the roof corners
+        sx = -1 if k % 2 else 1
+        rope_path(n, [(sx * 1.35, D / 2 - 0.2, 2.0), (sx * (1.0 + rng.random() * 0.2), D / 2 - 0.4 - k * 0.1, 1.75 - rng.random() * 0.2), (sx * 0.9, D / 2 - 0.25, 2.05)], 0.004, rng)
+    n.to_object("STATE_neglected").parent = rt
+
+    r = Part()  # ------------------------------------------------ reopened
+    plank(r, (1.8, 0.32, 0.05), (-0.3, D / 2 - 0.4, 1.3), rng, color="teak")
+    for sx in (-1, 1):
+        r.box((0.05, 0.3, 0.3), (-0.3 + sx * 0.85, D / 2 - 0.4, 1.12), "MAT_Wood_Teak_A", rgb("teak_dark"))
+    for k in range(4):  # finished lamps on the shelf
+        x = -0.95 + k * 0.42
+        r.lathe([(0, 0), (0.07, 0), (0.07, 0.02), (0.02, 0.05), (0.015, 0.26), (0.05, 0.28), (0.06, 0.3), (0.0, 0.31)], (x, D / 2 - 0.4, 1.33), "MAT_Brass_A", rgb("brass", 0.05, rng), segments=10)
+    for k in range(5):  # wax models and clay moulds on the bench
+        x = -1.1 + k * 0.28
+        if k % 2:
+            r.lathe([(0, 0), (0.05, 0), (0.05, 0.02), (0.015, 0.05), (0.012, 0.16), (0.04, 0.18), (0.0, 0.19)], (x, 0.15, 0.99), "MAT_Wood_Teak_A", rgb("marigold_yellow", 0.05, rng), segments=8)
+        else:
+            r.lathe([(0, 0), (0.09, 0), (0.1, 0.1), (0.07, 0.16), (0.0, 0.17)], (x, 0.25, 0.99), "MAT_Terracotta_A", rgb("terracotta", 0.06, rng), segments=10)
+    r.box((0.4, 0.05, 0.03), (-0.2, 0.0, 0.995), "MAT_Iron_A", rgb("iron"), rot_z=0.3)  # tongs
+    r.lathe([(0, 0), (0.08, 0), (0.1, 0.12), (0.0, 0.1)], (0.95, 0.35, 0.84), "MAT_Stone_Granite_A", rgb("granite_dark"), segments=10)  # crucible
+    r.box((0.4, 0.25, 0.08), (0.55, -0.35, 0.16), "MAT_Wood_Teak_A", rgb("teak_dark", 0.04, rng), taper=(0.6, 1.0))  # bellows
+    r.box((0.36, 0.22, 0.12), (0.55, -0.35, 0.24), "MAT_Cloth_A", rgb("cloth_indigo", 0.05, rng), taper=(0.55, 0.9))
+    r.box((0.24, 0.12, 0.2), (0.95, 0.12, 0.12 + 0.36), "MAT_Plaster_Lime_A", rgb("clay_lime", 0.04, rng))  # patch over the crack
+    for k in range(3):  # charcoal sacks
+        sack(r, (1.25 - k * 0.05, -0.75 + k * 0.28, 0.12), 0.6, rng, color="cloth_white", open_top=k == 0, fill="dark_recess")
+    ro = r.to_object("STATE_reopened")
+    ro.parent = rt
+    f = Part()
+    f.ico(1.0, (0, 0, 0), "MAT_Emissive_A", rgb("flame"), subdiv=1, scale=(0.08, 0.03, 0.06))
+    fo = f.to_object("FLAME_Forge")
+    fo.location = (0.95, -0.02, 0.28)
+    fo.parent = ro
+
+    collider("Back", (W, 0.35, 2.3), (0, D / 2 - 0.12, 1.15), parent=rt)
+    collider("Bench", (1.5, 0.7, 1.0), (-0.5, 0.2, 0.5), parent=rt)
+    collider("Furnace", (0.8, 0.8, 0.9), (0.95, 0.35, 0.45), parent=rt)
+    for sx in (-1, 1):
+        collider(f"Post_{sx}", (0.2, 0.2, 2.3), (sx * (W / 2 - 0.1), -D / 2 + 0.15, 1.15), parent=rt)
+    empty("SOCKET_Work", (-0.5, -0.75, 0.12), parent=rt)
+    return export_asset("PRP_Casting_Corner_A", "props", rt, required=["STATE_neglected", "STATE_reopened", "FLAME_Forge", "COL_Bench", "SOCKET_Work"]), rt
+
+
+@asset
+def PRP_Brass_Scrap_A():
+    """Pickup: broken brass - a cracked lamp foot, a bent vessel rim and a snapped wick-cup, half in the dust."""
+    rng = random.Random(6202)
+    rt = root("PRP_Brass_Scrap_A")
+    p = Part()
+    p.lathe([(0, 0), (0.11, 0), (0.11, 0.015), (0.05, 0.04), (0.025, 0.06), (0.0, 0.06)], (0, 0, 0), "MAT_Brass_A", rgb("brass", 0.08, rng), segments=12)
+    p.tube([(0.12 + math.cos(a) * 0.09, -0.05 + math.sin(a) * 0.09, 0.012) for a in [k * 0.45 for k in range(9)]], [0.01] * 9, "MAT_Brass_A", rgb("brass", 0.1, rng), segments=6)
+    p.lathe([(0, 0), (0.035, 0.0), (0.045, 0.025), (0.0, 0.02)], (-0.1, 0.08, 0.0), "MAT_Brass_A", rgb("brass", 0.12, rng), segments=8)
+    heap(p, (0.02, 0.0, 0.0), 0.12, 6, "soil_dry", rng, size=0.03, mat="MAT_Soil_A")
+    p.to_object("PRP_Brass_Scrap_A_Mesh").parent = rt
+    return export_asset("PRP_Brass_Scrap_A", "props", rt), rt

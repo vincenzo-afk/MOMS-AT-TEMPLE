@@ -38,5 +38,9 @@ export const ITEMS: ItemDefinition[] = [
   { id: "brass_bangle", name: "Brass bangle", description: "A thin brass bangle with a red bead. Valli lost one by the temple tank.", category: "quest", icon: "◯", maxStack: 1, tags: ["lost"], questProtected: true },
   { id: "velan_chisel", name: "Velan's chisel", description: "A well-worn chisel with a brass collar. VELAN is scratched into the handle.", category: "tool", icon: "⟋", maxStack: 1, tags: ["lost"], questProtected: true },
   { id: "coin_pouch", name: "Cloth pouch", description: "A red cloth pouch heavy with coins. Someone must be missing it.", category: "trade", icon: "◎", maxStack: 1, tags: ["lost"], use: { label: "Open it and keep the coins", coins: 8, flag: "kept_pouch" } },
+  // the casting corner (session 5)
+  { id: "brass_scrap", name: "Broken brass", description: "A cracked lamp foot, a bent vessel rim. Melted down, old brass casts again.", category: "material", icon: "⚱", maxStack: 6, tags: ["brass"], sellPrice: 1 },
+  { id: "beeswax", name: "Beeswax", description: "A yellow cake of wax. Carved into a lamp, then lost in the mould as the brass pours in.", category: "material", icon: "▤", maxStack: 6, tags: ["wax"] },
+  { id: "brass_lamp", name: "Cast brass lamp", description: "A kuthuvilakku cast in the corner behind the workshop: five wick-cups on a tall stem.", category: "trade", icon: "♆", maxStack: 2, tags: ["lamp"], sellPrice: 8 },
   { id: "tulsi_pot", name: "Tulsi pot", description: "Holy basil in a painted pot, a gift from Amudha.", category: "decor", icon: "♣", maxStack: 1, tags: ["decor"], questProtected: true },
 ];

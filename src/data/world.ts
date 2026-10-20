@@ -31,6 +31,9 @@ export const PICKUPS: PickupDefinition[] = [
   { id: "pk_bangle", placementId: "pickup_bangle", itemId: "brass_bangle", quantity: 1, label: "a brass bangle", locationId: "loc_kulam",
     conditions: [{ type: "quest", id: "q_bangle", status: "active" }] },
   { id: "pk_chisel", placementId: "pickup_chisel", itemId: "velan_chisel", quantity: 1, label: "a chisel", locationId: "loc_ruins", conditions: [] },
+  { id: "pk_scrap_ruins", placementId: "pickup_scrap_ruins", itemId: "brass_scrap", quantity: 1, label: "broken brass", locationId: "loc_ruins", conditions: [] },
+  { id: "pk_scrap_grounds", placementId: "pickup_scrap_grounds", itemId: "brass_scrap", quantity: 1, label: "broken brass", locationId: "loc_forgotten", conditions: [] },
+  { id: "pk_scrap_ruins2", placementId: "pickup_scrap_ruins2", itemId: "brass_scrap", quantity: 1, label: "broken brass", locationId: "loc_ruins", conditions: [] },
   { id: "pk_pouch", placementId: "pickup_pouch", itemId: "coin_pouch", quantity: 1, label: "a cloth pouch", locationId: "loc_bazaar", conditions: [] },
 ];
 

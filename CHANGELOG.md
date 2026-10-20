@@ -27,6 +27,16 @@
 - **Licences.** Every audio slot has a `licence` field; validation checks it, and also that spatial loops loop.
 - Three new music slots: `mus_morning`, `mus_workshop` and `mus_evening`.
 
+### Added: the casting corner and a second festival
+- **The Forgotten Craft** (Velan, after *Velan's Chisel*): the workshop's lamp-casting corner (README §4, "a disused workshop contains tools from a forgotten craft"; §9.5 neglected and restored states).
+  - The new `PRP_Casting_Corner_A` asset has a **neglected** state (dust sheet, fallen shelf, scattered mould halves, a cracked cold furnace, cobwebs) and a **reopened** state (patched glowing furnace, wax models, a crucible, bellows, cast lamps on the shelf).
+  - Inspecting the corner reveals Kamala's palm-leaf ledger, a discovery. Reopening it takes timber, mortar and rope.
+  - Reopening it makes the **casting furnace** station appear. Stations can now depend on world state.
+  - The furnace casts a **brass lamp** from two pieces of broken brass and a cake of beeswax.
+  - Broken brass is a real pickup in the western ruins and the old grounds, and Selvam's cart also brings some. Selvam sells beeswax and buys cast lamps.
+- **Karthigai Deepam** (Sundaram, after the lamp festival and the casting corner): cast a lamp for the sanctum door, gather three clay lamps, deliver both, help Valli line the walls. Lamp rows appear along the temple walls and a brass lamp stand at the sanctum door, lit from dusk. The Living Record entry links back to the casting corner and the lamp festival.
+- Notice-board hints, villager dialogue and Living Record texts for both quests.
+
 ### Fixed
 - **Pausing mid-conversation.** Pausing during a conversation (for example on focus loss) dropped the panel without ending the conversation. The villager stayed in "talking" mode and the player stayed locked. Resuming now returns you to the open panel.
 - **Hotkeys after Esc.** A hotkey pressed in the same frame as the Esc that closed a panel (M right after Esc) was dropped.

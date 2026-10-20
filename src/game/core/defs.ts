@@ -1,5 +1,5 @@
 import { ITEMS } from "../../data/items";
-import { RECIPES } from "../../data/recipes";
+import { RECIPES, STATION_CONDITIONS } from "../../data/recipes";
 import { QUESTS } from "../../data/quests";
 import { RESTORATIONS } from "../../data/restorations";
 import { GATHER_NODES } from "../../data/gatherNodes";
@@ -10,6 +10,7 @@ import { DISCOVERIES, type DiscoveryDefinition } from "../../data/discoveries";
 import { CROPS, DECOR_SLOTS, PLOTS, WATER_SOURCES } from "../../data/farming";
 import { BARKS, CONTAINERS, DOORS, PICKUPS, TOPICS } from "../../data/world";
 import type {
+  Condition,
   DialogueNode,
   GatherNodeDefinition,
   ItemDefinition,
@@ -32,6 +33,8 @@ import type {
 export interface Definitions {
   items: Map<string, ItemDefinition>;
   recipes: Map<string, RecipeDefinition>;
+  /** stations that exist only in some world state (e.g. the casting corner once reopened) */
+  stationConditions: Record<string, Condition[]>;
   quests: Map<string, QuestDefinition>;
   restorations: Map<string, RestorationDefinition>;
   gatherNodes: Map<string, GatherNodeDefinition>;
@@ -56,6 +59,7 @@ export function loadDefinitions(): Definitions {
   return {
     items: byId(ITEMS),
     recipes: byId(RECIPES),
+    stationConditions: STATION_CONDITIONS,
     quests: byId(QUESTS),
     restorations: byId(RESTORATIONS),
     gatherNodes: byId(GATHER_NODES),

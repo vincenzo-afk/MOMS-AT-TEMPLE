@@ -36,7 +36,7 @@ Added in session 2 from asserts_img/MAIN NPC ACTIONS.jpg:
 | sit_idle | 90 | yes | benches (seat 0.45 m) for player and NPCs |
 | rest_idle | 120 | yes | sitting on the ground |
 
-Total: **28 clips**. Not yet produced: walk_start/stop, walk_backward, strafes, pickup_table, carry_idle/walk, close_container, sweep_designated_area.
+Total: **61 clips** (sessions 1 to 5; full list in `CLIPS` in `blender/scripts/tom/character.py`): idle_relaxed, walk_forward, run_forward, turn_left, turn_right, interact_reach, pickup_ground, talk_idle, talk_gesture, craft_at_station, repair_channel, idle_look_around, gather_flower, water_plant, plant_seed, harvest_plant, make_garland, open_container, inspect_object, place_object, greet, talk_listen, give_item, receive_item, trade_counter, read_record, sit_idle, rest_idle, sprint_forward, walk_back, strafe_left, strafe_right, crouch_idle, crouch_walk, jump_start, jump_air, fall_loop, land_soft, land_hard, vault, climb, sit_down, stand_up, idle_fidget_shift, idle_fidget_stretch, coconut_smash, pray_idle, light_lamp, apply_vibhuti, photo_pose, drive_seated, queue_shuffle, scold, door_push, close_container, pickup_table, carry_idle, carry_walk, sweep, garden_kneel, talk_explain. Not yet produced: walk_start / walk_stop transition clips (starts and stops are blended). The face (jaw, eyes, lids) is driven procedurally by `FaceController`, not by clips.
 
 ## Sharing clips across characters
 

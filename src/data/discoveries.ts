@@ -17,6 +17,20 @@ export interface DiscoveryDefinition {
 // Inscription texts are fiction written for the game, not translations of real inscriptions.
 export const DISCOVERIES: DiscoveryDefinition[] = [
   {
+    id: "disc_casting_ledger",
+    interactableId: "int_casting_ledger",
+    locationId: "loc_workshop",
+    descriptionKey: "rec_ledger",
+    title: "Kamala's mould ledger",
+    conditions: [{ type: "flag", id: "casting_inspected", value: true }],
+    causeEventIds: [],
+    reading: [
+      "Palm leaves tied between two boards, the writing small and quick. Each line is a lamp: who asked for it, the weight of brass, the festival.",
+      "\"Five-faced kuthuvilakku for the weaver's daughter's wedding. Two hand-lamps for the well-house shrine. Forty agal for the temple walls at Karthigai, as every year.\"",
+      "The last leaf has only a date and the word Karthigai. Nothing was written after it.",
+    ],
+  },
+  {
     id: "disc_channel_inscription",
     interactableId: "int_inscription",
     locationId: "loc_forgotten",

@@ -1,4 +1,9 @@
-import type { RecipeDefinition } from "../game/core/types";
+import type { Condition, RecipeDefinition } from "../game/core/types";
+
+/** Stations that only exist in a certain world state (a station not listed is always usable). */
+export const STATION_CONDITIONS: Record<string, Condition[]> = {
+  st_casting: [{ type: "restoration", id: "rest_casting_corner", state: "reopened" }],
+};
 
 export const RECIPES: RecipeDefinition[] = [
   {
@@ -112,5 +117,17 @@ export const RECIPES: RecipeDefinition[] = [
     prerequisites: [],
     craftSeconds: 4,
     skill: { id: "gardening", level: 3 },
+  },
+  {
+    id: "r_brass_lamp",
+    name: "Cast brass lamp",
+    stationId: "st_casting",
+    inputs: [
+      { itemId: "brass_scrap", quantity: 2 },
+      { itemId: "beeswax", quantity: 1 },
+    ],
+    outputs: [{ itemId: "brass_lamp", quantity: 1 }],
+    prerequisites: ["casting_reopened"],
+    craftSeconds: 4,
   },
 ];
