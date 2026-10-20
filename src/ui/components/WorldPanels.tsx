@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { ItemIcon } from "./ItemIcon";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, NOTICE_HINTS, RECORD_TEXT } from "../../data/text";
 import { ANCHORS, INTERACTABLES, NAV_EDGES, NAV_NODES, PLACEMENTS, REGIONS, WORLD_BOUNDS } from "../../data/level";
@@ -30,7 +31,7 @@ function Slot({ stack, onClick, testId }: { stack: ItemStack | null; onClick?: (
     <button className={`slot ${stack ? "" : "empty"}`} onClick={onClick} disabled={!stack} title={d ? `${d.name} — ${d.description}` : "Empty"} aria-label={d ? `${d.name} x${stack!.quantity}` : "Empty slot"} data-testid={testId}>
       {d && (
         <>
-          <span className={`icon cat-${d.category}`}>{d.icon}</span>
+          <ItemIcon def={d} />
           <span className="qty">{stack!.quantity}</span>
         </>
       )}

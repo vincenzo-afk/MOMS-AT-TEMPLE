@@ -1079,7 +1079,7 @@ export class Game {
     }
     const h = this.session.hourOfDay;
     const day = THREE.MathUtils.smoothstep(Math.sin(((h - 6) / 12) * Math.PI), -0.15, 0.35);
-    this.atmosphere.update(dt, this.camera, this.weather, day, this.indoors);
+    this.atmosphere.update(dt, this.camera, this.weather, day, this.indoors, this.player?.position.y ?? 0);
     if (this.player) {
       const p = this.player.position;
       const water = this.level.waterPoints.reduce((m, w) => Math.min(m, w.distanceTo(p)), Infinity);

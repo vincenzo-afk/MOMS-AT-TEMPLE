@@ -53,6 +53,10 @@
   - the drive guidance
   - an NPC deliberately boxed in on her route, who re-plans and then steps past (stuck recovery is now tested)
 
+### Added: icons and atmosphere
+- **Rendered inventory icons.** All 32 items have an icon rendered in Blender (`blender/scripts/render_icons.py`): a small model of each, in the world's vertex-colour palette, shown from a 3/4 view on a transparent background at 128 px. The icons appear in the bag, the chest and containers, shop rows, recipe inputs and the item details. An item without an icon falls back to its glyph.
+- **Drifting leaves.** A pool of 70 instanced leaves falls around the player outdoors. They flutter, drift downwind, tumble and rest on the ground for a moment. Fewer fall in rain, none indoors, and nothing is allocated per frame.
+
 ### Changed
 - A Temple Visit has no background music, following the music cue rules. It used to start the day bed and then fall silent at the next cue check.
 

@@ -1,6 +1,6 @@
 # Asset Generation Queue (image references)
 
-> **Session 2:** 14 reference sheets were supplied in `asserts_img/` and the matching assets were built (see `docs/REFERENCE_COVERAGE.md`). The requests below stay open where those sheets do not cover them: close **orthographic turnarounds** of each character (front, side and back at the same scale), a **temple elevation** sheet, and **painted inventory icons** in the COLECTABLES.jpg style.
+> **Session 2:** 14 reference sheets were supplied in `asserts_img/` and the matching assets were built (see `docs/REFERENCE_COVERAGE.md`). The requests below stay open where those sheets do not cover them: close **orthographic turnarounds** of each character (front, side and back at the same scale), a **temple elevation** sheet, and **painted inventory icons** in the COLECTABLES.jpg style (session 5: rendered icons for all 32 items stand in until painted ones exist; see `blender/scripts/render_icons.py`).
 
 These images are **references for the Blender production pass**, not game assets. The first playable area already exists as procedural Blender models; the references below are what is needed to raise the most visible assets from first-pass to production quality. Generate a small coherent set first (priority 1), review it against the acceptance rules in README §10.5, and drop approved files into `blender/references/<ASSET_ID>/`.
 

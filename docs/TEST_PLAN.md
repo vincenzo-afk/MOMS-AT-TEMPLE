@@ -73,6 +73,7 @@ Screenshots are written to `test-results/screens/` (ignored by git).
 - `tests/e2e/visit-extras.spec.ts` (3): the chappal-bush memory test; vibhuti for the family, gossip and annadanam; drive guidance (beacon, arrow, distance, gone once parked).
 - `tests/e2e/npc-stuck.spec.ts` (1): an NPC caged on her route re-plans, skips and steps past (repaths ≥ 2, unstuck ≥ 1, out of the cage, still bound for her anchor).
 - `tests/e2e/perf.spec.ts` (1): budgets for startup (title < 45 s, new game < 20 s), frame time (p95 < 50 ms, at most 3 hitches over 100 ms), retained heap growth after GC (< 8 MB over 16 s of play), draw calls (< 1400) and triangles (< 2 M). Playwright launches Chromium with `--js-flags=--expose-gc` for the heap sample. Measured: 4.3 s, 0.3 s, p95 20 ms, 0 hitches, +0.2 MB, 564 draw calls, 0.9 M triangles.
+- `tests/e2e/atmosphere.spec.ts` (1): leaves drift and land around the player outdoors and are hidden indoors (a spot under the house roof is found by probing for a ceiling).
 - `tests/e2e/casting.spec.ts` (2): *The Forgotten Craft* end to end (the neglected corner, the ledger discovery, the repair and its visual swap, real brass pickups in the ruins and old grounds, casting at the furnace, the Living Record); *Karthigai Deepam* end to end, with the wall lamps appearing and a dusk screenshot.
 
 ## Asset tests (`scripts/validate-glb.mjs`)

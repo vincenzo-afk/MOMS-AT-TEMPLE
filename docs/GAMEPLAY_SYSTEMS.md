@@ -115,4 +115,14 @@ Start it from the title screen. One visit is a run through six stages placed in 
 
 ## Not implemented yet
 
-Cabinets and shelves as extra storage, carrying animations, a second festival or post-festival events, market stock changing over time, NPCs reacting to the player sprinting or trespassing indoors, locked containers or lock-picking (deliberately not planned).
+Since session 4 or 5, all of these exist:
+- the shelf in your house as a second store
+- carrying a full water pot
+- a second festival, Karthigai Deepam
+- daily rotating stock from Selvam's cart
+- remarks when you sprint past villagers or walk into their houses
+
+Still missing:
+- **Stolen goods:** nobody recognises stolen goods you carry later. Only theft that someone sees happen is a crime.
+- **Festival calendar:** festivals do not recur on a seasonal calendar. Festival evenings follow once the festival has been held.
+- **Locked containers and lock-picking:** deliberately not planned.

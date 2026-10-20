@@ -7,9 +7,17 @@ const RAIN_BOX = 36;
 const MOTES = 260;
 const FIREFLIES = 120;
 const PUFFS = 96;
+const LEAVES = 70;
+const LEAF_BOX = 30;
+const _m = new THREE.Matrix4();
+const _q = new THREE.Quaternion();
+const _e = new THREE.Euler();
+const _p = new THREE.Vector3();
+const _s = new THREE.Vector3(1, 1, 1);
 
 /**
- * Weather and ambient particles around the camera: rain streaks, sunlit dust motes by day, fireflies at night.
+ * Weather and ambient particles around the camera: rain streaks, sunlit dust motes by day, fireflies at night,
+ * and dry leaves (neem and palm leaflets) drifting down and tumbling with the wind.
  * All counts are fixed (bounded cost); particles wrap around the camera instead of being spawned.
  */
 export class Atmosphere {
@@ -28,6 +36,13 @@ export class Atmosphere {
   private puffVel: Float32Array;
   private puffAge: Float32Array;
   private puffNext = 0;
+  // drifting leaves: instanced quads with position, velocity, spin and a short rest on the ground
+  private leaves: THREE.InstancedMesh;
+  private leafPos = new Float32Array(LEAVES * 3);
+  private leafSpin = new Float32Array(LEAVES * 3);
+  private leafRest = new Float32Array(LEAVES);
+  /** leaves that touched the ground so far (diagnostics and tests) */
+  leafLandings = 0;
 
   constructor() {
     this.group.name = "Atmosphere";
@@ -65,7 +80,22 @@ export class Atmosphere {
     pg.setAttribute("position", new THREE.BufferAttribute(this.puffPos, 3));
     this.puffs = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xc9b38f, size: 0.16, transparent: true, opacity: 0.55, depthWrite: false }));
     this.puffs.frustumCulled = false;
-    this.group.add(this.rain, this.motes, this.flies, this.puffs);
+    // ---- leaves: a slightly cupped diamond, double-sided; colours from fresh green to dry brown
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, -0.07, 0.025, 0.006, 0, 0, 0, 0.07, -0.025, 0.006, 0], 3));
+    lg.setIndex([0, 1, 2, 0, 2, 3]);
+    lg.computeVertexNormals();
+    this.leaves = new THREE.InstancedMesh(lg, new THREE.MeshLambertMaterial({ side: THREE.DoubleSide }), LEAVES);
+    this.leaves.name = "Leaves";
+    this.leaves.frustumCulled = false;
+    const tint = [0x7f8f3a, 0xa08c3c, 0x8a5f2a, 0xb59a52, 0x6d7d32];
+    const col = new THREE.Color();
+    for (let i = 0; i < LEAVES; i++) {
+      this.leaves.setColorAt(i, col.setHex(tint[i % tint.length]!));
+      this.leafPos.set([(Math.random() - 0.5) * LEAF_BOX, Math.random() * 9, (Math.random() - 0.5) * LEAF_BOX], i * 3);
+      this.leafSpin.set([Math.random() * 6, Math.random() * 6, Math.random() * 6], i * 3);
+    }
+    this.group.add(this.rain, this.motes, this.flies, this.puffs, this.leaves);
   }
 
   /** A ring of dust at a landing point; strength 0..1 scales the count and spread. */
@@ -99,6 +129,51 @@ export class Atmosphere {
     if (live) (this.puffs.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
   }
 
+  /**
+   * Leaves fall slowly (about 0.6 m/s), flutter side to side, drift downwind and tumble; on landing they lie
+   * still for a moment, then a new leaf starts high up somewhere around the camera. Positions are relative
+   * to the camera's ground point, so the pool always surrounds the player. Fewer fall in rain or under a roof.
+   */
+  private updateLeaves(dt: number, c: THREE.Vector3, weather: Weather, indoors: boolean, groundY: number): void {
+    const active = indoors ? 0 : 1 - weather.rain * 0.7;
+    this.leaves.visible = active > 0.05;
+    if (!this.leaves.visible) return;
+    const wind = 0.3 + weather.wind * 1.6;
+    const ground = groundY;
+    for (let i = 0; i < LEAVES; i++) {
+      const o = i * 3;
+      if (this.leafRest[i]! > 0) {
+        this.leafRest[i]! -= dt;
+        if (this.leafRest[i]! <= 0) this.leafPos.set([(Math.random() - 0.5) * LEAF_BOX, 7 + Math.random() * 4, (Math.random() - 0.5) * LEAF_BOX], o);
+      } else {
+        const ph = i * 1.7 + this.t;
+        this.leafPos[o]! += (wind + Math.sin(ph * 1.3) * 0.5) * dt;
+        this.leafPos[o + 1]! -= (0.45 + Math.abs(Math.sin(ph * 2.1)) * 0.35) * dt;
+        this.leafPos[o + 2]! += Math.cos(ph * 0.9) * 0.4 * dt;
+        this.leafSpin[o]! += dt * (2 + (i % 3));
+        this.leafSpin[o + 1]! += dt * 0.7;
+        this.leafSpin[o + 2]! += dt * (1.5 + (i % 2));
+        if (this.leafPos[o + 1]! <= 0.02) {
+          this.leafPos[o + 1] = 0.02;
+          this.leafRest[i] = 2 + Math.random() * 4;
+          this.leafLandings++;
+        }
+        // wrap horizontally inside the box around the camera
+        if (this.leafPos[o]! > LEAF_BOX / 2) this.leafPos[o]! -= LEAF_BOX;
+        else if (this.leafPos[o]! < -LEAF_BOX / 2) this.leafPos[o]! += LEAF_BOX;
+        if (this.leafPos[o + 2]! > LEAF_BOX / 2) this.leafPos[o + 2]! -= LEAF_BOX;
+        else if (this.leafPos[o + 2]! < -LEAF_BOX / 2) this.leafPos[o + 2]! += LEAF_BOX;
+      }
+      const lying = this.leafRest[i]! > 0;
+      _e.set(lying ? 0.06 : this.leafSpin[o]!, this.leafSpin[o + 1]!, lying ? 0 : this.leafSpin[o + 2]!); // the quad lies in XZ: flat on the ground
+      _q.setFromEuler(_e);
+      _p.set(c.x + this.leafPos[o]!, ground + this.leafPos[o + 1]!, c.z + this.leafPos[o + 2]!);
+      _s.setScalar(i < LEAVES * active ? 1.6 : 0);
+      this.leaves.setMatrixAt(i, _m.compose(_p, _q, _s));
+    }
+    this.leaves.instanceMatrix.needsUpdate = true;
+  }
+
   private resetDrop(i: number, center: THREE.Vector3, anyHeight: boolean): void {
     const x = center.x + (Math.random() - 0.5) * RAIN_BOX;
     const z = center.z + (Math.random() - 0.5) * RAIN_BOX;
@@ -107,7 +182,7 @@ export class Atmosphere {
   }
 
   /** `day` 0..1 daylight, `indoors` hides rain streaks under a ceiling. */
-  update(dt: number, camera: THREE.Camera, weather: Weather, day: number, indoors: boolean): void {
+  update(dt: number, camera: THREE.Camera, weather: Weather, day: number, indoors: boolean, groundY = 0): void {
     this.t += dt;
     ENV_UNIFORMS.tomTime.value = this.t;
     this.updatePuffs(dt);
@@ -149,6 +224,8 @@ export class Atmosphere {
     }
     this.motes.position.set(c.x, Math.max(0, c.y - 3), c.z);
     (this.motes.geometry.getAttribute("position") as THREE.BufferAttribute).needsUpdate = true;
+
+    this.updateLeaves(dt, c, weather, indoors, groundY);
 
     // fireflies at night, not in rain
     const fm = this.flies.material as THREE.PointsMaterial;

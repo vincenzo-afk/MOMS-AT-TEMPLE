@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, RECORD_TEXT } from "../../data/text";
 import { countItem } from "../../game/inventory/inventory";
+import { ItemIcon } from "./ItemIcon";
 import { CommunityPanel, ContainerPanel, DecorPanel, MapPanel, NoticesPanel, StoragePanel } from "./WorldPanels";
 import { MiniGamePanel, VisitScore } from "./Visit";
 import { SKILL_NAMES, skillLevel } from "../../data/farming";
@@ -194,7 +195,7 @@ function InventoryPanel() {
             <button key={i} className={`slot ${sel === i ? "selected" : ""} ${slot ? "" : "empty"}`} onClick={() => setSel(i)} aria-label={d ? `${d.name} x${slot!.quantity}` : "Empty slot"} data-testid={slot ? `slot-${slot.itemId}` : undefined}>
               {d && (
                 <>
-                  <span className={`icon cat-${d.category}`}>{d.icon}</span>
+                  <ItemIcon def={d} />
                   <span className="qty">{slot!.quantity}</span>
                 </>
               )}
@@ -205,7 +206,9 @@ function InventoryPanel() {
       <div className="inv-detail">
         {def ? (
           <>
-            <h3>{def.name}</h3>
+            <h3>
+              <ItemIcon def={def} small /> {def.name}
+            </h3>
             <div className="meta">
               {def.category} · stack {stack!.quantity}/{def.maxStack}
               {def.questProtected ? " · keep for a task" : ""}
@@ -328,7 +331,7 @@ function CraftPanel() {
   const s = useGameState();
   const recipes = game.session.recipesForStation(ui.stationId ?? "");
   return (
-    <Frame title={ui.stationId === "st_festival_station" ? "Festival table" : "Workbench"} testId="craft">
+    <Frame title={ui.stationId === "st_festival_station" ? "Festival table" : ui.stationId === "st_casting" ? "Casting furnace" : "Workbench"} testId="craft">
       {recipes.map((r) => {
         const known = game.session.isRecipeKnown(r.id);
         const check = game.session.canCraft(r.id);
@@ -342,7 +345,7 @@ function CraftPanel() {
                     const have = countItem(s.inventory, i.itemId);
                     return (
                       <li key={i.itemId} className={have >= i.quantity ? "ok" : "short"}>
-                        {game.session.defs.items.get(i.itemId)?.name} {have}/{i.quantity}
+                        <ItemIcon def={game.session.defs.items.get(i.itemId)} small /> {game.session.defs.items.get(i.itemId)?.name} {have}/{i.quantity}
                       </li>
                     );
                   })}
@@ -391,7 +394,7 @@ function ShopPanel() {
       {game.session.shopStock(shop.id).map((o) => (
         <div key={o.itemId} className="trade-row">
           <span>
-            {game.session.defs.items.get(o.itemId)?.name}
+            <ItemIcon def={game.session.defs.items.get(o.itemId)} small /> {game.session.defs.items.get(o.itemId)?.name}
             {o.special && <span className="small special"> · today</span>}
           </span>
           <span className="price">{o.price} ◎</span>
@@ -411,7 +414,7 @@ function ShopPanel() {
       {shop.buys.map((o) => (
         <div key={o.itemId} className="trade-row">
           <span>
-            {game.session.defs.items.get(o.itemId)?.name} <span className="muted">(you have {countItem(s.inventory, o.itemId)})</span>
+            <ItemIcon def={game.session.defs.items.get(o.itemId)} small /> {game.session.defs.items.get(o.itemId)?.name} <span className="muted">(you have {countItem(s.inventory, o.itemId)})</span>
           </span>
           <span className="price">{o.price} ◎</span>
           <button
