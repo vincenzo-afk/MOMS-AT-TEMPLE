@@ -19,6 +19,7 @@ import { VisitDirector, type VisitUi } from "../visit/VisitDirector";
 import type { VisitWorld } from "../visit/VisitWorld";
 import { isFestivalDay } from "../visit/rules";
 import { visitAssetIds } from "../../data/visit";
+import { TUTORIAL, currentStep, stepDone, type TutorialSignals } from "./Tutorial";
 import { CharacterAnimator } from "../player/CharacterAnimator";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera";
 import { InteractionSystem, type Candidate } from "../interaction/InteractionSystem";
@@ -76,6 +77,8 @@ export interface UiState {
   indoors: boolean;
   /** Temple Visit HUD and mini-game state (null outside a visit). */
   visit: VisitUi | null;
+  /** Current onboarding step (null when finished, skipped or switched off). */
+  tutorial: { index: number; total: number; text: string; keys: string } | null;
 }
 
 export class Game {
@@ -107,6 +110,7 @@ export class Game {
     weather: "clear",
     indoors: false,
     visit: null,
+    tutorial: null,
   });
   input: Input;
   level!: LevelHandles;
@@ -127,6 +131,9 @@ export class Game {
   private actionTimer = 0;
   private talkingTo: string | null = null;
   private seat: SeatSession | null = null;
+  private tut: TutorialSignals = { cameraTurned: 0, walked: 0, jogSeconds: 0, jumps: 0, talkedToValli: false, gathered: false, panelsOpened: new Set(), inspected: false };
+  private tutYaw = 0;
+  private tutPos = new THREE.Vector3();
   /** The running Temple Visit (GAME_DESIGN.md), if any. */
   visit: VisitDirector | null = null;
   private visitWorlds = new Map<string, VisitWorld>();
@@ -178,6 +185,9 @@ export class Game {
       if (!locked && this.ui.get().mode === "play" && this.ui.get().panel === null) this.pause();
     });
     window.addEventListener("resize", this.resize);
+    // closing or hiding the tab saves (the 60 s autosave alone could lose a minute of play)
+    window.addEventListener("pagehide", this.saveOnHide);
+    document.addEventListener("visibilitychange", this.saveOnHide);
     this.resize();
   }
 
@@ -194,7 +204,7 @@ export class Game {
       await this.assets.loadAll(ids, (done, total) => this.ui.set({ loading: { done, total, label: "Loading models" } }));
       this.ui.set({ loading: { done: 1, total: 1, label: "Building the settlement" }, assetProblems: this.assets.problems.map((p) => `${p.id}: ${p.message}`) });
 
-      this.level = buildLevel(this.assets, this.settings.graphicsQuality);
+      this.level = buildLevel(this.assets);
       this.scene.add(this.level.root);
       this.worldView = new WorldView(this.session, this.level);
 
@@ -291,11 +301,19 @@ export class Game {
     this.scene.add(this.sky);
   }
 
+  private saveOnHide = () => {
+    if (document.visibilityState === "hidden" || !document.hasFocus()) {
+      const ui = this.ui.get();
+      if ((ui.mode === "play" || ui.mode === "paused") && !this.visit) void this.saveGame();
+    }
+  };
+
   private resize = () => {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     const q = this.settings?.graphicsQuality ?? "high";
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, q === "high" ? 2 : q === "medium" ? 1.5 : 1));
+    const scale = Math.min(1, Math.max(0.5, this.settings?.renderScale ?? 1));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, q === "high" ? 2 : q === "medium" ? 1.5 : 1) * scale);
     this.renderer.setSize(w, h, false);
     this.postfx?.setSize(w, h, this.renderer.getPixelRatio());
     this.camera.aspect = w / h;
@@ -303,6 +321,7 @@ export class Game {
   };
 
   applySettings(s: Settings): void {
+    const qualityChanged = this.settings?.graphicsQuality !== s.graphicsQuality;
     this.settings = s;
     this.postfx?.configure(s.graphicsQuality, s.ambientOcclusion === true);
     this.camera.fov = s.fov;
@@ -314,6 +333,15 @@ export class Game {
     }
     this.renderer.shadowMap.enabled = s.graphicsQuality !== "low";
     this.sun.castShadow = s.graphicsQuality !== "low";
+    // materials compile their shadow-receiving code once: recompile them when shadows switch on or off
+    if (qualityChanged)
+      this.scene.traverse((o) => {
+        const m = (o as THREE.Mesh).material;
+        if (m) for (const x of Array.isArray(m) ? m : [m]) x.needsUpdate = true;
+      });
+    if (this.cam) this.cam.reducedMotion = s.reducedMotion === true;
+    if (this.player) this.player.reducedMotion = s.reducedMotion === true;
+    document.documentElement.classList.toggle("high-contrast", s.highContrast === true);
     this.input.setBindings(s.keyBindings ?? {});
     document.documentElement.style.setProperty("--dialogue-alpha", String(s.dialogueBackdrop ?? 0.9));
     document.documentElement.style.setProperty("--text-scale", String(s.textScale));
@@ -465,7 +493,7 @@ export class Game {
     this.audio.setMusic("mus_exploration_day");
     this.audio.startLoop("amb_settlement_day");
     this.input.requestLock();
-    if (!this.session.state.quests.q_arrival) this.toast("Valli is waiting just inside the gate. Walk with W A S D, press E to talk.", "info");
+    if (!this.session.state.quests.q_arrival && this.settings.tutorial === false) this.toast("Valli is waiting just inside the gate. Walk with W A S D, press E to talk.", "info");
   }
 
   pause(): void {
@@ -481,6 +509,7 @@ export class Game {
 
   openPanel(panel: Panel): void {
     if (this.ui.get().mode !== "play") return;
+    if (panel) this.tut.panelsOpened.add(panel);
     this.input.releaseLock();
     this.audio.play("ui_open");
     this.ui.set({ panel });
@@ -538,6 +567,7 @@ export class Game {
         this.toast(e.text, e.tone);
         break;
       case "gathered":
+        this.tut.gathered = true;
         this.audio.play("sfx_pickup");
         break;
       case "crafted":
@@ -565,6 +595,8 @@ export class Game {
         this.audio.play("mus_discovery");
         break;
       case "inspect":
+        this.tut.inspected = true;
+        this.tut.panelsOpened.add("inspect");
         this.ui.set({ panel: "inspect", inspectText: e.text });
         break;
       case "door":
@@ -764,6 +796,65 @@ export class Game {
     this.player.model.visible = alpha > 0.02;
   }
 
+  private lastTrespass = -999;
+  private lastBellHour = -1;
+  /** Inside the granary after closing time without Selvam's key: the watchman objects (and remembers). */
+  private checkTrespass(indoors: boolean): void {
+    if (!indoors || this.visit) return;
+    const granary = this.level.byId.get("granary");
+    if (!granary || granary.position.distanceTo(this.player.position) > 5) return;
+    const h = this.session.hourOfDay;
+    if ((h < 19 && h >= 6) || this.session.state.flags.granary_key) return;
+    if (this.clock - this.lastTrespass < 30) return;
+    this.lastTrespass = this.clock;
+    if (this.npcs.say("npc_kaaval", "trespass")) {
+      this.session.changeRelationship("npc_kaaval", -3);
+      this.toast("Kannan doesn't like you being in the granary after dark.", "bad");
+    }
+  }
+
+  /** The temple bell for the morning and evening puja, heard within 80 m of the temple. */
+  private templeBells(): void {
+    const h = Math.floor(this.session.hourOfDay);
+    if (h === this.lastBellHour) return;
+    this.lastBellHour = h;
+    if (h !== 5 && h !== 17) return;
+    const temple = new THREE.Vector3(0, 0, -14.5);
+    if (this.player.position.distanceTo(temple) > 80) return;
+    [0, 900, 1800].forEach((ms) => window.setTimeout(() => this.audio.visitCue("bell"), ms));
+    this.npcs.say("npc_archaka", "bell");
+  }
+
+  /** Onboarding: feed what the player did into the current step; complete it in the save flags. */
+  private updateTutorial(dt: number): void {
+    const flags = this.session.state.flags;
+    const step = this.visit || this.settings.tutorial === false ? null : currentStep(flags);
+    if (step) {
+      const t = this.tut;
+      t.cameraTurned += Math.abs(Math.atan2(Math.sin(this.cam.yaw - this.tutYaw), Math.cos(this.cam.yaw - this.tutYaw)));
+      if (this.player.grounded) t.walked += Math.min(1, this.player.position.distanceTo(this.tutPos));
+      if (this.player.stats.gait === "jog" || this.player.stats.gait === "sprint") t.jogSeconds += dt;
+      t.jumps = this.player.stats.jumps;
+      t.talkedToValli = !!this.session.state.quests.q_arrival;
+      if (stepDone(step.id, t)) {
+        flags[`tut_${step.id}`] = true;
+        this.audio.play("ui_confirm");
+      }
+    }
+    this.tutYaw = this.cam.yaw;
+    this.tutPos.copy(this.player.position);
+    const now = this.visit || this.settings.tutorial === false ? null : currentStep(flags);
+    const cur = this.ui.get().tutorial;
+    if ((now?.id ?? null) !== (cur ? TUTORIAL[cur.index]?.id : null))
+      this.ui.set({ tutorial: now ? { index: TUTORIAL.indexOf(now), total: TUTORIAL.length, text: now.text, keys: now.keys } : null });
+  }
+
+  /** Skip the rest of the onboarding (the tutorial card's Skip button). */
+  skipTutorial(): void {
+    for (const t of TUTORIAL) this.session.state.flags[`tut_${t.id}`] = true;
+    this.ui.set({ tutorial: null });
+  }
+
   /** Landing juice and consequences: camera shake and dust scale with the fall; a long fall hurts (limp). */
   private onPlayerLand(kind: LandKind, height: number): void {
     const p = this.player.position;
@@ -863,6 +954,8 @@ export class Game {
         void this.saveGame();
       }
       this.updateLocation();
+      this.updateTutorial(dt);
+      if (!this.visit) this.templeBells();
       this.musicCheck -= dt;
       if (this.musicCheck <= 0) {
         this.musicCheck = 5;
@@ -929,6 +1022,7 @@ export class Game {
         this.indoors = indoors;
         this.ui.set({ indoors });
       }
+      this.checkTrespass(indoors);
     }
     this.lodTimer -= dt;
     if (this.lodTimer <= 0) {
@@ -1094,6 +1188,8 @@ export class Game {
     this.renderer.setAnimationLoop(null);
     this.input.dispose();
     window.removeEventListener("resize", this.resize);
+    window.removeEventListener("pagehide", this.saveOnHide);
+    document.removeEventListener("visibilitychange", this.saveOnHide);
     this.timer.dispose();
     this.renderer.dispose();
   }

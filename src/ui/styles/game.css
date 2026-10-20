@@ -1267,3 +1267,51 @@ svg.map {
   font-size: 0.9rem;
   background: rgba(30, 20, 12, 0.6);
 }
+
+/* ---------------- high contrast (Settings) ---------------- */
+.high-contrast {
+  --panel: rgba(8, 6, 4, 0.97);
+  --edge: #f2d38a;
+}
+.high-contrast body,
+.high-contrast .hud,
+.high-contrast .panel,
+.high-contrast .dialogue,
+.high-contrast .minigame {
+  color: #ffffff;
+}
+.high-contrast .muted {
+  color: #e8e0d0;
+  opacity: 1;
+}
+.high-contrast .prompt,
+.high-contrast .toast,
+.high-contrast .visit-objective {
+  outline: 2px solid #f2d38a;
+}
+.high-contrast button {
+  border-width: 2px;
+}
+
+/* ---------------- tutorial ---------------- */
+.tutorial-card {
+  position: absolute;
+  left: 1.2rem;
+  top: 5.6rem;
+  max-width: 19rem;
+  background: var(--panel);
+  border: 1px solid var(--gold-bright);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  pointer-events: auto;
+  animation: prompt-in 200ms ease-out;
+}
+.tutorial-text {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  margin: 0.15rem 0 0.3rem;
+}
+.tutorial-card button {
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.6rem;
+}

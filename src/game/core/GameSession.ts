@@ -161,6 +161,9 @@ export class GameSession {
     this.state.inventory = added.inventory;
     return { ok: true };
   }
+  skillLevel(skill: SkillId): number {
+    return levelOf(this.state.skills[skill]);
+  }
   private gainSkill(skill: SkillId, xp: number): void {
     const before = levelOf(this.state.skills[skill]);
     this.state.skills = { ...this.state.skills, [skill]: this.state.skills[skill] + xp };
@@ -275,7 +278,7 @@ export class GameSession {
     this.notify(`Completed: ${def.title}${coins && coins.type === "coins" ? ` (+${coins.amount} coins)` : ""}`, "good");
   }
 
-  private changeRelationship(npcId: string, amount: number): void {
+  changeRelationship(npcId: string, amount: number): void {
     const cur = this.state.relationships[npcId] ?? 0;
     this.state.relationships = { ...this.state.relationships, [npcId]: Math.max(-100, Math.min(100, cur + amount)) };
   }
@@ -370,16 +373,20 @@ export class GameSession {
     const n = this.defs.gatherNodes.get(nodeId);
     if (!n) return { ok: false, reason: "Nothing here." };
     if (!this.isNodeAvailable(nodeId)) return { ok: false, reason: "Nothing left to gather here yet." };
-    const res = this.give([{ itemId: n.itemId, quantity: n.quantity }]);
+    const cat = this.defs.items.get(n.itemId)?.category;
+    // skill perks: practised hands gather more
+    const bonus = (cat === "flower" && this.skillLevel("gardening") >= 2) || ((n.itemId === "channel_stone" || n.itemId === "lime_clay") && this.skillLevel("masonry") >= 2) ? 1 : 0;
+    const quantity = n.quantity + bonus;
+    const res = this.give([{ itemId: n.itemId, quantity }]);
     if (!res.ok) {
       this.notify(res.reason, "bad");
       return res;
     }
     this.state.gatherNodes = { ...this.state.gatherNodes, [nodeId]: { depletedAtMinute: this.state.worldMinutes } };
-    const cat = this.defs.items.get(n.itemId)?.category;
     if (cat === "flower") this.gainSkill("gardening", 1);
+    if (n.itemId === "channel_stone" || n.itemId === "lime_clay") this.gainSkill("masonry", 1);
     this.emit({ type: "gathered", nodeId, itemId: n.itemId });
-    this.notify(`+${n.quantity} ${this.itemName(n.itemId)}`, "good");
+    this.notify(`+${quantity} ${this.itemName(n.itemId)}${bonus ? " (skill bonus)" : ""}`, "good");
     this.commit();
     return { ok: true };
   }
@@ -390,12 +397,15 @@ export class GameSession {
   }
   isRecipeKnown(recipeId: string): boolean {
     const r = this.defs.recipes.get(recipeId);
-    return !!r && r.prerequisites.every((f) => this.state.flags[f]);
+    return !!r && r.prerequisites.every((f) => this.state.flags[f]) && (!r.skill || this.skillLevel(r.skill.id) >= r.skill.level);
   }
   canCraft(recipeId: string): ActionResult {
     const r = this.defs.recipes.get(recipeId);
     if (!r) return { ok: false, reason: "Unknown recipe." };
-    if (!this.isRecipeKnown(recipeId)) return { ok: false, reason: "You haven't learned this yet." };
+    if (!this.isRecipeKnown(recipeId)) {
+      const sk = r.skill && this.skillLevel(r.skill.id) < r.skill.level ? r.skill : null;
+      return { ok: false, reason: sk ? `Needs ${sk.id} level ${sk.level}.` : "You haven't learned this yet." };
+    }
     if (!hasItems(this.state.inventory, r.inputs)) return { ok: false, reason: `Needs ${this.describeStacks(r.inputs)}.` };
     const sim = exchange(this.state.inventory, r.inputs, r.outputs, (id) => this.defs.items.get(id));
     if (!sim.ok) return sim;
@@ -411,6 +421,7 @@ export class GameSession {
     const counts = { ...this.state.craftedCounts };
     for (const o of r.outputs) counts[o.itemId] = (counts[o.itemId] ?? 0) + o.quantity;
     this.state.craftedCounts = counts;
+    if (r.setsFlag) this.state.flags = { ...this.state.flags, [r.setsFlag]: true };
     this.gainSkill("crafting", 4);
     this.emit({ type: "crafted", recipeId });
     this.notify(`Crafted ${r.name}`, "good");
@@ -419,8 +430,17 @@ export class GameSession {
   }
 
   // ---------------------------------------------------------------- trading
+  /** Today's stock: seasonal entries need their conditions, daily specials rotate by world day. */
+  shopStock(shopId: string): Array<{ itemId: string; price: number; special: boolean }> {
+    const shop = this.defs.shops.get(shopId);
+    if (!shop) return [];
+    const day = Math.floor(this.state.worldMinutes / 1440);
+    return shop.sells
+      .filter((o) => (!o.when || evaluateAll(o.when, this.state, this.defs)) && (!o.days || (day + o.days.offset) % o.days.every === 0))
+      .map((o) => ({ itemId: o.itemId, price: o.price, special: !!o.when || !!o.days }));
+  }
   buy(shopId: string, itemId: string): ActionResult {
-    const offer = this.defs.shops.get(shopId)?.sells.find((s) => s.itemId === itemId);
+    const offer = this.shopStock(shopId).find((s) => s.itemId === itemId);
     if (!offer) return { ok: false, reason: "Not for sale." };
     if (this.state.coins < offer.price) return { ok: false, reason: "Not enough coins." };
     const res = this.give([{ itemId, quantity: 1 }]);
@@ -480,7 +500,8 @@ export class GameSession {
     const p = this.plotState(plotId);
     if (p.stage !== "ripe") return { ok: false, reason: "Nothing to harvest yet." };
     const crop = [...this.defs.crops.values()].find((c) => c.seedItemId === p.seedItemId) ?? [...this.defs.crops.values()][0]!;
-    const res = this.give([{ itemId: crop.produceItemId, quantity: crop.yield }]);
+    const yieldN = crop.yield + (this.skillLevel("gardening") >= 3 ? 1 : 0);
+    const res = this.give([{ itemId: crop.produceItemId, quantity: yieldN }]);
     if (!res.ok) {
       this.notify(res.reason, "bad");
       return res;
@@ -488,7 +509,7 @@ export class GameSession {
     this.setPlot(plotId, { stage: "empty", seedItemId: null, plantedAt: 0, wateredAt: null });
     this.gainSkill("gardening", 4);
     this.emit({ type: "farm", plotId, action: "harvest" });
-    this.notify(`+${crop.yield} ${this.itemName(crop.produceItemId)}`, "good");
+    this.notify(`+${yieldN} ${this.itemName(crop.produceItemId)}`, "good");
     this.commit();
     return { ok: true };
   }

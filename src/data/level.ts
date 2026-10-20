@@ -330,6 +330,7 @@ export const INTERACTABLES: InteractablePlacement[] = [
   { id: "int_marker", kind: "discovery", refId: "disc_marker_stone", label: "the boundary stone", locationId: "loc_fields", pos: [113.6, 0, -58.8], radius: 2.0 },
   { id: "int_rest", kind: "rest", refId: "home", label: "your cot", locationId: "loc_home", pos: [-27.2, 0.45, 26.5], radius: 1.4, socket: "house_player.SOCKET_Bed" },
   { id: "int_ct_granary", kind: "container", refId: "ct_granary_crate", label: "crate", locationId: "loc_bazaar", pos: [118.9, 0.4, -6.8], radius: 1.4 },
+  { id: "int_ct_shelf", kind: "container", refId: "ct_home_shelf", label: "shelf", locationId: "loc_home", pos: [-29.7, 0.45, 29.0], radius: 1.4 },
   { id: "int_ct_raman", kind: "container", refId: "ct_raman_crate", label: "crate", locationId: "loc_bazaar", pos: [55.2, 0, 3.4], radius: 1.4 },
   { id: "int_ct_ruins", kind: "container", refId: "ct_ruins_crate", label: "crate", locationId: "loc_ruins", pos: [-108, 0, -29.3], radius: 1.4 },
   { id: "int_ct_field", kind: "container", refId: "ct_field_crate", label: "crate", locationId: "loc_fields", pos: [43.6, 0, -57.5], radius: 1.4 },
@@ -383,6 +384,7 @@ export const ANCHORS: Record<string, { pos: [number, number, number]; faceY: num
   anc_road: { pos: [4.5, 0, 75], faceY: 270 },
   anc_woods: { pos: [-80, 0, -72], faceY: 30 },
   anc_granary: { pos: [119.6, 0, -3.6], faceY: 0 },
+  anc_temple_door: { pos: [2.4, 0, -1.8], faceY: 0 }, // at the foot of the temple steps
   anc_shelter_bazaar: { pos: [88, 0, -2.4], faceY: 0 },
   anc_shelter_fields: { pos: [60, 0, -54.4], faceY: 0 },
   anc_shelter_road: { pos: [12.6, 0, 84], faceY: 90 },
@@ -477,9 +479,11 @@ export const VISUAL_BINDINGS: VisualBinding[] = [
   ...[1, 2, 3, 4].map((i) => ({ placementId: `plot_${i}`, plotId: `plot_${i}` })),
   ...["pickup_bangle", "pickup_chisel", "pickup_pouch"].map((p) => ({ placementId: p, pickupId: `pk_${p.slice(7)}` })),
   ...["decor_doorway", "decor_doorstep", "decor_lamp", "decor_mat", "decor_plant"].map((s) => ({ placementId: s, decorSlot: s })),
-  ...["fest_kolam_1", "fest_kolam_2", "fest_kolam_3", "fest_bunting_1", "fest_bunting_2", "fest_bunting_3", "fest_lamps_1", "fest_lamps_2", "fest_lamps_3", "fest_lamps_4", "fest_stand_1", "fest_stand_2", "fest_arch_1", "fest_arch_2", "fest_arch_3"].map(
-    (p) => ({ placementId: p, flag: "festival_held" }),
-  ),
+  // festival build-up (README §4.6): bunting and arches when preparations are announced, kolams once the
+  // offering bundle is ready, lamps on the night itself
+  ...["fest_bunting_1", "fest_bunting_2", "fest_bunting_3", "fest_arch_1", "fest_arch_2", "fest_arch_3"].map((p) => ({ placementId: p, flag: "festival_preparing" })),
+  ...["fest_kolam_1", "fest_kolam_2", "fest_kolam_3"].map((p) => ({ placementId: p, flag: "festival_bundle_ready" })),
+  ...["fest_lamps_1", "fest_lamps_2", "fest_lamps_3", "fest_lamps_4", "fest_stand_1", "fest_stand_2"].map((p) => ({ placementId: p, flag: "festival_held" })),
 ];
 
 export const REGIONS: Region[] = [

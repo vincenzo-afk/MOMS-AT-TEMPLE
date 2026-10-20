@@ -28,3 +28,16 @@ export const DECOR_SLOTS: DecorSlotDefinition[] = [
 /** Skill levels from experience: level n needs 10 * n^2 XP. */
 export const skillLevel = (xp: number) => Math.floor(Math.sqrt(Math.max(0, xp) / 10));
 export const SKILL_NAMES = { gardening: "Gardening", masonry: "Masonry", crafting: "Crafting" } as const;
+
+/** What each skill level gives (shown in the Community panel; applied in GameSession). */
+export const SKILL_PERKS: Record<keyof typeof SKILL_NAMES, Array<{ level: number; text: string }>> = {
+  gardening: [
+    { level: 2, text: "+1 flower each time you gather" },
+    { level: 3, text: "+1 produce at every harvest; recipe: tulsi pot" },
+  ],
+  masonry: [{ level: 2, text: "+1 stone or lime clay each time you gather them" }],
+  crafting: [
+    { level: 2, text: "recipe: clay oil lamp" },
+    { level: 3, text: "recipe: woven mat" },
+  ],
+};

@@ -99,6 +99,24 @@ export const NPCS: NpcDefinition[] = [
       { fromHour: 28, toHour: 30, anchorId: "anc_granary", activity: "patrol" },
     ],
   },
+  // ---- the temple's archaka (README §4.1: the tradition's own roles, not "monks")
+  {
+    id: "npc_archaka",
+    name: "Sundaram",
+    role: "Archaka (temple priest)",
+    appearance: { model: "CHR_NPC_Priest", tint: "#c8792c", accent: "#9b2d20" },
+    homeAnchorId: "anc_temple_door",
+    workAnchorId: "anc_temple_door",
+    schedule: [
+      festival("anc_temple_door"),
+      { fromHour: 5, toHour: 8, anchorId: "anc_temple_door", activity: "puja" },
+      { fromHour: 8, toHour: 12, anchorId: "anc_temple_door", activity: "talk" },
+      { fromHour: 12, toHour: 16, anchorId: "anc_courtyard_cover", activity: "rest" },
+      { fromHour: 16, toHour: 17, anchorId: "anc_temple_door", activity: "talk" },
+      { fromHour: 17, toHour: 19, anchorId: "anc_temple_door", activity: "puja" },
+      { fromHour: 19, toHour: 29, anchorId: "anc_temple_door", activity: "home" },
+    ],
+  },
   // ---- everyday villagers (CHR_006): ambient routines across the larger map
   {
     id: "npc_villager_raman",

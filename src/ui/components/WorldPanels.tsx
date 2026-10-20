@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useGame, useGameState, useUi } from "../hooks";
 import { LOCATIONS, NOTICE_HINTS, RECORD_TEXT } from "../../data/text";
 import { ANCHORS, INTERACTABLES, NAV_EDGES, NAV_NODES, PLACEMENTS, REGIONS, WORLD_BOUNDS } from "../../data/level";
-import { SKILL_NAMES, skillLevel } from "../../data/farming";
+import { SKILL_NAMES, SKILL_PERKS, skillLevel } from "../../data/farming";
 import { scheduleAt } from "../../game/npc/NpcSystem";
 import type { ItemStack, SkillId } from "../../game/core/types";
 
@@ -328,6 +328,13 @@ export function CommunityPanel() {
               <div className="meter">
                 <div style={{ width: `${Math.min(100, ((xp - prev) / (next - prev)) * 100)}%` }} />
               </div>
+              <ul className="perks small">
+                {SKILL_PERKS[k].map((perk) => (
+                  <li key={perk.level} className={lvl >= perk.level ? "" : "muted"}>
+                    Lv {perk.level}: {perk.text}
+                  </li>
+                ))}
+              </ul>
             </div>
           );
         })}

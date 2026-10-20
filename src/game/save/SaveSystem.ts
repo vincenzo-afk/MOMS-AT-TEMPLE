@@ -30,6 +30,10 @@ export const DEFAULT_SETTINGS: Settings = {
   typewriter: true,
   showTargetRing: true,
   ambientOcclusion: false,
+  renderScale: 1,
+  reducedMotion: false,
+  highContrast: false,
+  tutorial: true,
 };
 
 /** IndexedDB persistence with a rolling backup and validation on every read. */
@@ -186,6 +190,10 @@ export function sanitizeSettings(raw: unknown): Settings {
   }
   if (r.graphicsQuality === "low" || r.graphicsQuality === "medium" || r.graphicsQuality === "high") s.graphicsQuality = r.graphicsQuality;
   if (typeof r.ambientOcclusion === "boolean") s.ambientOcclusion = r.ambientOcclusion;
+  if (typeof r.renderScale === "number" && Number.isFinite(r.renderScale)) s.renderScale = Math.min(1, Math.max(0.5, r.renderScale));
+  if (typeof r.reducedMotion === "boolean") s.reducedMotion = r.reducedMotion;
+  if (typeof r.highContrast === "boolean") s.highContrast = r.highContrast;
+  if (typeof r.tutorial === "boolean") s.tutorial = r.tutorial;
   return s;
 }
 

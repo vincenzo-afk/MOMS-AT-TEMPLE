@@ -16,6 +16,8 @@ export function evaluate(c: Condition, s: GameState, defs: Definitions): boolean
     }
     case "flag":
       return (s.flags[c.id] === true) === c.value;
+    case "skill":
+      return Math.floor(Math.sqrt(Math.max(0, s.skills[c.id] ?? 0) / 10)) >= c.level;
     case "restoration":
       return s.restorations[c.id] === c.state;
     case "hasItem":

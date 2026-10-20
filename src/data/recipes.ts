@@ -70,6 +70,47 @@ export const RECIPES: RecipeDefinition[] = [
     ],
     outputs: [{ itemId: "festival_bundle", quantity: 1 }],
     prerequisites: ["festival_preparing"],
+    setsFlag: "festival_bundle_ready", // the villagers start drawing the festival kolams
     craftSeconds: 3,
+  },
+  // skill-gated recipes (README §3.3)
+  {
+    id: "r_clay_lamp",
+    name: "Clay oil lamp",
+    stationId: "st_workshop_bench",
+    inputs: [
+      { itemId: "lime_clay", quantity: 2 },
+      { itemId: "banana_twine", quantity: 1 },
+    ],
+    outputs: [{ itemId: "oil_lamp", quantity: 1 }],
+    prerequisites: [],
+    craftSeconds: 3,
+    skill: { id: "crafting", level: 2 },
+  },
+  {
+    id: "r_woven_mat",
+    name: "Woven mat",
+    stationId: "st_workshop_bench",
+    inputs: [
+      { itemId: "dry_grass", quantity: 4 },
+      { itemId: "banana_twine", quantity: 1 },
+    ],
+    outputs: [{ itemId: "woven_mat", quantity: 1 }],
+    prerequisites: [],
+    craftSeconds: 4,
+    skill: { id: "crafting", level: 3 },
+  },
+  {
+    id: "r_tulsi_pot",
+    name: "Tulsi pot",
+    stationId: "st_workshop_bench",
+    inputs: [
+      { itemId: "lime_clay", quantity: 3 },
+      { itemId: "produce", quantity: 1 },
+    ],
+    outputs: [{ itemId: "tulsi_pot", quantity: 1 }],
+    prerequisites: [],
+    craftSeconds: 4,
+    skill: { id: "gardening", level: 3 },
   },
 ];

@@ -552,4 +552,38 @@ export const DIALOGUE: DialogueNode[] = [
   node({ id: "g_garden", npcId: "group:villager", priority: 60, conditions: [flag("garden_blooming")], lines: ["The marigolds are back in Amudha's garden. My mother used to say a garden is the settlement's face."] }),
   node({ id: "g_rota", npcId: "group:villager", priority: 75, conditions: [flag("rota_restored")], lines: ["Elder Ponnan put a rota on the notice board - my household's month is Aadi. We'll clear the channels then, like our grandparents did."] }),
   node({ id: "g_default", npcId: "group:villager", lines: ["Vanakkam! Busy day.", "If you're looking for work, the notice board by the south gate always has something."] }),
+  // ---- Sundaram, the archaka
+  node({
+    id: "ar_lamp_offer",
+    npcId: "npc_archaka",
+    priority: 59,
+    conditions: [done("q_arrival"), notStarted("q_archaka_lamp")],
+    lines: ["Vanakkam. You are the newcomer Valli spoke of.", "The evening puja needs one more lamp at the sanctum door, and my hands are full with the archana. Could you bring one?"],
+    options: [
+      { label: "I'll find a lamp.", effects: [{ type: "startQuest", questId: "q_archaka_lamp" }] },
+      { label: "Another time.", effects: [] },
+    ],
+  }),
+  node({ id: "ar_lamp_waiting", npcId: "npc_archaka", priority: 60, conditions: [active("q_archaka_lamp")], lines: ["Selvam keeps lamps on his stall. Before sunset, if you can."] }),
+  node({
+    id: "ar_lamp_deliver",
+    npcId: "npc_archaka",
+    priority: 97,
+    conditions: [at("q_archaka_lamp", "deliver"), has("oil_lamp")],
+    lines: ["A good lamp. It will burn at the door tonight."],
+    options: [{ label: "For the evening puja.", effects: [{ type: "deliver", questId: "q_archaka_lamp", objectiveId: "deliver" }] }],
+  }),
+  node({
+    id: "ar_blessed",
+    npcId: "npc_archaka",
+    priority: 20,
+    conditions: [flag("archaka_blessing")],
+    lines: ["Your lamp burns at the door every evening now. Come for the puja at six - morning or evening, the bell will tell you."],
+  }),
+  node({
+    id: "ar_default",
+    npcId: "npc_archaka",
+    priority: 10,
+    lines: ["The morning puja is at five, the evening one at five in the afternoon. The bell rings for both.", "Walk around the sanctum keeping it on your right - that is pradakshina."],
+  }),
 ];

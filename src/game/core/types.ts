@@ -30,9 +30,14 @@ export interface RecipeDefinition {
   outputs: ItemStack[];
   prerequisites: string[]; // world flags required
   craftSeconds: number;
+  /** a skill level the recipe needs (README §3.3: skills give access to new activities) */
+  skill?: { id: SkillId; level: number };
+  /** a world flag set the first time this is crafted (festival build-up) */
+  setsFlag?: string;
 }
 
 export type Condition =
+  | { type: "skill"; id: SkillId; level: number }
   | { type: "quest"; id: string; status: QuestStatus | "not_started" }
   | { type: "objective"; questId: string; objectiveId: string }
   | { type: "flag"; id: string; value: boolean }
@@ -121,7 +126,7 @@ export interface ScheduleEntry {
   fromHour: number; // inclusive, 0-24 (values past 24 wrap to the next morning)
   toHour: number; // exclusive
   anchorId: string;
-  activity: "work" | "rest" | "talk" | "home" | "sit" | "garden" | "craft" | "trade" | "festival" | "patrol";
+  activity: "work" | "rest" | "talk" | "home" | "sit" | "garden" | "craft" | "trade" | "festival" | "patrol" | "puja";
   /** Optional: entry only applies while these hold (checked before unconditional entries). */
   when?: Condition[];
 }
@@ -160,7 +165,8 @@ export interface DialogueNode {
 export interface ShopDefinition {
   id: string;
   npcId: string;
-  sells: Array<{ itemId: string; price: number }>;
+  /** `when` gates seasonal stock; `days` rotates a special: in stock when (day + offset) % every === 0 */
+  sells: Array<{ itemId: string; price: number; when?: Condition[]; days?: { every: number; offset: number } }>;
   buys: Array<{ itemId: string; price: number }>;
 }
 
@@ -275,6 +281,14 @@ export interface Settings {
   typewriter: boolean; // reveal dialogue text gradually
   /** Screen-space ambient occlusion (GTAO). Re-renders the scene's normals, so it is off by default. */
   ambientOcclusion: boolean;
+  /** Internal render resolution as a fraction of the display (0.5-1): a big frame-rate lever on weak GPUs. */
+  renderScale: number;
+  /** No camera shake, sprint FOV kick, look-ahead drift or lean into turns. */
+  reducedMotion: boolean;
+  /** Solid panels, brighter text and outlined prompts. */
+  highContrast: boolean;
+  /** First-minutes tutorial hints (README §3.1). */
+  tutorial: boolean;
   showTargetRing: boolean;
 }
 
@@ -324,7 +338,7 @@ export interface TopicDefinition {
   answers: TopicAnswer[];
 }
 
-export type BarkTrigger = "greet" | "bump" | "rain" | "witness" | "festival" | "admire" | "missing";
+export type BarkTrigger = "greet" | "bump" | "rain" | "witness" | "festival" | "admire" | "missing" | "sprint" | "trespass" | "bell";
 
 export interface BarkDefinition {
   id: string;

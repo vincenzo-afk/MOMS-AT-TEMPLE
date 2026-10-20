@@ -47,6 +47,20 @@ export function Hud() {
       )}
 
       <VisitHud />
+      {ui.tutorial && ui.panel === null && (
+        <div className="tutorial-card" data-testid="tutorial">
+          <div className="small muted">
+            Getting started · {ui.tutorial.index + 1}/{ui.tutorial.total}
+          </div>
+          <div className="tutorial-text">{ui.tutorial.text}</div>
+          <div className="small">
+            <kbd>{ui.tutorial.keys}</kbd>
+          </div>
+          <button className="small" data-testid="tutorial-skip" onClick={() => game.skipTutorial()}>
+            Skip tutorial
+          </button>
+        </div>
+      )}
       {ui.mode === "play" && ui.panel === null && isTouchDevice() && <TouchControls />}
       <InteractionPrompt prompt={ui.prompt?.primary && ui.panel === null && !ui.busyLabel ? ui.prompt : null} />
 

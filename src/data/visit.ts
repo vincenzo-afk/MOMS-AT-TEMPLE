@@ -67,7 +67,7 @@ export const LAYOUTS: Record<string, TempleLayout> = {
     queue: "rails",
     coconut: "coconut",
     lamps: "lamps",
-    priest: [2.4, 0, -3.4],
+    priest: [2.4, 0, -1.8],
     darshan: [0, 0, -3.2],
     pradakshina: { center: [0, -14.5], rx: 11, rz: 14.3 },
     prasadam: "prasadam",

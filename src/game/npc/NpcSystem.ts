@@ -25,10 +25,11 @@ const ACTIVITY_CLIP: Record<ScheduleEntry["activity"], LoopAction | null> = {
   craft: "craft_at_station",
   trade: "trade_counter",
   sit: "sit_idle",
-  rest: null,
+  rest: "sit_idle", // a seated rest (on the ground where the anchor has no seat)
   home: null,
   festival: "talk_idle",
   patrol: null,
+  puja: "pray_idle",
 };
 const NPC_OVERRIDES: Record<string, Partial<Record<ScheduleEntry["activity"], LoopAction | null>>> = {
   npc_ponnan: { work: "read_record", rest: null },
@@ -210,7 +211,7 @@ export class NpcSystem {
   }
 
   private updatePresence(rt: NpcRuntime): void {
-    rt.present = this.session.isNpcPresent(rt.def.id);
+    rt.present = this.session.isNpcPresent(rt.def.id) && !this.suppressed.has(rt.def.id);
     const h = this.session.hourOfDay;
     const night = h >= 21 || h < 5;
     rt.indoors = rt.present && rt.activity === "home" && night && rt.mode === "activity" && !rt.path.length;
@@ -218,6 +219,18 @@ export class NpcSystem {
   }
 
   /** Visible, awake and in the world (used by interaction and witness checks). */
+  /** A named NPC speaks a contextual line now (trespass warnings, the puja bell), if present and not busy. */
+  say(npcId: string, trigger: BarkTrigger): boolean {
+    const rt = this.npcs.get(npcId);
+    if (!rt || !rt.present || rt.indoors || rt.mode === "talking") return false;
+    return this.bark(rt, trigger, true);
+  }
+
+  private sprintRemark = new Map<string, number>();
+
+  /** NPCs hidden by a mode (the Temple Visit brings its own priest). */
+  readonly suppressed = new Set<string>();
+
   isAvailable(npcId: string): boolean {
     const rt = this.npcs.get(npcId);
     return !!rt && rt.present && !rt.indoors;
@@ -490,6 +503,12 @@ export class NpcSystem {
     // bumped by a running player
     if (dPlayer < 0.8 && this.playerSpeed > 3.2 && this.clock - rt.lastBark > 6) {
       if (this.bark(rt, "bump", true) && rt.mode === "activity" && !rt.animator.currentAction?.startsWith("sit")) this.playOnce(rt, "talk_gesture");
+      return;
+    }
+    // a sprinting player brushing past: a word about it (no crime, just manners)
+    if (dPlayer < 2.6 && this.playerSpeed > 5 && this.clock - (this.sprintRemark.get(rt.def.id) ?? -99) > 15) {
+      // its own cooldown: a greeting a moment ago should not swallow the remark
+      if (this.bark(rt, "sprint", true)) this.sprintRemark.set(rt.def.id, this.clock);
       return;
     }
     // acknowledge the player passing by

@@ -161,6 +161,11 @@ export function PauseMenu() {
             </button>
             <button onClick={() => setView("controls")}>Controls</button>
             <button onClick={() => setView("settings")}>Settings</button>
+            {game.ui.get().tutorial && (
+              <button data-testid="pause-skip-tutorial" onClick={() => game.skipTutorial()}>
+                Skip the tutorial
+              </button>
+            )}
             <button
               onClick={async () => {
                 await game.saveGame();
@@ -215,6 +220,27 @@ export function SettingsForm({ onBack }: { onBack: () => void }) {
           <option value="high">High</option>
         </select>
       </label>
+      {slider("renderScale", "Render resolution", 0.5, 1, 0.05)}
+      <label className="setting">
+        <span>Reduce motion (no camera shake, FOV kick or lean)</span>
+        <input type="checkbox" checked={s.reducedMotion === true} onChange={(e) => update({ reducedMotion: e.target.checked })} data-testid="setting-reduced-motion" />
+      </label>
+      <label className="setting">
+        <span>High contrast interface</span>
+        <input type="checkbox" checked={s.highContrast === true} onChange={(e) => update({ highContrast: e.target.checked })} data-testid="setting-high-contrast" />
+      </label>
+      <label className="setting">
+        <span>Full screen</span>
+        <button
+          data-testid="setting-fullscreen"
+          onClick={() => {
+            if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+            else void document.documentElement.requestFullscreen?.().catch(() => undefined);
+          }}
+        >
+          Toggle
+        </button>
+      </label>
       <label className="setting">
         <span>Ambient occlusion (slower)</span>
         <input type="checkbox" checked={s.ambientOcclusion === true} onChange={(e) => update({ ambientOcclusion: e.target.checked })} data-testid="setting-ao" />
@@ -222,6 +248,10 @@ export function SettingsForm({ onBack }: { onBack: () => void }) {
       <label className="setting">
         <span>Play opening sequence</span>
         <input type="checkbox" checked={s.showIntro} onChange={(e) => update({ showIntro: e.target.checked })} />
+      </label>
+      <label className="setting">
+        <span>Show tutorial hints</span>
+        <input type="checkbox" checked={s.tutorial !== false} onChange={(e) => update({ tutorial: e.target.checked })} data-testid="setting-tutorial" />
       </label>
       <label className="setting">
         <span>Reveal dialogue gradually</span>

@@ -186,6 +186,7 @@ export class VisitDirector {
     const g = this.game;
     this.world.setActive(true);
     this.world.resetLamps();
+    g.npcs.suppressed.add("npc_archaka");
     // the house's player bed: wake up there at 4:50
     const bed = g.level.sockets.get("house_player.SOCKET_Bed") ?? new THREE.Vector3(-27.2, 0.45, 26.5);
     const inside = g.level.sockets.get("house_player.SOCKET_Inside") ?? this.houseCenter;
@@ -234,6 +235,7 @@ export class VisitDirector {
     const g = this.game;
     this.world.setActive(false);
     this.world.resetLamps();
+    g.npcs.suppressed.delete("npc_archaka");
     g.scene.remove(this.family.group);
     for (const e of this.extras) g.scene.remove(e.object);
     for (const lane of this.crowd) for (const c of lane.people) g.scene.remove(c.person.object);

@@ -83,6 +83,8 @@ export class PlayerController {
   private look = 0;
   /** World point the head turns toward (interaction focus, nearby speaker), or null. */
   lookTarget: THREE.Vector3 | null = null;
+  /** Accessibility: no lean into turns. */
+  reducedMotion = false;
   /** Local offset of the model inside the root (seated pelvis placement). */
   readonly modelOffset = new THREE.Vector3();
   /** Runs after the clip blend and before the procedural layers (seat placement). Owns model.position when set. */
@@ -462,7 +464,7 @@ export class PlayerController {
     this.object.updateMatrixWorld(true);
 
     // lean into turns, proportional to speed x yaw rate (additive on the spine and chest)
-    const wantLean = this.state === "ground" ? THREE.MathUtils.clamp(-this.yawRate * speed * 0.045, -0.3, 0.3) : 0;
+    const wantLean = this.state === "ground" && !this.reducedMotion ? THREE.MathUtils.clamp(-this.yawRate * speed * 0.045, -0.3, 0.3) : 0;
     this.lean = THREE.MathUtils.lerp(this.lean, wantLean, 1 - Math.exp(-8 * dt));
     if (Math.abs(this.lean) > 0.002) {
       _fwd.set(Math.sin(this.yaw), 0, Math.cos(this.yaw));

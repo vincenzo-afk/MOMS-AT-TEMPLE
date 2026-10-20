@@ -96,11 +96,16 @@ export function validateDefinitions(d: Definitions): string[] {
     (npc.appearsWhen ?? []).forEach((c) => cond(c, `npc ${npc.id} appearsWhen`));
   }
   for (const r of d.recipes.values()) need(["st_workshop_bench", "st_festival_station"].includes(r.stationId), `recipe ${r.id}: unknown station ${r.stationId}`);
+  for (const r of d.recipes.values()) if (r.skill) need(r.skill.level >= 1 && r.skill.level <= 10, `recipe ${r.id}: skill level out of range`);
   for (const slot of d.decorSlots.values()) slot.accepts.forEach((i) => item(i, `decor slot ${slot.id}`));
   for (const w of d.waterSources.values()) w.conditions.forEach((c) => cond(c, `water source ${w.id}`));
   for (const s of d.shops.values()) {
     need(d.npcs.has(s.npcId), `shop ${s.id}: unknown npc`);
     [...s.sells, ...s.buys].forEach((o) => item(o.itemId, `shop ${s.id}`));
+    s.sells.forEach((o) => {
+      (o.when ?? []).forEach((c) => cond(c, `shop ${s.id} stock`));
+      if (o.days) need(o.days.every > 0 && o.days.offset >= 0, `shop ${s.id}: bad rotation for ${o.itemId}`);
+    });
   }
   const placementIds = new Set(PLACEMENTS.map((p) => p.id).filter(Boolean));
   const who = (w: string, ctx: string) => need(w === "any" || w === "default" || d.npcs.has(w) || groups.has(w), `${ctx}: unknown speaker ${w}`);

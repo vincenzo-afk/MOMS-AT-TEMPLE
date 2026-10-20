@@ -207,6 +207,22 @@ export const QUESTS: QuestDefinition[] = [
     ],
   },
   {
+    id: "q_archaka_lamp",
+    title: "A Lamp for the Evening Puja",
+    description: "Sundaram the archaka is one lamp short for the evening puja at the sanctum door.",
+    giverNpcId: "npc_archaka",
+    prerequisites: ["q_arrival"],
+    objectives: [
+      { id: "lamp", type: "collect", text: "Find an oil lamp (Selvam sells them; skilled hands can make one)", targetId: "oil_lamp", requiredCount: 1, locationId: "loc_bazaar" },
+      { id: "deliver", type: "deliver", text: "Bring the lamp to Sundaram at the temple door", targetId: "oil_lamp", requiredCount: 1, locationId: "loc_courtyard" },
+    ],
+    rewards: [
+      { type: "coins", amount: 4 },
+      { type: "relationship", npcId: "npc_archaka", amount: 12 },
+      { type: "flag", id: "archaka_blessing" },
+    ],
+  },
+  {
     id: "q_bangle",
     title: "The Lost Bangle",
     description: "Valli lost one of her brass bangles somewhere by the temple tank on the south road.",

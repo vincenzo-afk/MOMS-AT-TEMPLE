@@ -388,9 +388,12 @@ function ShopPanel() {
     <Frame title={`${name}'s stall`} testId="shop">
       <div className="coins-line">You have {s.coins} coins</div>
       <h4 className="section">For sale</h4>
-      {shop.sells.map((o) => (
+      {game.session.shopStock(shop.id).map((o) => (
         <div key={o.itemId} className="trade-row">
-          <span>{game.session.defs.items.get(o.itemId)?.name}</span>
+          <span>
+            {game.session.defs.items.get(o.itemId)?.name}
+            {o.special && <span className="small special"> · today</span>}
+          </span>
           <span className="price">{o.price} ◎</span>
           <button
             className="primary"

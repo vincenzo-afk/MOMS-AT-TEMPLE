@@ -71,7 +71,7 @@ function placementMatrix(p: Placement): THREE.Matrix4 {
 }
 
 /** Builds the settlement from src/data/level.ts using the exported Blender GLBs. */
-export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "high"): LevelHandles {
+export function buildLevel(assets: AssetLibrary): LevelHandles {
   const root = new THREE.Group();
   root.name = "Level";
   const collision = new CollisionWorld();
@@ -111,7 +111,7 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
       }
       const inst = new THREE.InstancedMesh(mesh.geometry, mesh.material, matrices.length);
       matrices.forEach((m, i) => inst.setMatrixAt(i, m.clone().multiply(mesh.matrixWorld)));
-      inst.castShadow = quality !== "low" && !NO_SHADOW.test(assetId);
+      inst.castShadow = !NO_SHADOW.test(assetId); // the renderer's shadow switch turns all shadows off on low
       inst.receiveShadow = true;
       inst.name = `${assetId}__instanced`;
       inst.computeBoundingSphere();
@@ -176,7 +176,7 @@ export function buildLevel(assets: AssetLibrary, quality: "low" | "medium" | "hi
         waterPoints.push(mesh.getWorldPosition(new THREE.Vector3()));
         mesh.castShadow = false;
         mesh.renderOrder = 2;
-      } else if (quality === "low" || NO_SHADOW.test(p.asset) || (p.id?.startsWith("paddy_") && mesh.name.startsWith("STATE_"))) {
+      } else if (NO_SHADOW.test(p.asset) || (p.id?.startsWith("paddy_") && mesh.name.startsWith("STATE_"))) {
         mesh.castShadow = false;
       }
     });

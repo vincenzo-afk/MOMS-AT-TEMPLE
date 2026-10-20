@@ -39,6 +39,8 @@ export class ThirdPersonCamera {
   private shake = 0;
   private shakeT = 0;
   private fovKick = 0;
+  /** Accessibility: no shake, FOV kick or look-ahead drift. */
+  reducedMotion = false;
   baseFov = 60;
   sensitivity = 1;
   invertY = false;
@@ -65,6 +67,7 @@ export class ThirdPersonCamera {
 
   /** Trigger a short decaying shake (hard landings). strength ~0.05-0.2 m. */
   addShake(strength: number): void {
+    if (this.reducedMotion) return;
     this.shake = Math.max(this.shake, strength);
   }
 
@@ -80,7 +83,7 @@ export class ThirdPersonCamera {
     this.distance = THREE.MathUtils.clamp(this.distance + input.wheel * 0.5, 1.6, 9);
     // look-ahead: lead the framing slightly in the direction of travel
     _desired.set(0, 0, 0);
-    if (velocity) _desired.set(velocity.x, 0, velocity.z).multiplyScalar(0.18);
+    if (velocity && !this.reducedMotion) _desired.set(velocity.x, 0, velocity.z).multiplyScalar(0.18);
     if (_desired.length() > 1.1) _desired.setLength(1.1);
     this.ahead.lerp(_desired, 1 - Math.exp(-2.5 * dt));
     _desired.copy(focus).add(this.ahead);
@@ -91,7 +94,7 @@ export class ThirdPersonCamera {
       this.ahead.set(0, 0, 0);
     } else this.target.lerp(_desired, 1 - Math.exp(-14 * dt));
     this.shoulder = THREE.MathUtils.lerp(this.shoulder, shoulder ? SHOULDER : 0, 1 - Math.exp(-4 * dt));
-    this.fovKick = THREE.MathUtils.lerp(this.fovKick, sprint * 9, 1 - Math.exp(-3 * dt));
+    this.fovKick = THREE.MathUtils.lerp(this.fovKick, this.reducedMotion ? 0 : sprint * 9, 1 - Math.exp(-3 * dt));
     if (this.shake > 0) {
       this.shakeT += dt;
       this.shake = Math.max(0, this.shake - dt * 0.6);
